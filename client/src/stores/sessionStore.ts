@@ -12,6 +12,7 @@ import type {
 } from "@color-wars/shared/src/types/RoomState";
 import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
+import type { MapID } from "@color-wars/shared/src/maps";
 
 const DEFAULT_PLAYER_NAME = "Commander";
 type ActionState = 'resolving_action' | 'idle'
@@ -213,12 +214,18 @@ export const useStore = create(
                 console.warn("Unable to end turn", error);
               }
             },
-            purchaseTerritory: (territoryId: TerritoryId) => {
-              if (!territoryId) {
-                return;
-              }
+            buyTerritory: (territoryId: TerritoryId) => {
+              if (!territoryId) return;
               try {
-                //network.room?.send('purchaseTerritory', { territoryId })
+                network.send('BUY_TERRITORY', {territoryID: territoryId})
+              } catch (error) {
+                console.warn("Unable to purchase territory", error);
+              }
+            },
+            sellTerritory: (territoryId: TerritoryId) => {
+              if (!territoryId) return;
+              try {
+                network.send('SELL_TERRITORY', {territoryID: territoryId})
               } catch (error) {
                 console.warn("Unable to purchase territory", error);
               }
@@ -244,6 +251,13 @@ export const useStore = create(
                 z.state.game.diceState.rollTo = rollTo;
               });
             },
+            setMapID: (mapID: MapID) => {
+              try{
+                network.send('CHANGE_MAP', {mapID})
+              }catch(err){
+                console.warn('unable to do action: change map', mapID)
+              }
+            }
           }),
         ),
       ),

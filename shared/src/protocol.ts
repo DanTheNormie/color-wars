@@ -1,5 +1,8 @@
+import { type MapID } from "./maps";
+
 export interface ClientMessages {
-  PURCHASE_TERRITORY: { territoryId: string; price: number };
+  BUY_TERRITORY: { territoryID: string; };
+  SELL_TERRITORY: { territoryID: string };
   ROLL_DICE: {}; // Empty payload
   PONG: { serverT1: number; clientT2: number };
   START_GAME: {};
@@ -8,6 +11,7 @@ export interface ClientMessages {
   KICK_PLAYER: {playerId: string, reason?: string}
   SEND_MESSAGE: {senderId: string, content: string, timeStamp: number}
   END_TURN: {};
+  CHANGE_MAP: {mapID: MapID}
 }
 
 export interface ServerMessages {

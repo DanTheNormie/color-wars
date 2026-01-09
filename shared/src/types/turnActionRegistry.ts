@@ -7,7 +7,9 @@ export const TURN_ACTION_REGISTRY = {
   INCR_MONEY: {} as { playerId: string, amount: number },
   DECR_MONEY: {} as { playerId: string, amount: number },
   DRAW_3_REWARD_CARDS: {} as { playerId: string, cardIds: RewardID[] },
-  SELECT_CARD: {} as {selectedCardId: string}
+  SELECT_CARD: {} as {selectedCardId: string},
+  BUY_TERRITORY: {} as {playerId: string, territoryID: string, amount: number},
+  SELL_TERRITORY: {} as {playerId: string, territoryID: string, amount: number}
 
 } as const;
 

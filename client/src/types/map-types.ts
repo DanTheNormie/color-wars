@@ -1,7 +1,7 @@
 // src/types/map-types.ts
 
 export interface MapGridConfig {
-  orientation: "pointy" | "flat";
+  orientation: string;
   hexSize: number;
   origin: { q: number; r: number };
   bounds: { minQ: number; maxQ: number; minR: number; maxR: number };

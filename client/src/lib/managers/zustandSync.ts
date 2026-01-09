@@ -7,6 +7,7 @@ import { useDiceTrackStore } from "@/stores/diceTrackStore";
 import { hexStringToHexNumber } from "@/utils/color-utils";
 import { useMapStore } from "@/stores/mapStateStore";
 import { useChatStore } from "@/stores/chatStore";
+import { useInfoDrawerStore } from "@/stores/InfoDrawerStore";
 
 class ZustandSyncManager {
   private unsubs: (() => void)[] = [];
@@ -101,8 +102,16 @@ class ZustandSyncManager {
 
       GameEventBus.on('UPDATE_ACTION_STATE', ({state})=>{
         useStore.getState().setActionState(state)
+      }),
+
+      GameEventBus.on('SET_TERRITORY_INFO_DRAWER', ({open})=>{
+        useInfoDrawerStore.getState().setTerritoryInfoDrawerOpen(open)
+      }),
+
+      GameEventBus.on('CHANGE_MAP_ID', ({mapID}) => {
+        useMapStore.getState().setMapID(mapID)
       })
-    );
+    )
   }
 
   destroy() {

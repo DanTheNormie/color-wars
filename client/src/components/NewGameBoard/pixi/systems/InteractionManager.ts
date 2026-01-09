@@ -1,3 +1,4 @@
+import { GameEventBus } from "@/lib/managers/GameEventBus";
 import { PixiEngine } from "../engine";
 import { useMapStore } from "@/stores/mapStateStore";
 import type { Hex } from "@/types/map-types";
@@ -65,6 +66,11 @@ export class InteractionManager {
     const territoryID = this.hexLookup.get(`${hex.q},${hex.r}`) || null;
 
     useMapStore.getState().setSelectedTerritory(territoryID);
+    if(territoryID) {
+      GameEventBus.emit('SET_TERRITORY_INFO_DRAWER', {open: true});
+    }else{
+      GameEventBus.emit('SET_TERRITORY_INFO_DRAWER', {open: false});
+    }
   };
 
   public destroy() {

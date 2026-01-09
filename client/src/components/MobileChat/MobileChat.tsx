@@ -70,37 +70,12 @@ export default function ChatInterface() {
 
   return (
     <Drawer open={isOpen} fixed onOpenChange={setIsOpen} disablePreventScroll={true} repositionInputs={false}>
-      {/* 
-        The Trigger acts as the "Fixed Bottom Bar" 
-        It is visible when the drawer is closed.
-      */}
       <DrawerTrigger asChild>
-        {/* <div className="hover:bg-accent/10 w-full cursor-pointer p-4 transition-colors">
-          <div className="mx-auto flex w-full items-center gap-1">
-            <div className="bg-primary/10 text-primary flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-              <CircleUserRound size={20} />
-            </div>
-
-            <div className="flex h-10 flex-1 items-center overflow-hidden">
-              {lastMessage ? (
-                <div ref={previewTextRef} className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-xs font-bold">{lastMessage.senderId}</span>:<span className="text-foreground flex-1 truncate text-sm">{lastMessage.content}</span>
-                </div>
-              ) : (
-                <span className="text-muted-foreground text-sm">Click to send message</span>
-              )}
-            </div>
-          </div>
-        </div> */}
         <div className="w-full h-full px-2 flex items-center">
           <PreviewTicker message={lastMessage} isOpen={isOpen}/>
         </div>
       </DrawerTrigger>
 
-      {/* 
-        The Drawer Content (Expanded View) 
-        This overlays the bottom bar when opened.
-      */}
       <DrawerContent className="fixed bottom-0 left-0 right-0 flex h-[45dvh] flex-col rounded-[10px] outline-none">
         <div className="mx-auto flex h-full w-full max-w-2xl flex-col overflow-hidden">
           <DrawerHeader className="border-b">

@@ -179,6 +179,8 @@ export class PixiEngine {
       this.viewport.on("zoomed", this.handleZoom);
 
       this.handleResize();
+
+      pixiTargetLocator.register('pixi-engine', this)
     })();
 
     return this.initPromise;
@@ -335,7 +337,7 @@ export class PixiEngine {
 
     // 3. Initialize Mesh
     // We map the incoming generic "MapHex" to the shape TerrainMesh expects
-    this.terrain.init(map, hexSize, this.hexTexture);
+    this.terrain.init(map, hexSize, this.hexTexture, {minQ, minR, maxQ, maxR});
 
     // build outlines for territories
     this.outlineLayer?.build(map);
@@ -438,7 +440,7 @@ export class PixiEngine {
 
     window.removeEventListener("resize", this.handleResize);
 
-    this.app?.destroy(true);
+    this.app?.destroy(true,true);
     this.hoverStateUnsub?.();
     this.selectedStateUnsub?.();
     this.territoryColorUnsub?.();
@@ -446,6 +448,7 @@ export class PixiEngine {
     this.viewport?.off("zoomed", this.handleZoom);
 
     pixiTargetLocator.clear();
+    pixiTargetLocator.unregister('pixi-engine')
 
     this.app = null;
     this.viewport = null;

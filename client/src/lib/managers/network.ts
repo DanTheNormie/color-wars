@@ -115,6 +115,9 @@ class Network {
         $(this.room.state.game).listen("activePlayerId", (newValue) => {
           GameEventBus.emit("UPDATE_ACTIVE_PLAYER", { playerId: newValue });
         }),
+        $(this.room.state).listen('mapID', (newValue) => {
+          GameEventBus.emit("CHANGE_MAP_ID", {mapID: newValue})
+        })
       );
     });
     this.room.onError((code, message) => {

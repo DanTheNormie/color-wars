@@ -1,15 +1,21 @@
 import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
 import type { ActionType, TURN_ACTION_REGISTRY } from "./turnActionRegistry";
+import { type MapID } from "../maps";
+import type { DevelopmentType } from "./economyTypes";
 
 export type RoomPhase = "lobby" | "active" | "finished";
 export type RoomVisibility = "private" | "public";
 export type TradeStatus = "pending" | "accepted" | "rejected";
-export type BuildingType = "none" | "city" | "factory" | "silo";
 export type TurnPhase = "awaiting-roll" | "resolving-draft" | "resolving-bankruptcy" | "awaiting-end-turn" | "game-over";
 
 export class TerritoryState extends Schema {
-  @type("string") ownerId: string = "";
-  @type("string") buildingType: BuildingType = "none";
+  @type("string") ownerId: string;
+  @type("string") buildingType: DevelopmentType = "BASE";
+
+  constructor(playerID: string){
+    super();
+    this.ownerId = playerID
+  }
 }
 
 export class StatusEffect extends Schema {
@@ -159,6 +165,7 @@ export class RoomState extends Schema {
   @type(GameState) game = new GameState();
   @type(GameState) turnCheckpoint: GameState | null = null;
   @type([GameAction]) turnActionHistory = new ArraySchema<GameAction>();
+  @type('string') mapID: MapID = 'INDIA'
 
   constructor(roomId: string) {
     super();

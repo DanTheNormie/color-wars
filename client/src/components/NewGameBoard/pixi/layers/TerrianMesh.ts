@@ -12,12 +12,22 @@ export class TerrainMesh extends PIXI.Container {
     super();
   }
 
-  init(map: GameMap, hexSize: number, texture: PIXI.Texture) {
+  init(map: GameMap, hexSize: number, texture: PIXI.Texture, boundaryHexes: { minQ:number, minR:number, maxQ:number, maxR:number }) {
     this.clear();
+    
+    const {minQ, minR, maxQ, maxR} = boundaryHexes
     const hexes = map.hexes
+    
     map.territories.forEach((t)=>{
       this.territoryMap.set(t.id, t.hexes)
     })
+
+    this.territoryMap.set('test', [
+      {q:minQ, r:minR, s: -minQ-minR, territoryID:'test'},
+      {q:minQ, r:maxR, s: -minQ-maxR, territoryID:'test'},
+      {q:maxQ, r:minR, s: -maxQ-minR, territoryID:'test'},
+      {q:maxQ, r:maxR, s: -maxQ-maxR, territoryID:'test'}
+    ])
     const totalHexes = hexes.length;
 
     // --- 1. Allocate Buffers ---

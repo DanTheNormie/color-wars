@@ -42,7 +42,6 @@ declare module "react" {
 }
 
 const Card = ({ id }: { id: string }) => {
-  const phase = useCardStore((s) => s.phase);
   return (
     <div id={id} className="card-wrapper relative flex h-full w-full justify-center rounded-xl select-none">
       <style>{`

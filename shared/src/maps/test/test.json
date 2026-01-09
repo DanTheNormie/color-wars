@@ -1,0 +1,310 @@
+{
+  "id": "sample-subcontinent",
+  "name": "Sample Subcontinent",
+  "version": "0.1.0",
+  "grid": {
+    "orientation": "pointy",
+    "hexSize": 12,
+    "origin": {
+      "q": -2,
+      "r": -1
+    },
+    "bounds": {
+      "minQ": -2,
+      "maxQ": 4,
+      "minR": -1,
+      "maxR": 3
+    },
+    "resolutionTag": "prototype"
+  },
+  "hexes": [
+    {
+      "q": -1,
+      "r": -1,
+      "s": 2,
+      "territoryID": "aurora"
+    },
+    {
+      "q": 0,
+      "r": -1,
+      "s": 1,
+      "territoryID": "aurora"
+    },
+    {
+      "q": 1,
+      "r": -1,
+      "s": 0,
+      "territoryID": "aurora"
+    },
+    {
+      "q": 1,
+      "r": 0,
+      "s": -1,
+      "territoryID": "borealis"
+    },
+    {
+      "q": 2,
+      "r": 0,
+      "s": -2,
+      "territoryID": "borealis"
+    },
+    {
+      "q": 2,
+      "r": 1,
+      "s": -3,
+      "territoryID": "borealis"
+    },
+    {
+      "q": 0,
+      "r": 1,
+      "s": -1,
+      "territoryID": "cerulea"
+    },
+    {
+      "q": 1,
+      "r": 1,
+      "s": -2,
+      "territoryID": "cerulea"
+    },
+    {
+      "q": 0,
+      "r": 2,
+      "s": -2,
+      "territoryID": "cerulea"
+    },
+    {
+      "q": -2,
+      "r": 0,
+      "s": 2,
+      "territoryID": "dorado"
+    },
+    {
+      "q": -2,
+      "r": 1,
+      "s": 1,
+      "territoryID": "dorado"
+    },
+    {
+      "q": -1,
+      "r": 1,
+      "s": 0,
+      "territoryID": "dorado"
+    },
+    {
+      "q": 3,
+      "r": -1,
+      "s": -2,
+      "territoryID": "ember"
+    },
+    {
+      "q": 3,
+      "r": 0,
+      "s": -3,
+      "territoryID": "ember"
+    },
+    {
+      "q": 4,
+      "r": -1,
+      "s": -3,
+      "territoryID": "ember"
+    },
+    {
+      "q": -1,
+      "r": 2,
+      "s": -1,
+      "territoryID": "fjord"
+    },
+    {
+      "q": -1,
+      "r": 3,
+      "s": -2,
+      "territoryID": "fjord"
+    },
+    {
+      "q": 0,
+      "r": 3,
+      "s": -3,
+      "territoryID": "fjord"
+    }
+  ],
+  "territories": [
+    {
+      "id": "aurora",
+      "name": "Aurora",
+      "displayColor": "#f39c12",
+      "hexes": [
+        {
+          "q": -1,
+          "r": -1,
+          "s": 2,
+          "territoryID": "aurora"
+        },
+        {
+          "q": 0,
+          "r": -1,
+          "s": 1,
+          "territoryID": "aurora"
+        },
+        {
+          "q": 1,
+          "r": -1,
+          "s": 0,
+          "territoryID": "aurora"
+        }
+      ]
+    },
+    {
+      "id": "borealis",
+      "name": "Borealis",
+      "displayColor": "#3498db",
+      "hexes": [
+        {
+          "q": 1,
+          "r": 0,
+          "s": -1,
+          "territoryID": "borealis"
+        },
+        {
+          "q": 2,
+          "r": 0,
+          "s": -2,
+          "territoryID": "borealis"
+        },
+        {
+          "q": 2,
+          "r": 1,
+          "s": -3,
+          "territoryID": "borealis"
+        }
+      ]
+    },
+    {
+      "id": "cerulea",
+      "name": "Cerulea",
+      "displayColor": "#1abc9c",
+      "hexes": [
+        {
+          "q": 0,
+          "r": 1,
+          "s": -1,
+          "territoryID": "cerulea"
+        },
+        {
+          "q": 1,
+          "r": 1,
+          "s": -2,
+          "territoryID": "cerulea"
+        },
+        {
+          "q": 0,
+          "r": 2,
+          "s": -2,
+          "territoryID": "cerulea"
+        }
+      ]
+    },
+    {
+      "id": "dorado",
+      "name": "Dorado",
+      "displayColor": "#9b59b6",
+      "hexes": [
+        {
+          "q": -2,
+          "r": 0,
+          "s": 2,
+          "territoryID": "dorado"
+        },
+        {
+          "q": -2,
+          "r": 1,
+          "s": 1,
+          "territoryID": "dorado"
+        },
+        {
+          "q": -1,
+          "r": 1,
+          "s": 0,
+          "territoryID": "dorado"
+        }
+      ]
+    },
+    {
+      "id": "ember",
+      "name": "Ember",
+      "displayColor": "#e74c3c",
+      "hexes": [
+        {
+          "q": 3,
+          "r": -1,
+          "s": -2,
+          "territoryID": "ember"
+        },
+        {
+          "q": 3,
+          "r": 0,
+          "s": -3,
+          "territoryID": "ember"
+        },
+        {
+          "q": 4,
+          "r": -1,
+          "s": -3,
+          "territoryID": "ember"
+        }
+      ]
+    },
+    {
+      "id": "fjord",
+      "name": "Fjord",
+      "displayColor": "#2ecc71",
+      "hexes": [
+        {
+          "q": -1,
+          "r": 2,
+          "s": -1,
+          "territoryID": "fjord"
+        },
+        {
+          "q": -1,
+          "r": 3,
+          "s": -2,
+          "territoryID": "fjord"
+        },
+        {
+          "q": 0,
+          "r": 3,
+          "s": -3,
+          "territoryID": "fjord"
+        }
+      ]
+    }
+  ],
+  "adjacencies": {
+    "dorado": [
+      "aurora",
+      "cerulea",
+      "fjord"
+    ],
+    "aurora": [
+      "borealis",
+      "dorado"
+    ],
+    "borealis": [
+      "aurora",
+      "cerulea",
+      "ember"
+    ],
+    "cerulea": [
+      "borealis",
+      "dorado",
+      "fjord"
+    ],
+    "ember": [
+      "borealis"
+    ],
+    "fjord": [
+      "cerulea",
+      "dorado"
+    ]
+  }
+}

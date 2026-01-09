@@ -9,6 +9,16 @@ const LobbyActions = () => {
   const startGame = useStore((z) => z.startGame);
   const leaveGame = useStore((z) => z.leaveGame);
   const setTerritoryColor = useMapStore((z) => z.setTerritoryColor);
+
+  const setMapID = useStore((z) => z.setMapID)
+  const handleOnClick1 = ()=>{
+    setMapID('INDIA')
+  }
+  const handleOnClick2 = ()=>{
+    setMapID('TEST')
+  }
+
+
   const handleLeaveGame = async () => {
     await leaveGame();
     navigate("/");
@@ -23,6 +33,8 @@ const LobbyActions = () => {
       <Button variant="destructive" onClick={handleLeaveGame}>
         Leave Game
       </Button>
+      <Button onClick={handleOnClick1}>Load India Map </Button>
+      <Button onClick={handleOnClick2}>Load test Map </Button>
       <Button variant="outline" onClick={ff}>
         Set Territory Color
       </Button>

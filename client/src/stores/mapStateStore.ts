@@ -2,7 +2,32 @@ import { create } from "zustand";
 import type { GameMap } from "@/types/map-types";
 import { subscribeWithSelector } from "zustand/middleware";
 import { devtools, combine } from "zustand/middleware";
-import { immer} from "zustand/middleware/immer";
+import { immer } from "zustand/middleware/immer";
+import { MAPS, type MapID } from "@color-wars/shared/src/maps";
+ 
+interface territoryEconomy {
+    BASE:{
+        capEx: number;
+        opEx: number;
+        revenue: number;
+    };
+    CITY: {
+        capEx: number;
+        opEx: number;
+        revenue: number;
+    };
+    FACTORY: {
+        capEx: number;
+        opEx: number;
+        revenue: number;
+    };
+    MISSILE_SILO: {
+        capEx: number;
+        opEx: number;
+        revenue: number;
+    };
+}
+
 
 interface MapState {
   //currentMap: GameMap | null;
@@ -11,16 +36,18 @@ interface MapState {
   hoveredTerritoryId: string | null;
   selectedTerritoryId: string | null;
   colorMap: Map<string, string>;
-
+  current_map: GameMap;
+  current_mapID: MapID;
   // Actions
-  fetchMap: (url: string) => Promise<GameMap|null>;
+  fetchMap: (url: string) => Promise<GameMap | null>;
   setHoveredTerritory: (id: string | null) => void;
   setSelectedTerritory: (id: string | null) => void;
   setTerritoryColor: (id: string, color: string) => void;
-  reset: () => void
+  removeTerritoryColor: (id: string) => void;
+  setMapID: (mapID: MapID) => void;
+  getEconomyData: () => territoryEconomy | never;
+  reset: () => void;
 }
-
-
 export const useMapStore = create<MapState>()(
   subscribeWithSelector(
     devtools(
@@ -32,9 +59,11 @@ export const useMapStore = create<MapState>()(
             error: null as string | null,
             hoveredTerritoryId: null as string | null,
             selectedTerritoryId: null as string | null,
-            colorMap: new Map<string,string>(),
+            colorMap: new Map<string, string>(),
+            current_map: MAPS.INDIA.map as GameMap,
+            current_mapID: MAPS.INDIA.id as MapID
           },
-          (set) => ({
+          (set, get) => ({
             fetchMap: async (url: string) => {
               set((state) => {
                 state.isLoading = true;
@@ -52,14 +81,14 @@ export const useMapStore = create<MapState>()(
                   //state.currentMap = data;
                   state.isLoading = false;
                 });
-                return data
+                return data;
               } catch (err) {
                 console.error(err);
                 set((state) => {
                   state.error = (err as Error).message;
                   state.isLoading = false;
                 });
-                return null
+                return null;
               }
             },
             setHoveredTerritory: (id: string | null) => {
@@ -75,15 +104,43 @@ export const useMapStore = create<MapState>()(
             },
             setTerritoryColor: (territoryID: string, color: string) => {
               set((s) => {
-                s.colorMap = new Map(s.colorMap)
-                s.colorMap.set(territoryID, color)
+                s.colorMap = new Map(s.colorMap);
+                s.colorMap.set(territoryID, color);
               });
             },
-            reset: ()=>{set(useMapStore.getInitialState())}
+            removeTerritoryColor: (territoryID: string) => {
+              set((s) => {
+                s.colorMap = new Map(s.colorMap);
+                s.colorMap.set(territoryID, '#555555');
+              });
+            },
+            reset: () => {
+              set(useMapStore.getInitialState());
+            },
+            setMapID: (mapID) => {
+              set((s) => {
+                s.current_map = MAPS[mapID].map;
+              });
+            },
+            getEconomyData: () => {
+              const mapID = get().current_mapID
+              
+              const current_map = get().current_map
+              
+              const territoryID = get().selectedTerritoryId
+              
+              const selectedTerritory = current_map.territories.find((t)=>t.id == territoryID)
+              if(!selectedTerritory) throw new Error(`territory ID invalid, map:${mapID}, territory:${territoryID}`)
+              const territorySize = selectedTerritory?.hexes.length
+              
+              const economy = MAPS[mapID].getTerritoryEconomy(territorySize)
+              
+              return economy              
+            },
           }),
         ),
       ),
       { name: "mapStateStore" },
     ),
-  )
+  ),
 );

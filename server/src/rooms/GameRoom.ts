@@ -199,6 +199,18 @@ export class GameRoom extends Room<RoomState> {
       logger.info('received end turn');
       this.gameEngine.endTurn();
     })
+
+    this.onAction('CHANGE_MAP', (client, {mapID}) => {
+      this.state.mapID = mapID
+    })
+
+    this.onAction('BUY_TERRITORY', (client, {territoryID}) => {
+      this.gameEngine.buyTerritory(client, territoryID)
+    })
+
+    this.onAction('SELL_TERRITORY', (client, {territoryID})=>{
+      this.gameEngine.sellTerritory(client, territoryID)
+    })
   }
 
   onAuth(client: Client<any, any>, options: any, context: AuthContext) {

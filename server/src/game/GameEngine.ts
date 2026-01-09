@@ -1,44 +1,18 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { GameAction, PlayerState, RoomState } from "@color-wars/shared/src/types/RoomState";
+import { GameAction, PlayerState, RoomState, TerritoryState } from "@color-wars/shared/src/types/RoomState";
 import { PLAYER } from "@color-wars/shared/src/config/game";
 import { Client, Room } from "colyseus";
 import { StatusEffect } from "@color-wars/shared/src/types/RoomState";
 import { RewardID, StatusEffectID } from "@color-wars/shared/src/types/effectId";
-import { cli } from "winston/lib/winston/config";
-
-type MapTerritory = {
-  id: string;
-  name: string;
-  hexIds: string[];
-};
-
-type MapDefinition = {
-  id: string;
-  name: string;
-  territories: MapTerritory[];
-};
-
-const loadDefaultMapDefinition = (): MapDefinition | null => {
-  try {
-    const filePath = path.resolve(__dirname, "../../../client/public/india_5.json");
-    const raw = readFileSync(filePath, "utf8");
-    const parsed = JSON.parse(raw) as MapDefinition;
-    return parsed;
-  } catch (error) {
-    return null;
-  }
-};
+import { MAPS } from "@color-wars/shared/src/maps";
 
 export class GameEngine {
-  private mapDefinition: MapDefinition | null;
   private roomClock?: {
     setTimeout: (callback: () => void, delay: number) => any;
   };
 
-  constructor(private readonly state: RoomState) {
-    this.mapDefinition = loadDefaultMapDefinition();
-  }
+  constructor(private readonly state: RoomState) {}
 
   setRoomClock(clock: { setTimeout: (callback: () => void, delay: number) => any }) {
     this.roomClock = clock;
@@ -70,15 +44,14 @@ export class GameEngine {
   }
 
   startGame() {
-
-    for(const playerID of this.state.game.playerOrder){
-      const player = this.state.game.players.get(playerID)!
-      player.money = 1500
-      player.position = 0
+    for (const playerID of this.state.game.playerOrder) {
+      const player = this.state.game.players.get(playerID)!;
+      player.money = 1500;
+      player.position = 0;
       player.hasRolled = false;
     }
 
-    this.state.game.activePlayerId = this.state.game.playerOrder.at(0)
+    this.state.game.activePlayerId = this.state.game.playerOrder.at(0);
     this.state.game.turnPhase = "awaiting-roll";
   }
 
@@ -87,14 +60,14 @@ export class GameEngine {
     const die2 = Math.floor(Math.random() * 6) + 1;
     const roll = die1 + die2;
 
-    this.state.pushAction('ROLL_DICE', client.sessionId, {die1, die2})
+    this.state.pushAction("ROLL_DICE", client.sessionId, { die1, die2 });
 
     const player = this.state.game.players.get(client.sessionId)!;
     const fromTile = player.position;
-    const toTile = (fromTile+roll) % 34
+    const toTile = (fromTile + roll) % 34;
 
-    player.position = toTile
-    this.state.pushAction('MOVE_PLAYER', client.sessionId, {fromTile, toTile, tokenId: client.sessionId})
+    player.position = toTile;
+    this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
 
     // player.money += 200
     // this.state.pushAction('INCR_MONEY', client.sessionId, {playerId: client.sessionId, amount: 200})
@@ -102,18 +75,48 @@ export class GameEngine {
     // player.money -= 200
     // this.state.pushAction('DECR_MONEY', client.sessionId, {playerId: client.sessionId, amount: 200})
 
-    this.state.pushAction('DRAW_3_REWARD_CARDS', client.sessionId, {playerId: client.sessionId, cardIds: ['GET_500_CASH','GET_2000_CASH',"GET_KILL_CARD"]})
+    this.state.pushAction("DRAW_3_REWARD_CARDS", client.sessionId, { playerId: client.sessionId, cardIds: ["GET_500_CASH", "GET_2000_CASH", "GET_KILL_CARD"] });
 
     player.hasRolled = true;
   }
 
+  buyTerritory(client: Client, territoryID: string) {
+    const player = this.state.game.players.get(client.sessionId)!
+
+    const territorySize = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!.hexes.length
+
+    const economy = MAPS[this.state.mapID].getTerritoryEconomy(territorySize)
+
+    const cost = economy.BASE.capEx
+    
+    this.state.pushAction('BUY_TERRITORY', player.id, {playerId: player.id, territoryID, amount: cost})
+    
+    player.money -= cost;
+    this.state.game.territoryOwnership.set(territoryID, new TerritoryState(player.id))
+  }
+
+  sellTerritory(client: Client, territoryID: string) {
+    const player = this.state.game.players.get(client.sessionId)!
+
+    const territorySize = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!.hexes.length
+
+    const economy = MAPS[this.state.mapID].getTerritoryEconomy(territorySize)
+
+    const cost = economy.BASE.capEx/2
+
+    this.state.pushAction('SELL_TERRITORY', player.id, {playerId: player.id, territoryID, amount:cost})
+    
+    player.money += cost;
+    this.state.game.territoryOwnership.set(territoryID, new TerritoryState(player.id))
+  }
+
   endTurn() {
     const currentIdx = this.state.game.playerOrder.indexOf(this.state.game.activePlayerId);
-    
+
     const nextIdx = (currentIdx + 1) % this.state.game.playerOrder.length;
-    if(nextIdx === 0){
+    if (nextIdx === 0) {
       this.state.game.currentRound += 1;
-      for(const [,player] of this.state.game.players){
+      for (const [, player] of this.state.game.players) {
         player.hasRolled = false;
       }
     }
@@ -129,21 +132,20 @@ export interface EffectContext {
 }
 
 export const RewardEffects: Record<RewardID, (ctx: EffectContext) => void> = {
-  'GET_500_CASH': (ctx: EffectContext) => {},
-  'GET_2000_CASH': (ctx: EffectContext) => {},
-  'GET_KILL_CARD': (ctx: EffectContext) => {},
-  'GET_SHIELD_CARD': (ctx: EffectContext) => {},
+  GET_500_CASH: (ctx: EffectContext) => {},
+  GET_2000_CASH: (ctx: EffectContext) => {},
+  GET_KILL_CARD: (ctx: EffectContext) => {},
+  GET_SHIELD_CARD: (ctx: EffectContext) => {},
 };
-
 
 // server/logic/TurnProcessor.ts
 export function processStatusEffects(state: RoomState, playerId: string) {
   const player = state.game.players.get(playerId)!;
-  
+
   // Iterate backwards to allow safe removal
   for (let i = player.statusEffects.length - 1; i >= 0; i--) {
     const effect = player.statusEffects[i];
-    
+
     switch (effect.id as StatusEffectID) {
       case "DEBT":
         // Example: Deduct money each turn

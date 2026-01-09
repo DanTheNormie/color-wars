@@ -10,6 +10,7 @@ import { useDiceTrackStore } from "@/stores/diceTrackStore";
 import { useStore } from "@/stores/sessionStore";
 import { PixiEngine } from "@/components/NewGameBoard/pixi/engine";
 import { useCardStore } from "@/stores/cardSelectionStore";
+import { useMapStore } from "@/stores/mapStateStore";
 
 export class HexHop extends BaseAction<typeof TURN_ACTION_REGISTRY["MOVE_PLAYER"]> {
   execute(): ActionHandle {
@@ -167,5 +168,37 @@ export class ResolveSelectionAction extends BaseAction<{ selectedCardId: string 
     });
 
     return new ActionHandle(resolveAnimationTask, () => {}, () => {});
+  }
+}
+
+export class BuyTerritoryAction extends BaseAction<typeof TURN_ACTION_REGISTRY['BUY_TERRITORY']> {
+  execute(): ActionHandle {
+    const { playerId, territoryID, amount } = this.payload
+
+    const playerColor = useStore.getState().state.game.players[playerId].color
+
+    useMapStore.getState().setTerritoryColor(territoryID, playerColor)
+    useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
+
+    return new ActionHandle(
+      new Promise<void>((resolve) => resolve()),
+      ()=>{},
+      ()=>{}
+    )
+  }
+}
+
+export class SellTerritoryAction extends BaseAction<typeof TURN_ACTION_REGISTRY['SELL_TERRITORY']> {
+  execute(): ActionHandle {
+    const { playerId, territoryID, amount } = this.payload
+
+    useMapStore.getState().removeTerritoryColor(territoryID)
+    useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
+
+    return new ActionHandle(
+      new Promise<void>((resolve) => resolve()),
+      ()=>{},
+      ()=>{}
+    )
   }
 }

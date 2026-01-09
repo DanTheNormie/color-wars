@@ -10,10 +10,18 @@ type Rule<K extends ClientActionType> = (
 const ACTION_RULES: {
   [K in ClientActionType]: Array<Rule<K>>;
 } = {
-  PURCHASE_TERRITORY: [
+  BUY_TERRITORY: [
     rules.requirePlayerExists,
     rules.requirePlayersTurn,
-    rules.requireEnoughMoney,
+    rules.requireTerritoryExists,
+    rules.requireTerritoryVacant,
+    rules.requireEnoughMoneyToBuyTerritory
+  ],
+  SELL_TERRITORY: [
+    rules.requirePlayerExists,
+    rules.requirePlayersTurn,
+    rules.requireTerritoryExists,
+    rules.requireTerritoryOwnerShip
   ],
 
   ROLL_DICE: [
@@ -35,6 +43,11 @@ const ACTION_RULES: {
     rules.requirePlayersTurn,
     rules.requireHasRolledDice,
   ],
+
+  CHANGE_MAP: [
+    rules.requireLobbyPhase,
+    rules.requireLeader
+  ]
 };
 
 export function validateOrThrow<K extends ClientActionType>(

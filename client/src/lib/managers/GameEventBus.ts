@@ -4,6 +4,7 @@
 import type { RoomState, PlayerState, DiceStateMode, RoomPhase } from "@color-wars/shared/src/types/RoomState";
 import type { NetworkState } from "./network";
 import type { Message } from "@color-wars/shared/src/types/RoomState";
+import type { MapID } from "@color-wars/shared/src/maps";
 
 export interface LOCAL_EVENT {
   FULL_SEND: RoomState;
@@ -28,6 +29,8 @@ export interface LOCAL_EVENT {
   UPDATE_ROOM_PHASE: {phase: RoomPhase}
   TOAST: {content:string, type:'success'|'error'|'warning'|'info'}
   UPDATE_ACTION_STATE: {state: 'resolving_action' | 'idle'}
+  SET_TERRITORY_INFO_DRAWER: {open: boolean}
+  CHANGE_MAP_ID: {mapID: MapID}
 }
 
 export type LocalEventType = Extract<keyof LOCAL_EVENT, string>;
