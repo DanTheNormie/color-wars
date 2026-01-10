@@ -47,7 +47,6 @@ const registerClientBuild = (app: express.Express) => {
 
 export default config({
   initializeGameServer: (gameServer) => {
-    gameServer.simulateLatency(300);
     gameServer.define(DEFAULT_ROOM_TYPE, GameRoom).enableRealtimeListing().sortBy({ clients: -1 });
   },
 
