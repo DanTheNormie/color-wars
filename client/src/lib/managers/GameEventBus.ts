@@ -28,7 +28,7 @@ export interface LOCAL_EVENT {
   UPDATE_ACTIVE_PLAYER: {playerId: string}
   UPDATE_ROOM_PHASE: {phase: RoomPhase}
   TOAST: {content:string, type:'success'|'error'|'warning'|'info'}
-  UPDATE_ACTION_STATE: {state: 'resolving_action' | 'idle'}
+  UPDATE_ACTION_STATE: {state: 'resolving_action' | 'idle' | 'awaiting_action_result'}
   SET_TERRITORY_INFO_DRAWER: {open: boolean}
   CHANGE_MAP_ID: {mapID: MapID}
 }

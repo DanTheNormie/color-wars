@@ -55,9 +55,9 @@ class Network {
     console.log("Attaching room listeners");
     if (!this.room) throw new Error("Not connected");
 
-    this.onMessage("PING", ({ serverT1 }) => {
-      this.send("PONG", { serverT1, clientT2: Date.now() });
-    });
+    // this.onMessage("PING", ({ serverT1 }) => {
+    //   this.send("PONG", { serverT1, clientT2: Date.now() });
+    // });
 
     this.onMessage("RELAY_MESSAGE", (message) => {
       GameEventBus.emit("RELAY_MESSAGE", message);
@@ -114,6 +114,7 @@ class Network {
         }),
         $(this.room.state.game).listen("activePlayerId", (newValue) => {
           GameEventBus.emit("UPDATE_ACTIVE_PLAYER", { playerId: newValue });
+          GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'idle'})
         }),
         $(this.room.state).listen('mapID', (newValue) => {
           GameEventBus.emit("CHANGE_MAP_ID", {mapID: newValue})

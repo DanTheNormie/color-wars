@@ -10,6 +10,13 @@ type Rule<K extends ClientActionType> = (
 const ACTION_RULES: {
   [K in ClientActionType]: Array<Rule<K>>;
 } = {
+  SELECT_CARD:[
+    rules.requirePlayerExists,
+    rules.requirePlayersTurn,
+    rules.requireResolvingDraftState,
+    rules.requireDrawnCards,
+    rules.requireValidSelectedCard
+  ],
   BUY_TERRITORY: [
     rules.requirePlayerExists,
     rules.requirePlayersTurn,

@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import gsap from "@/lib/gsap";
 import { useCardStore } from "@/stores/cardSelectionStore";
-import { ResolveSelectionAction } from "@/actions/actions";
 
 import { Swiper, SwiperSlide, type SwiperClass } from "swiper/react";
 import { EffectCards, Thumbs } from "swiper/modules";
@@ -43,7 +42,7 @@ declare module "react" {
 
 const Card = ({ id }: { id: string }) => {
   return (
-    <div id={id} className="card-wrapper relative flex h-full w-full justify-center rounded-xl select-none">
+    <div id={id} className="card-wrapper relative flex h-full w-full max-w-120 justify-center rounded-xl select-none">
       <style>{`
         .glare-rounded::part(tilt)::before {
             border-radius: calc(var(--radius) + 4px);
@@ -93,6 +92,7 @@ export const CardSelectionOverlay = () => {
   const cardIds = useCardStore((s) => s.cardIds);
   const phase = useCardStore((s) => s.phase);
   const selectedCardId = useCardStore((s) => s.selectedCardId);
+  const selectCard = useStore((s) => s.selectCard)
   const swiperRef = useRef<SwiperClass | null>(null);
   const setPhase = useCardStore((s) => s.setPhase);
   const reset = useCardStore((s) => s.reset);
@@ -109,7 +109,8 @@ export const CardSelectionOverlay = () => {
       return
     };
     console.log("action created", selectedCardId);
-    new ResolveSelectionAction({ selectedCardId }).execute();
+    selectCard(selectedCardId)
+    //new ResolveSelectionAction({ selectedCardId }).execute();
     // Example: sendSelectCardOp(id);
   };
 
@@ -182,11 +183,14 @@ export const CardSelectionOverlay = () => {
 
   return (
     <div ref={containerRef} className="fixed inset-0 z-100 flex h-full w-full flex-col items-center justify-center gap-12 bg-black/80 backdrop-blur-sm perspective-[2000px]">
-      <style>
+      <div className="flex h-full w-full max-w-120 flex-col items-center justify-center gap-12">
+        <style>
         {`
           .swiper.first {
             width: 60vw;
+            max-width: 480px;
             height: 45vh;
+            max-height: 720px;
           }
 
           .swiper,
@@ -236,6 +240,7 @@ export const CardSelectionOverlay = () => {
       <Button className={`${!isActivePlayer?'hidden':''} cursor-pointer relative transition-none`} onClick={handleCardSelect} size="lg" variant="outline">
         Confirm Selection
       </Button>
+      </div>
     </div>
   );
 };

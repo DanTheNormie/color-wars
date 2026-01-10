@@ -13,9 +13,10 @@ import type {
 import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
 import type { MapID } from "@color-wars/shared/src/maps";
+import { GameEventBus } from "@/lib/managers/GameEventBus";
 
 const DEFAULT_PLAYER_NAME = "Commander";
-type ActionState = 'resolving_action' | 'idle'
+type ActionState = 'resolving_action' | 'idle' | 'awaiting_action_result'
 
 interface LocalRoom {
   playerName: string;
@@ -202,7 +203,10 @@ export const useStore = create(
                 console.log("sending ", mode);
                 if (mode == "acc") network.send("ACCELERATE_DICE", {});
                 else if (mode == "rag") network.send("RAGDOLL_DICE", {});
-                else if (mode == "roll") network.send("ROLL_DICE", {});
+                else if (mode == "roll") {
+                  network.send("ROLL_DICE", {});
+                  GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
+                }
               } catch (error) {
                 console.error("[rollDice] Error sending rollDice message:", error);
               }
@@ -218,6 +222,7 @@ export const useStore = create(
               if (!territoryId) return;
               try {
                 network.send('BUY_TERRITORY', {territoryID: territoryId})
+                GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
               } catch (error) {
                 console.warn("Unable to purchase territory", error);
               }
@@ -226,6 +231,16 @@ export const useStore = create(
               if (!territoryId) return;
               try {
                 network.send('SELL_TERRITORY', {territoryID: territoryId})
+                GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
+              } catch (error) {
+                console.warn("Unable to purchase territory", error);
+              }
+            },
+            selectCard: (cardID : string) => {
+              if (!cardID) return;
+              try {
+                network.send('SELECT_CARD', {cardID: cardID})
+                GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
               } catch (error) {
                 console.warn("Unable to purchase territory", error);
               }

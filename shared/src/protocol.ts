@@ -12,6 +12,7 @@ export interface ClientMessages {
   SEND_MESSAGE: {senderId: string, content: string, timeStamp: number}
   END_TURN: {};
   CHANGE_MAP: {mapID: MapID}
+  SELECT_CARD: {cardID: string}
 }
 
 export interface ServerMessages {

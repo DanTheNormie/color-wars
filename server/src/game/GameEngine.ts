@@ -6,6 +6,8 @@ import { Client, Room } from "colyseus";
 import { StatusEffect } from "@color-wars/shared/src/types/RoomState";
 import { RewardID, StatusEffectID } from "@color-wars/shared/src/types/effectId";
 import { MAPS } from "@color-wars/shared/src/maps";
+import { type TileType, DICE_TRACK} from "@color-wars/shared/src/config/diceTrack"
+
 
 export class GameEngine {
   private roomClock?: {
@@ -46,7 +48,7 @@ export class GameEngine {
   startGame() {
     for (const playerID of this.state.game.playerOrder) {
       const player = this.state.game.players.get(playerID)!;
-      player.money = 1500;
+      player.money = 150000;
       player.position = 0;
       player.hasRolled = false;
     }
@@ -64,21 +66,67 @@ export class GameEngine {
 
     const player = this.state.game.players.get(client.sessionId)!;
     const fromTile = player.position;
-    const toTile = (fromTile + roll) % 34;
+    const toTile = (fromTile + roll) % DICE_TRACK.length;
 
+    const destTileType = DICE_TRACK[toTile]
+    
     player.position = toTile;
     this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
-
-    // player.money += 200
-    // this.state.pushAction('INCR_MONEY', client.sessionId, {playerId: client.sessionId, amount: 200})
-
-    // player.money -= 200
-    // this.state.pushAction('DECR_MONEY', client.sessionId, {playerId: client.sessionId, amount: 200})
-
-    this.state.pushAction("DRAW_3_REWARD_CARDS", client.sessionId, { playerId: client.sessionId, cardIds: ["GET_500_CASH", "GET_2000_CASH", "GET_KILL_CARD"] });
+    
+    this.handleTileEffect(destTileType, player)
 
     player.hasRolled = true;
   }
+
+  handleTileEffect(tileType: TileType, player: PlayerState){
+    switch(tileType){
+      case 'INCOME': {
+
+        const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
+        
+        player.money += amount
+        this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
+        break;
+      }
+      case 'TAX': {
+        const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
+        player.money -= amount
+        this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
+        break;
+      }
+      case 'REWARD':{
+        const amount = this.getRandomNumberWithStep(10000, 100000, 10000)
+        player.money += amount
+        this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
+        break;
+      }
+      case 'PENALTY':{
+        const amount = this.getRandomNumberWithStep(10000, 100000, 10000)
+        player.money -= amount
+        this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
+        break;
+      }
+      case 'SURPRISE':  {
+        const generatedCardIDs = ["GET_500_CASH", "GET_2000_CASH", "GET_KILL_CARD"] as RewardID[]
+        this.state.game.turnPhase = 'resolving-draft'
+        this.state.game.generatedCardIDs.push(...generatedCardIDs)
+        this.state.pushAction("DRAW_3_REWARD_CARDS", player.id, { playerId: player.id, cardIds: generatedCardIDs });
+        break;
+      }
+      case 'SAFE':
+      case 'START':  {break;}
+      default: throw new Error('invalid/unhandled tile type')
+    }
+  }
+
+  private getRandomNumberWithStep(min: number, max: number, step: number) {
+    // Calculate the number of possible steps (including min)
+    const steps = Math.floor((max - min) / step);
+    // Get a random integer between 0 and `steps` (inclusive)
+    const randomStep = Math.floor(Math.random() * (steps + 1));
+    // Scale and shift the number
+    return min + (randomStep * step);
+}
 
   buyTerritory(client: Client, territoryID: string) {
     const player = this.state.game.players.get(client.sessionId)!
@@ -107,7 +155,15 @@ export class GameEngine {
     this.state.pushAction('SELL_TERRITORY', player.id, {playerId: player.id, territoryID, amount:cost})
     
     player.money += cost;
-    this.state.game.territoryOwnership.set(territoryID, new TerritoryState(player.id))
+    this.state.game.territoryOwnership.delete(territoryID)
+  }
+
+  selectCard(client: Client, cardID: string) {
+
+    this.state.game.generatedCardIDs.clear()
+    this.state.pushAction('SELECT_CARD', client.sessionId, {selectedCardId: cardID})
+  
+    //TODO: apply card effect
   }
 
   endTurn() {

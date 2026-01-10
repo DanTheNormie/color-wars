@@ -156,6 +156,7 @@ export class GameState extends Schema {
   @type(["string"]) playerOrder: ArraySchema<string> = new ArraySchema<string>();
   @type("number") currentRound: number = 0;
   @type(["string"]) trackOrder = new ArraySchema<string>();
+  @type(["string"]) generatedCardIDs = new ArraySchema<string>();
 }
 
 export class RoomState extends Schema {

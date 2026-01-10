@@ -11,6 +11,9 @@ interface WithPlayer {
 interface WithTerritoryID extends WithPlayer {
   territoryID: string
 }
+interface WithCardID extends WithPlayer {
+  cardID: string
+}
 
 export const requireTerritoryExists = (s: PlainStateOf<RoomState>, ctx: WithTerritoryID) => {
   const mapID = s.mapID
@@ -39,6 +42,17 @@ export const requireTerritoryOwnerShip = (s: PlainStateOf<RoomState>, ctx: WithT
   if(!territoryState || (territoryState.ownerId != ctx.senderId)) throw new Error(`Player does not own territory with id: ${ctx.territoryID}`)
 }
 
+export const requireResolvingDraftState = (s: PlainStateOf<RoomState>, ctx: WithCardID) => {
+  if(s.game.turnPhase !== 'resolving-draft') throw new Error(`Turn phase is not "resolving-draft"`)
+}
+
+export const requireDrawnCards = (s: PlainStateOf<RoomState>, ctx: WithCardID) => {
+  if(s.game.generatedCardIDs.length !== 3) throw new Error (`No cards were drawn to choose from`)
+}
+
+export const requireValidSelectedCard = (s: PlainStateOf<RoomState>, ctx: WithCardID) => {
+  if(!s.game.generatedCardIDs.some((c) => ctx.cardID == c)) throw new Error (`Selected cardID: ${ctx.cardID} was not found in the generated cards list`)
+}
 
 // 2. The Rules
 // notice we don't reference specific Actions here, just data shapes.

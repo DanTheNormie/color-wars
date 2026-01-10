@@ -59,12 +59,12 @@ export class GameRoom extends Room<RoomState> {
     this.gameEngine = new GameEngine(this.state);
     this.gameEngine.setRoomClock(this.clock);
 
-    this.pinger = this.clock.setInterval(() => {
-      const now = Date.now();
-      for (const client of this.clients) {
-        this.dispatch("PING", { serverT1: now }, { client });
-      }
-    }, 2000);
+    // this.pinger = this.clock.setInterval(() => {
+    //   const now = Date.now();
+    //   for (const client of this.clients) {
+    //     this.dispatch("PING", { serverT1: now }, { client });
+    //   }
+    // }, 2000);
 
     this.registerMessageHandlers();
     logger.info("room created");
@@ -149,6 +149,7 @@ export class GameRoom extends Room<RoomState> {
   async onDispose() {
     //RoomManager.unregisterRoom(this);
     this.pinger?.clear();
+    logger.info("room destroyed");
   }
 
   private registerMessageHandlers() {
@@ -210,6 +211,10 @@ export class GameRoom extends Room<RoomState> {
 
     this.onAction('SELL_TERRITORY', (client, {territoryID})=>{
       this.gameEngine.sellTerritory(client, territoryID)
+    })
+
+    this.onAction('SELECT_CARD', (client, {cardID})=>{
+      this.gameEngine.selectCard(client, cardID)
     })
   }
 
