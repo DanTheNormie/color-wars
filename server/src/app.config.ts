@@ -4,7 +4,6 @@ import cors from "cors";
 import express from "express";
 import path from "path";
 import { existsSync } from "fs";
-
 import { GameRoom } from "./rooms/GameRoom";
 import { createMatchmakingRouter } from "./routes/matchmakingRoutes";
 import { logger } from "./utils/logger";
