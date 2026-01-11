@@ -229,8 +229,9 @@ export class DiceTrackLayer extends PIXI.Container {
       });
     };
   
-    hexTextures.START    = drawHex(0xffffff, 0x09090b, 0x262626);
-    hexTextures.SAFE     = drawHex(0x262626, 0x09090b, 0x262626);
+    hexTextures.START    = drawHex(0x000000, 0x09090b, 0xFFFFFF);
+    hexTextures.NEUTRAL  = drawHex(0x262626, 0x09090b, 0x262626)
+    hexTextures.SAFE     = drawHex(0xFFFFFF, 0x09090b, 0x262626);
     hexTextures.SURPRISE = drawHex(0xF1C40F, 0x09090b, 0x262626);
     hexTextures.INCOME   = drawHex(0x27AE60, 0x09090b, 0x262626);
     hexTextures.TAX      = drawHex(0x9B59B6, 0x09090b, 0x262626);

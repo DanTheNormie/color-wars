@@ -292,7 +292,7 @@ export const DebugGameControls = () => {
   const clear = useDiceTrackStore((s) => s.clear);
 
   return (
-    <div className="z-50 mb-4 h-[200px] w-full overflow-y-scroll shadow-2xl duration-300 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="z-50 mb-4 h-50 w-full overflow-y-scroll shadow-2xl duration-300 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <Card className="bg-background/95 supports-backdrop-filter:bg-background/80 border-orange-200/50 backdrop-blur">
         <CardContent className="flex flex-col gap-4">
           <Button onClick={clear} className="mt-1 h-8 w-full text-xs" variant="destructive">
