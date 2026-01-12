@@ -120,6 +120,186 @@ export function animateCoinConfettiToDom(sprite: PIXI.Sprite, targetEl: HTMLElem
       },
     });
 }
+export function animateCoinConfettiToCanvas(sprite: PIXI.Sprite, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
+  const canvas = document.getElementById("vfx-layer") as HTMLCanvasElement;
+  if (!canvas) return;
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  
+  const canavasRect = canvas.getBoundingClientRect();
+  
+  canvas.width = Math.round(canavasRect.width * dpr);
+  canvas.height = Math.round(canavasRect.height * dpr);
+  
+  const ctx = canvas.getContext("2d")!;
+  // IMPORTANT: reset transform before scaling
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+
+  const coins: {
+    x: number;
+    y: number;
+    r: number;
+    opacity: number;
+  }[] = [];
+
+  const meta: { burstX: number; burstY: number }[] = [];
+
+  const coinSize = sprite.width / 4;
+  const global = sprite.getGlobalPosition();
+  const canvasRect = app.canvas.getBoundingClientRect();
+
+  const startX = canvasRect.left + global.x;
+  const startY = canvasRect.top + global.y;
+
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * coinSize * 3;
+
+    coins.push({
+      x: startX,
+      y: startY,
+      r: coinSize / 2,
+      opacity: 1,
+    });
+
+    meta.push({
+      burstX: startX + Math.cos(angle) * radius,
+      burstY: startY + Math.sin(angle) * radius,
+    });
+  }
+
+  const rect = targetEl.getBoundingClientRect();
+  const endX = rect.left + rect.width / 2;
+  const endY = rect.top + rect.height / 2;
+
+  function render() {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    for (const c of coins) {
+      if (c.opacity <= 0) continue;
+
+      ctx.globalAlpha = c.opacity;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#31d652";
+      ctx.fill();
+      ctx.strokeStyle = "#262626";
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  return gsap
+    .timeline({
+      onUpdate: render,
+      onComplete: () => {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      },
+    })
+    .to(coins, {
+      x: (i) => meta[i].burstX,
+      y: (i) => meta[i].burstY,
+      stagger: 0.002,
+      duration: 0.4,
+      ease: "power2.out",
+    })
+    .to(coins, {
+      x: endX,
+      y: endY,
+      opacity: 0,
+      stagger: 0.005,
+      duration: 0.2,
+      ease: "power2.in",
+    });
+}
+
+export function testAnimation(x1: number, y1: number, x2: number, y2: number) {
+  const canvas = document.getElementById("vfx-layer") as HTMLCanvasElement;
+  if (!canvas) return;
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  
+  const rect = canvas.getBoundingClientRect();
+  
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  
+  const ctx = canvas.getContext("2d")!;
+  // IMPORTANT: reset transform before scaling
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+
+  console.log({
+    dpr: window.devicePixelRatio,
+    canvasCSS: canvas.getBoundingClientRect(),
+    canvasActual: { w: canvas.width, h: canvas.height },
+    ctxActual: { w: ctx.canvas.width, h: ctx.canvas.height },
+  });
+
+
+  const startX = x1
+  const startY = y1
+
+      const coins: {
+    x: number;
+    y: number;
+    r: number;
+    opacity: number;
+  }[] = [];
+
+  for(let i=1; i<=1; i++){
+    coins.push({
+      x: startX,
+      y: startY,
+      r: 100,
+      opacity: 1
+    })
+  }
+
+
+  function render() {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    for (const c of coins) {
+      if (c.opacity <= 0) continue;
+
+      ctx.globalAlpha = c.opacity;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#31d652";
+      ctx.fill();
+      ctx.strokeStyle = "#262626";
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  return gsap
+    .timeline({
+      onUpdate: render,
+      onComplete: () => {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      },
+    })
+    .to(coins, {
+      x: x2,
+      y: y2,
+      stagger: 0.002,
+      duration: 2,
+      ease: "power2.out",
+    })
+    .to(coins, {
+      x: x1,
+      y: y1,
+      stagger: 0.002,
+      duration: 2,
+      ease: "power2.out",
+    })
+    .repeat(20)
+}
 
 export function animateCoinConfetti(sprite: PIXI.Sprite, app: PIXI.Application, count = 12) {
   const confettiEls: HTMLElement[] = [];
@@ -173,7 +353,7 @@ export function animateCoinConfetti(sprite: PIXI.Sprite, app: PIXI.Application, 
     .to(confettiEls, {
       transform: (i) => {
         const { burstOffset } = meta[i];
-        return `translate(${burstOffset.x}px, ${burstOffset.y-30}px)`;
+        return `translate(${burstOffset.x}px, ${burstOffset.y - 30}px)`;
       },
       opacity: 0,
       duration: 0.2,

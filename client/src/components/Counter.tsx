@@ -33,11 +33,61 @@ export function CounterSimple({ value, animateDiff, id, className }: { value: nu
 }
 
 
-
-export default function PlayerM({ playerId }: { playerId: string }) {
+export function PlayerMoney({ playerId }: { playerId: string }) {
   const score = useStore((s) => s.state.game.players[playerId]?.money || 0);
 
   return (
-    <CounterSimple value={score} animateDiff id={`player-money-${playerId}`} />
+    <div className="flex items-center">
+      <div className="text-2xl mr-1">🏦</div><span className="mr-0.5">$</span>
+      <CounterSimple value={score} animateDiff id={`player-money-${playerId}`} />
+    </div>
+  );
+}
+
+export function PlayerBackpackMoney({ playerId }: { playerId: string }) {
+  const score = useStore((s) => s.state.game.players[playerId]?.backpack.money || 0);
+
+  return (
+    <div className="flex items-center">
+      <div className="text-2xl mr-1">🪙</div>
+      <CounterSimple value={score} animateDiff id={`player-backpack-money-${playerId}`} />
+    </div>
+  );
+}
+
+export function PlayerCards({ playerId }: { playerId: string }) {
+  const score = useStore((s) => s.state.game.players[playerId]?.cards.length || 0);
+
+  return (
+    <div className="flex items-center">
+      <span className="text-2xl">📚</span><span className="mr-1">x </span>
+      <CounterSimple value={score} animateDiff id={`player-cards-${playerId}`} />
+    </div>
+  );
+}
+
+export function PlayerBackpackCards({ playerId }: { playerId: string }) {
+  const playerBackpackCards = useStore((s) => s.state.game.players[playerId]?.backpack.cards.length || 0);
+
+  return (
+    <div className="flex items-center">
+      <span className="text-2xl">🃏</span><span className="mr-1">x </span>
+      <CounterSimple value={playerBackpackCards} animateDiff id={`player-backpack-cards-${playerId}`} />
+    </div>
+  );
+}
+
+export function PlayerTerritories({ playerId }: { playerId: string }) {
+  const playerT = useStore((s) => {
+    const territoryOwnershipMap = s.state.game.territoryOwnership
+    const playerTerritories = Object.values(territoryOwnershipMap).filter((t)=>t.ownerId == playerId)
+    return playerTerritories.length
+  });
+
+  return (
+    <div className="flex items-center">
+      <span className="text-2xl">🚩</span><span className="mr-1">x </span>
+      <CounterSimple value={playerT} animateDiff id={`player-territories-${playerId}`} />
+    </div>
   );
 }

@@ -6,7 +6,8 @@ import { useStore } from "@/stores/sessionStore";
 import { PLAYER } from "@color-wars/shared/src/config/game";
 import gsap from "@/lib/gsap";
 import { useGSAP } from "@gsap/react";
-import PlayerM from "./Counter";
+import { PlayerMoney, PlayerBackpackMoney, PlayerCards, PlayerBackpackCards, PlayerTerritories } from "./Counter";
+import { Separator } from "./ui/separator";
 
 function PickerPopover({ open, setOpen, enabled, trigger, children }: { open: boolean; setOpen: (v: boolean) => void; enabled: boolean; trigger: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -31,15 +32,15 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
     kickPlayer(player.id);
   };
 
-  useGSAP(() => {
-    const tl = gsap.timeline()
-    tl.from(ref.current, {
-      x: 800,
-      delay: 0.2,
-      duration: 0.25,
-      ease: "power2.out",
-    })
-  });
+  // useGSAP(() => {
+  //   const tl = gsap.timeline();
+  //   tl.from(ref.current, {
+  //     x: 800,
+  //     delay: 0.2,
+  //     duration: 0.25,
+  //     ease: "power2.out",
+  //   });
+  // });
 
   // useEffect(() => {
   //   if (!ref.current) return;
@@ -68,9 +69,9 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
   const isLeader = player.id === leaderId;
   const leaderAccess = leaderId === sessionId;
   return (
-    <li ref={ref} className={`player bg-secondary/10 relative flex items-center justify-between rounded-lg px-3 py-2 transition-opacity ${!player.connected ? "opacity-40" : ""}`}>
+    <li ref={ref} className={`player bg-secondary/10 flex items-center w-full justify-around gap-2 rounded-lg px-3 transition-opacity ${!player.connected ? "opacity-40" : ""}`}>
       {/* LEFT — Player Info */}
-      <div className="flex h-full items-center gap-3">
+      <div className="flex h-full w-full items-center gap-3">
         {/* Color Picker */}
         <PickerPopover
           open={openColor}
@@ -78,15 +79,15 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
           enabled={isLobbyPhase && isYou}
           trigger={<span className={`h-full w-3 self-stretch rounded-[2px] border ${isYou ? "cursor-pointer" : ""}`} style={{ backgroundColor: player.color }} />}
         >
-          <div className="grid grid-cols-5 gap-2 p-2">
+          <div className="grid h-full grid-cols-5 gap-2 p-2">
             {availableColors.map((color) => (
-              <button key={color} className="h-6 w-6 rounded-full border transition hover:scale-110" style={{ backgroundColor: color }} />
+              <button key={color} className="h-full w-6 rounded-full border transition hover:scale-110" style={{ backgroundColor: color }} />
             ))}
           </div>
         </PickerPopover>
 
         {/* Icon Picker */}
-        <PickerPopover
+        {/* <PickerPopover
           open={openIcon}
           setOpen={setOpenIcon}
           enabled={isLobbyPhase && isYou}
@@ -99,29 +100,57 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
               </button>
             ))}
           </div>
-        </PickerPopover>
+        </PickerPopover> */}
 
         {/* Name */}
-        <span className="text-sm font-medium text-white">
-          {player.name}
-          {isYou && " (You)"}
-          {isLeader && " 👑"}
-          {!player.connected && " [Disconnected]"}
-        </span>
+        <div className="flex flex-col h-full">
+          <span className={`flex items-center min-h-7 text-sm font-medium text-white ${!isLobbyPhase?"mb-2":""}`}>
+            {player.name}
+            {isYou && " (You)"}
+            {!player.connected && " [Disconnected]"}
+            {isLeader && <span className="ml-1">👑</span>}
+          </span>
+          {!isLobbyPhase && (
+
+            <div className="flex  justify-start gap-3">
+            <PlayerMoney playerId={player.id} />
+            <PlayerCards playerId={player.id} />
+            <PlayerTerritories playerId={player.id} />
+          </div>
+          )}
+        </div>
       </div>
+      {!isLobbyPhase && (
 
-      {/* RIGHT — Actions */}
-      <div className="flex items-center gap-2">
-        {!isLobbyPhase && <PlayerM playerId={player.id} />}
-
-        {leaderAccess && isLobbyPhase && !isYou && (
-          <button onClick={handleKickPlayer} title="Kick player">
-            ❌
-          </button>
+        <div className="w-full h-full">
+          <Separator className="w-full mx-auto" orientation="vertical" />
+        </div>
         )}
 
-        <Pinger playerId={player.id} />
-      </div>
+      {/* RIGHT — Actions */}
+      {!isLobbyPhase && (
+
+        <div className="flex flex-col w-full">
+          <div className=" flex w-50 justify-start items-center mb-2">
+            <span className="text-xl">🎒Backpack</span>
+            <span className="ml-2">&middot;</span>
+            <span className="ml-2 text-xs">This run</span>
+          </div>
+          
+          <div className="flex w-full gap-3">
+            <PlayerBackpackMoney playerId={player.id} />
+            <PlayerBackpackCards playerId={player.id} />
+          </div>
+          
+
+          {/* <Pinger playerId={player.id} /> */}
+        </div>
+      )}
+      {leaderAccess && isLobbyPhase && !isYou && (
+        <button onClick={handleKickPlayer} title="Kick player">
+          ❌
+        </button>
+      )}
     </li>
   );
 };
