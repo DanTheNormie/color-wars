@@ -120,9 +120,10 @@ export function animateCoinConfettiToDom(sprite: PIXI.Sprite, targetEl: HTMLElem
       },
     });
 }
-export function animateCoinConfettiToCanvas(sprite: PIXI.Sprite, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
+
+function getCanvasContext (){
   const canvas = document.getElementById("vfx-layer") as HTMLCanvasElement;
-  if (!canvas) return;
+  if (!canvas) throw new Error('canvas not ready yet');
   const dpr = Math.max(1, window.devicePixelRatio || 1);
 
   
@@ -135,6 +136,12 @@ export function animateCoinConfettiToCanvas(sprite: PIXI.Sprite, targetEl: HTMLE
   // IMPORTANT: reset transform before scaling
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
+
+  return ctx
+}
+
+export function animateCoinConfettiToCanvas(sprite: PIXI.Sprite, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
+  const ctx = getCanvasContext() 
 
   const coins: {
     x: number;

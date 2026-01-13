@@ -1,4 +1,5 @@
 // gameBootstrap.ts
+import { assetManager } from "./assetManager";
 import { soundManager } from "./sound";
 import { toastManager } from "./toast";
 import { zustandSyncManager } from "./zustandSync";
@@ -15,6 +16,7 @@ export function bootstrapGame() {
   toastManager.init();
   soundManager.init();
   zustandSyncManager.init();
+  assetManager.init()
 }
 
 export function shutdownGame() {

@@ -85,9 +85,3 @@ export const INNER_EDGE_SPEC: Record<string, number[]> = {
   "0,2": [0, 5], // SE, NE
   "0,1": [0, 5], // SE, NE
 };
-
-// 3. Tile Types (Placeholder for now)
-export const TILE_TYPES: Record<string, number> = {
-  DEFAULT: 0x333333,
-  SPECIAL: 0xaa3333,
-};

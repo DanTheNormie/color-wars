@@ -80,20 +80,18 @@ export class GameEngine {
 
   handleTileEffect(tileType: TileType, player: PlayerState){
     switch(tileType){
-      case 'INCOME': {
-
-        const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-        
-        player.money += amount
-        this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
-        break;
-      }
-      case 'TAX': {
-        const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-        player.money -= amount
-        this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
-        break;
-      }
+      // case 'INCOME': {
+      //   const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
+      //   player.money += amount
+      //   this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
+      //   break;
+      // }
+      // case 'TAX': {
+      //   const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
+      //   player.money -= amount
+      //   this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
+      //   break;
+      // }
       case 'REWARD':{
         const amount = this.getRandomNumberWithStep(10000, 100000, 10000)
         player.money += amount

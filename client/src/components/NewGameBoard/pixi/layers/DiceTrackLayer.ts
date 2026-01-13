@@ -3,7 +3,7 @@ import { TRACK_COORDINATES, INNER_EDGE_SPEC } from "../../config/dice-track-conf
 import { pixiTargetLocator } from "@/animation/target-locator";
 import { BACKGROUND_COLOR } from "../engine";
 import { TokenLayer } from "./TokenLayer";
-import { type TileType, DICE_TRACK } from "@color-wars/shared/src/config/diceTrack";
+import { type TileType, DICE_TRACK, TILE_TYPES } from "@color-wars/shared/src/config/diceTrack";
 
 export class DiceTrackLayer extends PIXI.Container {
   private background: PIXI.Graphics;
@@ -208,22 +208,30 @@ export class DiceTrackLayer extends PIXI.Container {
       innerStrokeWidth = 4,
       outerStrokeWidth = 5,
     ) => {
+      const GAP = 0.05
+      const finalRadius = radius * (1-GAP)
+      
+      const container = new PIXI.Container()
+
+      // HEX Shape
       const g = new PIXI.Graphics();
-  
-      // OUTER STROKE PATH
-      g.roundPoly(0, 0, radius, 6, 10, Math.PI / 6);
-      g.stroke({ width: outerStrokeWidth, color: outerStrokeColor, alignment:0 });
-  
       // INNER STROKE PATH
-      g.roundPoly(0, 0, radius - outerStrokeWidth, 6, 10, Math.PI / 6);
+      g.roundPoly(0, 0, finalRadius, 6, 10, Math.PI / 6);
       g.stroke({ width: innerStrokeWidth, color: innerStrokeColor, alignment: 1 });
-  
       // FILL PATH
-      g.roundPoly(0, 0, radius - outerStrokeWidth - innerStrokeWidth, 6, 10, Math.PI / 6);
+      g.roundPoly(0, 0, finalRadius - innerStrokeWidth, 6, 10, Math.PI / 6);
       g.fill(fillColor);
+      container.addChild(g)
   
+      // Icon
+      const icon = new PIXI.Sprite(PIXI.Texture.from('/tile-icons/money.png'))
+      icon.anchor.set(0.5)
+      icon.scale.set(0.25)
+      container.addChild(icon)
+
+
       return app.renderer.textureGenerator.generateTexture({
-        target: g,
+        target: container,
         resolution: window.devicePixelRatio || 1,
         antialias: true,
       });
@@ -233,10 +241,18 @@ export class DiceTrackLayer extends PIXI.Container {
     hexTextures.NEUTRAL  = drawHex(0x262626, 0x09090b, 0x262626)
     hexTextures.SAFE     = drawHex(0xFFFFFF, 0x09090b, 0x262626);
     hexTextures.SURPRISE = drawHex(0xF1C40F, 0x09090b, 0x262626);
-    hexTextures.INCOME   = drawHex(0x27AE60, 0x09090b, 0x262626);
-    hexTextures.TAX      = drawHex(0x9B59B6, 0x09090b, 0x262626);
     hexTextures.PENALTY  = drawHex(0xE74C3C, 0x09090b, 0x262626);
     hexTextures.REWARD   = drawHex(0x3498DB, 0x09090b, 0x262626);
+    
+    Object.values(TILE_TYPES).filter((t)=>t.startsWith('INCOME')).forEach((tileType)=>{
+      hexTextures[tileType] = drawHex(0x262626, 0x09090b, 0x262626)
+    })
+    
+    Object.values(TILE_TYPES).filter((t)=>t.startsWith('TAX')).forEach((tileType)=>{
+      hexTextures[tileType] = drawHex(0x262626, 0x09090b, 0x262626)
+    })
+    //hexTextures.INCOME   = drawHex(0x27AE60, 0x09090b, 0x262626);
+    //hexTextures.TAX      = drawHex(0x9B59B6, 0x09090b, 0x262626);
   
     return hexTextures;
   }
