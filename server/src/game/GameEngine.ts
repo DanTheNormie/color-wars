@@ -6,7 +6,7 @@ import { Client, Room } from "colyseus";
 import { StatusEffect } from "@color-wars/shared/src/types/RoomState";
 import { RewardID, StatusEffectID } from "@color-wars/shared/src/types/effectId";
 import { MAPS } from "@color-wars/shared/src/maps";
-import { type TileType, DICE_TRACK} from "@color-wars/shared/src/config/diceTrack"
+import { type TileType, DICE_TRACK, TileConfig} from "@color-wars/shared/src/config/diceTrack"
 
 
 export class GameEngine {
@@ -68,30 +68,30 @@ export class GameEngine {
     const fromTile = player.position;
     const toTile = (fromTile + roll) % DICE_TRACK.length;
 
-    const destTileType = DICE_TRACK[toTile]
+    const destTileConfig = DICE_TRACK[toTile]
     
     player.position = toTile;
     this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
     
-    this.handleTileEffect(destTileType, player)
+    this.handleTileEffect(destTileConfig, player)
 
     player.hasRolled = true;
   }
 
-  handleTileEffect(tileType: TileType, player: PlayerState){
-    switch(tileType){
-      // case 'INCOME': {
-      //   const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-      //   player.money += amount
-      //   this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
-      //   break;
-      // }
-      // case 'TAX': {
-      //   const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-      //   player.money -= amount
-      //   this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
-      //   break;
-      // }
+  handleTileEffect(tileConfig: TileConfig, player: PlayerState){
+    switch(tileConfig.type){
+      case 'INCOME': {
+        const amount = tileConfig.amount!
+        player.money += amount
+        this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
+        break;
+      }
+      case 'TAX': {
+        const amount = tileConfig.amount!
+        player.money -= amount
+        this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
+        break;
+      }
       case 'REWARD':{
         const amount = this.getRandomNumberWithStep(10000, 100000, 10000)
         player.money += amount

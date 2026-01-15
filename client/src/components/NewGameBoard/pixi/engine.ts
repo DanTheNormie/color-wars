@@ -9,6 +9,7 @@ import { DiceTrackLayer } from "./layers/DiceTrackLayer";
 import { useMapStore } from "@/stores/mapStateStore"; // For subscription
 import { pixiTargetLocator } from "@/animation/target-locator";
 
+
 export const BACKGROUND_COLOR = 0x09090b
 export const SECONDARY_COLOR = 0x555555
 
@@ -53,6 +54,22 @@ export class PixiEngine {
   private territoryColorUnsub: (() => void) | null = null;
   private hoverStateUnsub: (() => void) | null = null;
   private selectedStateUnsub: (() => void) | null = null;
+  
+
+  private async loadAssets(){
+
+		await PIXI.Assets.load([
+			'/tile-icons/flag.png',
+			'/tile-icons/gift.png',
+			'/tile-icons/angel_wings.png',
+			'/tile-icons/skull.png',
+			'/tile-icons/money.png',
+			'/tile-icons/warning.png',
+			'/tile-icons/money_bag.png',
+		],(progress)=>{
+      console.log(`loading... ${progress*100}`)
+    })
+  }
 
 
   // Getters
@@ -88,9 +105,10 @@ export class PixiEngine {
         backgroundColor: BACKGROUND_COLOR,
         antialias: true,
         powerPreference: "high-performance",
-        resolution: Math.min(window.devicePixelRatio, 2),
+        resolution: Math.min(window.devicePixelRatio, 4),
         autoDensity: true,
       });
+      await this.loadAssets()
 
       if (this.destroyed || myToken !== this.initToken) {
         try {

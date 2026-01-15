@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Gamepad2, Zap } from "lucide-react";
 import { CardSelectionOverlay } from "@/lib/cardOverlay";
 //import { DrawCardsAction } from "@/actions/actions";
-import { PixiCanvas } from "@/components/NewGameBoard/components/PixiCanvas";
+/* import { PixiCanvas } from "@/components/NewGameBoard/components/PixiCanvas"; */
 
 const LobbyPage = () => {
   const playerName = useStore((z) => z.room.playerName);
@@ -45,7 +45,7 @@ const LobbyPage = () => {
             <Zap className="h-4 w-4 fill-black transition-transform group-hover/btn:rotate-12 group-hover/btn:fill-white" />
           </Button>
           <CardSelectionOverlay/>
-          <PixiCanvas />
+          {/* <PixiCanvas /> */}
         </div>
       </div>
     </div>
