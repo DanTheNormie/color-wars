@@ -18,6 +18,25 @@ const router = createBrowserRouter([
         path: "/room/:roomId",
         element: <RoomPage />,
       },
+      {
+        element:<div 
+        className={`
+          text-[#D71E22]
+          text-[#1D3CE9]
+          text-[#FF63D4]
+          text-[#FF8D1C]
+          text-[#FFFF67]
+          text-[#4A565E]
+          text-[#5470FF]
+          text-[#1B913E]
+          text-[#80582D]
+          text-[#44FFF7]
+          text-[#6C2B3D]
+          text-[#EC7578]
+        `}>
+
+        </div>
+      }
     ],
   },
 ]);

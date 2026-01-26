@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { animateCoinConfettiToCanvas } from "@/animation/registry/anim";
 import { pixiTargetLocator } from "@/animation/target-locator";
 import { Sprite } from "pixi.js";
-import { useRef, type RefObject } from "react";
+import { useRef } from "react";
 import { PixiEngine } from "./NewGameBoard/pixi/engine";
 
 const LobbyActions = () => {

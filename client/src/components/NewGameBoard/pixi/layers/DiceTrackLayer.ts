@@ -3,7 +3,7 @@ import { TRACK_COORDINATES, INNER_EDGE_SPEC } from "../../config/dice-track-conf
 import { pixiTargetLocator } from "@/animation/target-locator";
 import { BACKGROUND_COLOR } from "../engine";
 import { TokenLayer } from "./TokenLayer";
-import { type TileConfig, type TileType, DICE_TRACK, TILE_TYPES } from "@color-wars/shared/src/config/diceTrack";
+import { type TileConfig, type TileType, DICE_TRACK } from "@color-wars/shared/src/config/diceTrack";
 
 type TileTextureConfig = {
   baseHex?: {
@@ -28,12 +28,10 @@ type TileTextureConfig = {
 
 export const TILE_TEXTURE_CONFIG: Record<TileType, TileTextureConfig> = {
   START: {
-    baseHex: {
-      fill: 0xffffff,
-    },
+    baseHex: {},
     icon: {
-      path: "/tile-icons/start.png",
-      scale: 0.9,
+      path: "/tile-icons/flag.png",
+      scale: 0.4,
       offset: { x: 0, y: 0 },
     },
   },

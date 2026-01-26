@@ -1,15 +1,4 @@
-import type { TileType } from "@color-wars/shared/src/config/diceTrack";
-
-export const TILE_STYLE: Record<
-  TileType,
-  {
-    fill: number;
-    stroke: number;
-    icon: string;
-    label: string;
-    textColor: number;
-  }
-> = {
+export const TILE_STYLE = {
   START: {
     fill: 0x0ea5e9,
     stroke: 0xe0f2fe,

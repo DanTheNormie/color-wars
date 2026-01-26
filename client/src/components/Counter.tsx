@@ -26,20 +26,22 @@ export function CounterSimple({ value, animateDiff, id, className }: { value: nu
   }, [value]);
 
   return (
-    <span ref={diffContainerRef} id={id} className="relative inline-block">
+    <span ref={diffContainerRef} id={id}  className="relative  flex items-center">
       <span className={className} ref={elRef}>0</span>
     </span>
   );
 }
 
+const statTextContainerClassName = "flex items-center";
+const textSizeClass = `flex items-center text-[0.4rem] xs:text-[0.4rem] sm:text-[0.6rem] lg:text-[0.8rem] sm:mr-0.5 md:mr-1`;
 
 export function PlayerMoney({ playerId }: { playerId: string }) {
   const score = useStore((s) => s.state.game.players[playerId]?.money || 0);
 
   return (
-    <div className="flex items-center">
-      <div className="text-2xl mr-1">🏦</div><span className="mr-0.5">$</span>
-      <CounterSimple value={score} animateDiff id={`player-money-${playerId}`} />
+    <div className={statTextContainerClassName}>
+      <div className={textSizeClass}>🏦</div>
+      <CounterSimple className={textSizeClass} value={score} animateDiff id={`player-money-${playerId}`} />
     </div>
   );
 }
@@ -48,9 +50,9 @@ export function PlayerBackpackMoney({ playerId }: { playerId: string }) {
   const score = useStore((s) => s.state.game.players[playerId]?.backpack.money || 0);
 
   return (
-    <div className="flex items-center">
-      <div className="text-2xl mr-1">🪙</div>
-      <CounterSimple value={score} animateDiff id={`player-backpack-money-${playerId}`} />
+    <div className={statTextContainerClassName}>
+      <div className={textSizeClass}>🪙</div>
+      <CounterSimple className={textSizeClass} value={score} animateDiff id={`player-backpack-money-${playerId}`} />
     </div>
   );
 }
@@ -59,9 +61,9 @@ export function PlayerCards({ playerId }: { playerId: string }) {
   const score = useStore((s) => s.state.game.players[playerId]?.cards.length || 0);
 
   return (
-    <div className="flex items-center">
-      <span className="text-2xl">📚</span><span className="mr-1">x </span>
-      <CounterSimple value={score} animateDiff id={`player-cards-${playerId}`} />
+    <div className={statTextContainerClassName}>
+      <div className={textSizeClass}>📚</div>
+      <CounterSimple className={textSizeClass} value={score} animateDiff id={`player-cards-${playerId}`} />
     </div>
   );
 }
@@ -70,9 +72,9 @@ export function PlayerBackpackCards({ playerId }: { playerId: string }) {
   const playerBackpackCards = useStore((s) => s.state.game.players[playerId]?.backpack.cards.length || 0);
 
   return (
-    <div className="flex items-center">
-      <span className="text-2xl">🃏</span><span className="mr-1">x </span>
-      <CounterSimple value={playerBackpackCards} animateDiff id={`player-backpack-cards-${playerId}`} />
+    <div className={statTextContainerClassName}>
+      <div className={textSizeClass}>🃏</div>
+      <CounterSimple className={textSizeClass} value={playerBackpackCards} animateDiff id={`player-backpack-cards-${playerId}`} />
     </div>
   );
 }
@@ -85,9 +87,9 @@ export function PlayerTerritories({ playerId }: { playerId: string }) {
   });
 
   return (
-    <div className="flex items-center">
-      <span className="text-2xl">🚩</span><span className="mr-1">x </span>
-      <CounterSimple value={playerT} animateDiff id={`player-territories-${playerId}`} />
+    <div className={statTextContainerClassName}>
+      <div className={textSizeClass}>🚩</div>
+      <CounterSimple className={textSizeClass} value={playerT} animateDiff id={`player-territories-${playerId}`} />
     </div>
   );
 }

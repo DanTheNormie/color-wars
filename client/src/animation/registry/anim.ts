@@ -374,11 +374,14 @@ export function animateCoinConfetti(sprite: PIXI.Sprite, app: PIXI.Application, 
 
 export function createFloatingDiff(container: HTMLElement, diff: number) {
   const diffEl = document.createElement("div");
+  const statTextEl = container.querySelector("span") as HTMLSpanElement;
+  const statTextElHeight = statTextEl.offsetHeight;
+  const statTextClass = statTextEl.className;
 
   diffEl.textContent = `${diff > 0 ? "+" : ""}${diff}`;
 
   // Tailwind utility classes:
-  diffEl.className = `absolute left-[-20] top-0 font-bold pointer-events-none`.trim();
+  diffEl.className = `absolute left-[-20] top-0 font-bold pointer-events-none ${statTextClass}`.trim();
 
   diffEl.style.color = diff > 0 ? "green" : "red";
 
@@ -393,14 +396,14 @@ export function createFloatingDiff(container: HTMLElement, diff: number) {
       opacity: 0,
     },
     {
-      y: -20,
+      y: statTextElHeight*-1,
       opacity: 1,
       duration: 0.4,
     },
   )
     .to(diffEl, { duration: 1 }) // <— wait 1 second
     .to(diffEl, {
-      y: -60,
+      y: statTextElHeight*-2,
       opacity: 0,
       duration: 0.4,
       ease: "power1.out",
