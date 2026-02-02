@@ -62,11 +62,6 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
   //   return () => ctx.revert();
   // }, []);
 
-  // const takenIcons = Object.values(players)
-  //   .map((p) => p.icon)
-  //   .filter(Boolean);
-  //const availableIcons = PLAYER.ICONS.filter((icon) => !takenIcons.includes(icon));
-
   const takenColors = Object.values(players)
     .map((p) => p.color)
     .filter(Boolean);
@@ -103,7 +98,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
             </div>
           </PickerPopover>
 
-          <Avatar className="h-[8vw] w-[8vw] sm:h-[10vw] sm:w-[10vw] sm:m-1">
+          <Avatar className="h-[8vw] w-[8vw] sm:h-[10vw] sm:w-[10vw] max-w-[72px] max-h-[72px] sm:m-1">
             <AvatarImage src={AvatarColorMap[player.color]}></AvatarImage>
           </Avatar>
           <div className="flex h-full flex-col justify-around">
@@ -172,7 +167,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
       </div>
       {!isLobbyPhase && <div className="h-full py-1">
         <Separator className="w-full" orientation="vertical" />
-        </div>}
+      </div>}
 
       {/* RIGHT — Actions */}
       {!isLobbyPhase && (

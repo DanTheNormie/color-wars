@@ -9,7 +9,7 @@ import LobbyActions from "@/components/LobbyActions";
 import ActionArea from "@/components/ActionArea";
 import { PixiCanvas } from "@/components/NewGameBoard/components/PixiCanvas";
 import { CardSelectionOverlay } from "@/lib/cardOverlay";
-import VfxLayer from "@/components/VfxLayer";
+import { VFXLayer } from "@/components/vfxOverlayLayer/vfxLayer";
 
 const RoomPage = () => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const RoomPage = () => {
       <div id='game-container' className="w-full max-w-180 pb-[100vh]">
         <PixiCanvas />
         <GameStatus />
-        <VfxLayer />
+        <VFXLayer />
 
         <ActionArea>
           {roomPhase === "active" && <TurnControls />}

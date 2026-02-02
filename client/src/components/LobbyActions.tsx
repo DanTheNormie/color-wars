@@ -6,7 +6,7 @@ import { animateCoinConfettiToCanvas } from "@/animation/registry/anim";
 import { pixiTargetLocator } from "@/animation/target-locator";
 import { Sprite } from "pixi.js";
 import { useRef } from "react";
-import { PixiEngine } from "./NewGameBoard/pixi/engine";
+import { PIXIVFXLayer } from "./vfxOverlayLayer/pixi/vfxEngine";
 
 const LobbyActions = () => {
   const navigate = useNavigate();
@@ -26,11 +26,13 @@ const LobbyActions = () => {
 
     const click = ()=>{
       const sprite = pixiTargetLocator.get<Sprite>('track-tile-0')!
-      const engine = pixiTargetLocator.get("pixi-engine") as PixiEngine;
-      if (!engine) throw new Error("PixiEngine not found in target locator");
-      const app = engine.getApp()!;
-      if (!app) throw new Error("Pixi Application not found in engine");
-      animateCoinConfettiToCanvas(sprite, ele.current!, app, 20)
+      const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+      const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
+      if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
+      const vfxApp = vfxLayer.getApp()!;
+      const boardApp = gameBoard.getApp()!;
+      if (!vfxApp) throw new Error("Pixi Application not found in engine");
+      vfxLayer.animateCoinConfettiOverlay(sprite, ele.current!, boardApp, vfxApp, 50)
     }
 
 

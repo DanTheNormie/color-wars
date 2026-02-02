@@ -1,35 +1,32 @@
 import { useEffect, useRef } from "react";
-import { PixiEngine } from "@/components/NewGameBoard/pixi/engine";
+import { PIXIGameBoard } from "@/components/NewGameBoard/pixi/engine";
 import { useMapStore } from "@/stores/mapStateStore";
-//import DebugGameControls from "./animationDebug";
 
 export function PixiCanvas() {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const engineRef = useRef<PixiEngine | null>(null);
-  const currentMap = useMapStore((s) => s.current_map)
+  const engineRef = useRef<PIXIGameBoard | null>(null);
+  const currentMap = useMapStore((s) => s.current_map);
 
   useEffect(() => {
     const node = containerRef.current;
     if (!node) return;
 
-    const engine = new PixiEngine();
-    engineRef.current = engine;
+    const gameBoard = new PIXIGameBoard();
+    engineRef.current = gameBoard;
 
-    engine.init(node).then(() => {
-        engine.loadMap(currentMap)
+    gameBoard.init(node).then(() => {
+      gameBoard.loadMap(currentMap);
     });
 
     return () => {
-      engine.destroy();
+      gameBoard.destroy();
       engineRef.current = null;
     };
   }, [currentMap]);
 
-
   return (
-    <div className="relative h-full w-full ">
+    <div className="relative h-full w-full">
       <div ref={containerRef} id="pixi-container-div" className="aspect-square h-full w-full bg-[#111111]" />
-      {/* <DebugGameControls /> */}
     </div>
   );
 }

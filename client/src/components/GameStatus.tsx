@@ -10,9 +10,6 @@ const GameStatus = () => {
         {Object.values(players).map((player) => (
           <Player key={player.id} player={player} />
         ))}
-        {Object.values(players).map((player) => (
-          <Player key={player.id} player={player} />
-        ))}
       </ul>
     </div>
   );

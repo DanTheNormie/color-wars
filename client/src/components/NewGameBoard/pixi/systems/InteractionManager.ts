@@ -1,16 +1,16 @@
 import { GameEventBus } from "@/lib/managers/GameEventBus";
-import { PixiEngine } from "../engine";
+import { PIXIGameBoard } from "../engine";
 import { useMapStore } from "@/stores/mapStateStore";
 import type { Hex } from "@/types/map-types";
 import { FederatedPointerEvent } from "pixi.js";
 
 export class InteractionManager {
-  private engine: PixiEngine;
+  private engine: PIXIGameBoard;
   private hexLookup = new Map<string, string>();
   private hexSize = 0;
   private isDragging = false;
 
-  constructor(engine: PixiEngine) {
+  constructor(engine: PIXIGameBoard) {
     this.engine = engine;
 
     const viewport = engine.getViewport();
@@ -24,7 +24,7 @@ export class InteractionManager {
         this.isDragging = true;
       });
       viewport.on("drag-end", () => {
-        setTimeout(() => (this.isDragging = false),0);
+        setTimeout(() => (this.isDragging = false), 0);
       });
     }
   }
@@ -66,10 +66,10 @@ export class InteractionManager {
     const territoryID = this.hexLookup.get(`${hex.q},${hex.r}`) || null;
 
     useMapStore.getState().setSelectedTerritory(territoryID);
-    if(territoryID) {
-      GameEventBus.emit('SET_TERRITORY_INFO_DRAWER', {open: true});
-    }else{
-      GameEventBus.emit('SET_TERRITORY_INFO_DRAWER', {open: false});
+    if (territoryID) {
+      GameEventBus.emit("SET_TERRITORY_INFO_DRAWER", { open: true });
+    } else {
+      GameEventBus.emit("SET_TERRITORY_INFO_DRAWER", { open: false });
     }
   };
 

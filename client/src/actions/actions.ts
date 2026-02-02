@@ -1,4 +1,4 @@
-import { animateCoinConfettiToDom, animateCoinConfetti, animateUnitHop } from "@/animation/registry/anim";
+import { animateCoinConfetti, animateUnitHop } from "@/animation/registry/anim";
 import { BaseAction } from "./core";
 import { TURN_ACTION_REGISTRY } from "@color-wars/shared/src/types/turnActionRegistry";
 import { ActionHandle } from "@/animation/driver/AnimationHandle";
@@ -8,11 +8,12 @@ import { Sprite } from "pixi.js";
 import { TRACK_COORDINATES } from "@/components/NewGameBoard/config/dice-track-config";
 import { useDiceTrackStore } from "@/stores/diceTrackStore";
 import { useStore } from "@/stores/sessionStore";
-import { PixiEngine } from "@/components/NewGameBoard/pixi/engine";
+import { PIXIGameBoard } from "@/components/NewGameBoard/pixi/engine";
 import { useCardStore } from "@/stores/cardSelectionStore";
 import { useMapStore } from "@/stores/mapStateStore";
+import type { PIXIVFXLayer } from "@/components/vfxOverlayLayer/pixi/vfxEngine";
 
-export class HexHop extends BaseAction<typeof TURN_ACTION_REGISTRY["MOVE_PLAYER"]> {
+export class HexHop extends BaseAction<(typeof TURN_ACTION_REGISTRY)["MOVE_PLAYER"]> {
   execute(): ActionHandle {
     const { fromTile, toTile, tokenId } = this.payload;
     const unit = pixiTargetLocator.get<PlayerSprite>(tokenId);
@@ -57,37 +58,43 @@ export class HexHop extends BaseAction<typeof TURN_ACTION_REGISTRY["MOVE_PLAYER"
   }
 }
 
-export class RollDice extends BaseAction<typeof TURN_ACTION_REGISTRY["ROLL_DICE"]> {
+export class RollDice extends BaseAction<(typeof TURN_ACTION_REGISTRY)["ROLL_DICE"]> {
   execute(): ActionHandle {
     const { die1, die2 } = this.payload;
     useStore.getState().rollDiceTo(die1, die2);
     return new ActionHandle(
       new Promise<void>((resolve) => setTimeout(resolve, 2500)),
-      () => { },
-      () => { },
+      () => {},
+      () => {},
     );
   }
 }
 
-export class IncrMoney extends BaseAction<typeof TURN_ACTION_REGISTRY["INCR_MONEY"]> {
+export class IncrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["INCR_MONEY"]> {
   execute(): ActionHandle {
     const { playerId, amount } = this.payload;
 
     const unit = pixiTargetLocator.get<PlayerSprite>(playerId);
     if (!unit) throw new Error("PlayerSprite unit not found for IncrMoney animation");
-    const tileID = unit.currentTileId
-    if(!tileID) throw new Error("PlayerSprite has no currentTileId for IncrMoney animation");
-    const tile = pixiTargetLocator.get<Sprite>(tileID);
-    const engine = pixiTargetLocator.get("pixi-engine") as PixiEngine;
-    if (!engine) throw new Error("PixiEngine not found in target locator");
-
-    const app = engine.getApp()!;
-    if (!app) throw new Error("Pixi Application not found in engine");
     
-    const ele = document.getElementById(`player-money-${playerId}`)
-    if(!ele) throw new Error("Target DOM element for money transfer not found");
+    const tileID = unit.currentTileId;
+    if (!tileID) throw new Error("PlayerSprite has no currentTileId for IncrMoney animation");
+    const tile = pixiTargetLocator.get<Sprite>(tileID)!;
 
-    const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
+    const ele = document.getElementById(`player-money-${playerId}`);
+    if (!ele) throw new Error("Target DOM element for money transfer not found");
+
+
+
+    const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+    const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
+    if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
+    const vfxApp = vfxLayer.getApp()!;
+    const boardApp = gameBoard.getApp()!;
+    if (!vfxApp) throw new Error("Pixi Application not found in engine");
+
+    // const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
+    const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 50)
 
     return ActionHandle.attachCallBack(anim, async () => {
       useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
@@ -96,16 +103,16 @@ export class IncrMoney extends BaseAction<typeof TURN_ACTION_REGISTRY["INCR_MONE
   }
 }
 
-export class DecrMoney extends BaseAction<typeof TURN_ACTION_REGISTRY["DECR_MONEY"]> {
+export class DecrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["DECR_MONEY"]> {
   execute(): ActionHandle {
     const { playerId, amount } = this.payload;
 
     const unit = pixiTargetLocator.get<PlayerSprite>(playerId);
     if (!unit) throw new Error("PlayerSprite unit not found for DecrMoney animation");
-    const tileID = unit.currentTileId
-    if(!tileID) throw new Error("PlayerSprite has no currentTileId for DecrMoney animation");
+    const tileID = unit.currentTileId;
+    if (!tileID) throw new Error("PlayerSprite has no currentTileId for DecrMoney animation");
     const tile = pixiTargetLocator.get<Sprite>(tileID);
-    const engine = pixiTargetLocator.get("pixi-engine") as PixiEngine;
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
     if (!engine) throw new Error("PixiEngine not found in target locator");
 
     const app = engine.getApp()!;
@@ -132,16 +139,20 @@ export class DrawCardsAction extends BaseAction<{ cardIds: string[] }> {
       const unsubscribe = useCardStore.subscribe(
         (state) => state.phase,
         (phase) => {
-          if (phase === 'interacting') {
+          if (phase === "interacting") {
             unsubscribe();
             resolve();
           }
-        }
+        },
       );
     });
 
     // Return the ActionHandle with empty cancel/fast-forward callbacks for now
-    return new ActionHandle(drawAnimationTask, () => {}, () => {});
+    return new ActionHandle(
+      drawAnimationTask,
+      () => {},
+      () => {},
+    );
   }
 }
 
@@ -158,47 +169,51 @@ export class ResolveSelectionAction extends BaseAction<{ selectedCardId: string 
       const unsubscribe = useCardStore.subscribe(
         (state) => state.phase,
         (phase) => {
-          if (phase === 'idle') {
+          if (phase === "idle") {
             unsubscribe();
             console.log("Card exit animation complete");
             resolve();
           }
-        }
+        },
       );
     });
 
-    return new ActionHandle(resolveAnimationTask, () => {}, () => {});
+    return new ActionHandle(
+      resolveAnimationTask,
+      () => {},
+      () => {},
+    );
   }
 }
 
-export class BuyTerritoryAction extends BaseAction<typeof TURN_ACTION_REGISTRY['BUY_TERRITORY']> {
+export class BuyTerritoryAction extends BaseAction<(typeof TURN_ACTION_REGISTRY)["BUY_TERRITORY"]> {
   execute(): ActionHandle {
-    const { playerId, territoryID, amount } = this.payload
+    const { playerId, territoryID, amount } = this.payload;
 
-    const playerColor = useStore.getState().state.game.players[playerId].color
+    const playerColor = useStore.getState().state.game.players[playerId].color;
 
-    useMapStore.getState().setTerritoryColor(territoryID, playerColor)
+    useMapStore.getState().setTerritoryColor(territoryID, playerColor);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),
-      ()=>{},
-      ()=>{}
-    )
+      () => {},
+      () => {},
+    );
   }
 }
 
-export class SellTerritoryAction extends BaseAction<typeof TURN_ACTION_REGISTRY['SELL_TERRITORY']> {
+export class SellTerritoryAction extends BaseAction<(typeof TURN_ACTION_REGISTRY)["SELL_TERRITORY"]> {
   execute(): ActionHandle {
-    const { playerId, territoryID, amount } = this.payload
+    const { playerId, territoryID, amount } = this.payload;
 
-    useMapStore.getState().removeTerritoryColor(territoryID)
+    useMapStore.getState().removeTerritoryColor(territoryID);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),
-      ()=>{},
-      ()=>{}
-    )
+      () => {},
+      () => {},
+    );
   }
 }

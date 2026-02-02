@@ -1,10 +1,10 @@
-import { PixiEngine } from "@/components/NewGameBoard/pixi/engine";
+import { PIXIGameBoard } from "@/components/NewGameBoard/pixi/engine";
 import { create } from "zustand";
 import { devtools, combine } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 type contextStore = {
-  pixiEngine: PixiEngine | null;
+  pixiEngine: PIXIGameBoard | null;
 };
 
 export const contextStore = create(
@@ -15,7 +15,7 @@ export const contextStore = create(
           pixiEngine: null,
         } as contextStore,
         (set) => ({
-          setPixiEngine: (pixiEngine: PixiEngine) => {
+          setPixiEngine: (pixiEngine: PIXIGameBoard) => {
             set({ pixiEngine });
           },
         }),
