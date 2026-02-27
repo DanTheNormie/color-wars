@@ -35,6 +35,14 @@ const LobbyActions = () => {
       vfxLayer.animateCoinConfettiOverlay(sprite, ele.current!, boardApp, vfxApp, 50)
     }
 
+    const click2 = ()=>{
+      const endElement = document.querySelector('[id^="player-money-"]')! as HTMLElement
+      const startElement = document.querySelector('[id^="player-backpack-money-"]')! as HTMLElement
+      const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+      if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
+      vfxLayer.playEnergyTransferAnimation(startElement, endElement)
+    }
+
 
   const handleLeaveGame = async () => {
     await leaveGame();
@@ -50,7 +58,7 @@ const LobbyActions = () => {
       <Button variant="destructive" onClick={handleLeaveGame}>
         Leave Game
       </Button>
-      <Button ref={ele} variant='outline' onClick={click}>coin effect</Button>
+      <Button ref={ele} variant='outline' onClick={click2}>coin effect</Button>
       {/* <Button onClick={handleOnClick1}>Load India Map </Button>
       <Button onClick={handleOnClick2}>Load test Map </Button>
       <Button variant="outline" onClick={ff}>
