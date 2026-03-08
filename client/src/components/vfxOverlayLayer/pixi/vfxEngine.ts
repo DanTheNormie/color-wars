@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { pixiTargetLocator } from "@/animation/target-locator";
-import { Assets, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
 import gsap from "@/lib/gsap";
 
 function clipInput(k: number, arr: number[]) {
@@ -34,7 +34,7 @@ export class PIXIVFXLayer {
   private initToken = 0;
   private initPromise: Promise<void> | null = null;
 
-  private async loadAssets() {}
+  private async loadAssets() { }
 
   // Getters
   getApp() {
@@ -94,9 +94,6 @@ export class PIXIVFXLayer {
   }
 
   animateCoinConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 12) {
-    const coins: PIXI.Graphics[] = [];
-    const meta: { x: number; y: number }[] = [];
-
     // ─────────────────────────────
     // 1️⃣ START POSITION (Board → Screen → Overlay)
     // ─────────────────────────────
@@ -116,26 +113,142 @@ export class PIXIVFXLayer {
     const endX = rect.left - overlayRect.left + rect.width / 2;
     const endY = rect.top - overlayRect.top + rect.height / 2;
 
-    // ─────────────────────────────
-    // 3️⃣ CREATE COINS IN OVERLAY PIXI
-    // ─────────────────────────────
     const coinSize = boardSprite.width / 4;
+
+    return this.playConfettiAnimation(
+      startX,
+      startY,
+      endX,
+      endY,
+      overlayApp,
+      this.vfxLayer!,
+      count,
+      coinSize * 3,
+      () =>
+        new PIXI.Graphics()
+          .circle(0, 0, coinSize / 2)
+          .fill(0x31d652)
+          .stroke({ width: 2, color: 0x262626 }),
+      0x31d652
+    );
+  }
+
+  playEnergyTransferAnimation(_startEl: HTMLElement, _endEl: HTMLElement) {
+    // ─────────────────────────────
+    // 1️⃣ COORDINATE MAPPING
+    // ─────────────────────────────
+    const overlayRect = this.app!.canvas.getBoundingClientRect();
+
+    const startRect = pixiTargetLocator.get<Sprite>("track-tile-0")!.getGlobalPosition();
+    const endRect = pixiTargetLocator.get<Sprite>("track-tile-17")!.getGlobalPosition();
+    const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
+    const boardRect = gameBoard.getApp()!.canvas.getBoundingClientRect();
+
+    const startX = boardRect.left + startRect.x - overlayRect.left;
+    const startY = boardRect.top + startRect.y - overlayRect.top;
+
+    const endX = boardRect.left + endRect.x - overlayRect.left;
+    const endY = boardRect.top + endRect.y - overlayRect.top;
+
+    return this.playConfettiAnimation(
+      startX,
+      startY,
+      endX,
+      endY,
+      this.app!,
+      this.vfxLayer!,
+      1,
+      50,
+      () => new PIXI.Graphics().circle(0, 0, 8).fill(0x31d652),
+      0x31d652
+    );
+  }
+
+  createProjectileWithTrail(
+    x: number,
+    y: number,
+    app: PIXI.Application,
+    layer: PIXI.Container,
+    createGraphic: () => PIXI.Container,
+    trailTint: number = 0xffffff
+  ) {
+    const graphic = createGraphic();
+    graphic.position.set(x, y);
+    layer.addChild(graphic);
+
+    const texture = this.createTrailTexture();
+    const historySize = 20;
+    const ropeSize = 100;
+    const historyX: number[] = Array.from({ length: historySize }, () => x);
+    const historyY: number[] = Array.from({ length: historySize }, () => y);
+    const points: PIXI.Point[] = Array.from({ length: ropeSize }, () => new PIXI.Point(x, y));
+
+    const rope = new PIXI.MeshRope({
+      texture,
+      points,
+    });
+
+    rope.blendMode = "normal";
+    rope.tint = trailTint;
+    layer.addChild(rope);
+
+    const tick = () => {
+      historyX.pop();
+      historyX.unshift(graphic.x);
+      historyY.pop();
+      historyY.unshift(graphic.y);
+
+      for (let i = 0; i < ropeSize; i++) {
+        const p = points[i];
+        const t = (i / ropeSize) * historySize;
+        const ix = cubicInterpolation(historyX, t);
+        const iy = cubicInterpolation(historyY, t);
+
+        p.x = ix;
+        p.y = iy;
+      }
+    };
+
+    app.ticker.add(tick);
+
+    return {
+      graphic,
+      rope,
+      destroy: () => {
+        app.ticker.remove(tick);
+        rope.destroy();
+        graphic.destroy();
+      },
+    };
+  }
+
+  playConfettiAnimation(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    app: PIXI.Application,
+    layer: PIXI.Container,
+    count: number,
+    splashRadius: number,
+    createGraphic: () => PIXI.Container,
+    trailTint: number = 0xffffff
+  ) {
+    const projectiles: { graphic: PIXI.Container; rope: PIXI.MeshRope; destroy: () => void }[] = [];
+    const meta: { x: number; y: number }[] = [];
+    const graphics: PIXI.Container[] = [];
+    const ropes: PIXI.MeshRope[] = [];
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * coinSize * 3;
+      const radius = Math.random() * splashRadius;
 
-      const coin = new PIXI.Graphics()
-        .circle(0, 0, coinSize / 2)
-        .fill(0x31d652)
-        .stroke({ width: 2, color: 0x262626 });
+      const proj = this.createProjectileWithTrail(startX, startY, app, layer, createGraphic, trailTint);
+      proj.graphic.alpha = 1;
 
-      coin.x = startX;
-      coin.y = startY;
-      coin.alpha = 1;
-
-      this.vfxLayer?.addChild(coin);
-      coins.push(coin);
+      projectiles.push(proj);
+      graphics.push(proj.graphic);
+      ropes.push(proj.rope);
 
       meta.push({
         x: startX + Math.cos(angle) * radius,
@@ -143,31 +256,56 @@ export class PIXIVFXLayer {
       });
     }
 
-    // ─────────────────────────────
-    // 4️⃣ GSAP TIMELINE
-    // ─────────────────────────────
+    const proxies = graphics.map((_, i) => ({ t: 0, index: i }));
+
     return gsap
       .timeline({
+        onUpdate: () => {
+          proxies.forEach((proxy) => {
+            const i = proxy.index;
+            const t = proxy.t;
+            const invT = 1 - t;
+            const cp = meta[i];
+
+            // Calculate cubic bezier control points so the curve passes exactly through cp at t=0.5
+            const c1x = cp.x + (cp.x - startX) / 3;
+            const c1y = cp.y + (cp.y - startY) / 3;
+
+            const c2x = cp.x + (cp.x - endX) / 3;
+            const c2y = cp.y + (cp.y - endY) / 3;
+
+            graphics[i].x =
+              invT * invT * invT * startX +
+              3 * invT * invT * t * c1x +
+              3 * invT * t * t * c2x +
+              t * t * t * endX;
+
+            graphics[i].y =
+              invT * invT * invT * startY +
+              3 * invT * invT * t * c1y +
+              3 * invT * t * t * c2y +
+              t * t * t * endY;
+          });
+        },
         onComplete: () => {
-          // Clean up aggressively
-          coins.forEach((c) => c.destroy());
+          projectiles.forEach((p) => p.destroy());
         },
       })
-      .to(coins, {
-        x: (i) => meta[i].x,
-        y: (i) => meta[i].y,
-        stagger: 0.002,
-        duration: 0.4,
-        ease: "power2.out",
+      .to(proxies, {
+        t: 1,
+        duration: 0.8,
+        ease: "power2.inOut",
+        stagger: 0.015,
       })
-      .to(coins, {
-        x: endX,
-        y: endY,
-        alpha: 0,
-        duration: 0.2,
-        ease: "power2.in",
-        stagger: 0.005,
-      });
+      .to(
+        [...graphics, ...ropes],
+        {
+          alpha: 0,
+          duration: 0.2,
+          ease: "power2.in",
+        },
+        "-=0.2"
+      );
   }
 
   createTrailTexture() {
@@ -196,109 +334,6 @@ export class PIXIVFXLayer {
     ctx.fillRect(0, 0, 256, 16);
 
     return PIXI.Texture.from(canvas);
-  }
-
-  animateCoinWithTrail(startX: number, startY: number, endX: number, endY: number, app: PIXI.Application, layer: PIXI.Container) {
-    // ── Coin ───────────────────────────────
-    const coin = new PIXI.Graphics().circle(0, 0, 8).fill(0x31d652);
-
-    coin.position.set(startX, startY);
-    layer.addChild(coin);
-
-    // ── Trail ──────────────────────────────
-    const texture = this.createTrailTexture();
-
-    const historySize = 20;
-    const ropeSize = 100;
-    const historyX: number[] = [];
-    const historyY: number[] = [];
-    const points: PIXI.Point[] = [];
-
-    for (let i = 0; i < historySize; i++) {
-      historyX.push(startX);
-      historyY.push(startY);
-    }
-
-    for (let i = 0; i < ropeSize; i++) {
-      points.push(new PIXI.Point(startX, startY));
-    }
-
-    const rope = new PIXI.MeshRope({
-      texture,
-      points,
-    });
-
-    rope.blendMode = "add";
-    rope.tint = 0x31d652;
-
-    layer.addChild(rope);
-
-    const tick = () => {
-      historyX.pop();
-      historyX.unshift(coin.x);
-      historyY.pop();
-      historyY.unshift(coin.y);
-
-      for (let i = 0; i < ropeSize; i++) {
-        const p = points[i];
-
-        const ix = cubicInterpolation(historyX, (i / ropeSize) * historySize);
-        const iy = cubicInterpolation(historyY, (i / ropeSize) * historySize);
-
-        p.x = ix;
-        p.y = iy;
-      }
-    };
-
-    app.ticker.add(tick);
-
-    // ── Motion ─────────────────────────────
-    gsap.to(coin, {
-      x: endX,
-      y: endY,
-      duration: 0.6,
-      ease: "power2.inOut",
-      onComplete: () => {
-        gsap.to([coin, rope], {
-          alpha: 0,
-          duration: 0.2,
-          onComplete: () => {
-            app.ticker.remove(tick);
-            rope.destroy();
-            coin.destroy();
-          },
-        });
-      },
-    });
-  }
-
-  playEnergyTransferAnimation(startEl: HTMLElement, endEl: HTMLElement) {
-    const count = 4;
-    const particles: PIXI.Graphics[] = [];
-    const meta: { x: number; y: number }[] = [];
-
-    // ─────────────────────────────
-    // 1️⃣ COORDINATE MAPPING
-    // ─────────────────────────────
-    const overlayRect = this.app!.canvas.getBoundingClientRect();
-    // const startRect = startEl.getBoundingClientRect();
-    // const endRect = endEl.getBoundingClientRect();
-
-    const startRect = pixiTargetLocator.get<Sprite>("track-tile-0")!.getGlobalPosition();
-    const endRect = pixiTargetLocator.get<Sprite>("track-tile-17")!.getGlobalPosition();
-    const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
-    const boardRect = gameBoard.getApp()!.canvas.getBoundingClientRect();
-
-    const startX = boardRect.left + startRect.x - overlayRect.left;
-    const startY = boardRect.top + startRect.y - overlayRect.top;
-
-    /* const startX = startRect.left + startRect.width / 2 - overlayRect.left;
-        const startY = startRect.top + startRect.height / 2 - overlayRect.top; */
-
-    const endX = boardRect.left + endRect.x - overlayRect.left;
-    const endY = boardRect.top + endRect.y - overlayRect.top;
-
-    this.animateCoinWithTrail(startX, startY, endX, endY, this.app!, this.app!.stage);
   }
 
   /* ============================

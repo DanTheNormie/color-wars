@@ -23,7 +23,7 @@ export function VFXLayer() {
   }, [currentMap]);
 
   return (
-    <div className="pointer-events-none fixed top-0 right-0 bottom-0 left-0 z-50 h-full w-full bg-transparent">
+    <div className="pointer-events-none fixed top-0 right-0 bottom-0 left-0 z-9 h-full w-full bg-transparent">
       <div ref={containerRef} id="vfx-layer" className="aspect-square h-full w-full" />
     </div>
   );
