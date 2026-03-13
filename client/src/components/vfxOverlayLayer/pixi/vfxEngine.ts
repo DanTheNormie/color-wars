@@ -93,7 +93,7 @@ export class PIXIVFXLayer {
     return this.initPromise;
   }
 
-  animateCoinConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 12) {
+  animateCoinConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5) {
     // ─────────────────────────────
     // 1️⃣ START POSITION (Board → Screen → Overlay)
     // ─────────────────────────────

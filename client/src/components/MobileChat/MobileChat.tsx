@@ -76,7 +76,7 @@ export default function ChatInterface() {
         </div>
       </DrawerTrigger>
 
-      <DrawerContent className="fixed bottom-0 left-0 right-0 flex h-[45dvh] flex-col rounded-[10px] outline-none">
+      <DrawerContent className="z-999 fixed bottom-0 left-0 right-0 flex h-[45dvh] flex-col rounded-[10px] outline-none">
         <div className="mx-auto flex h-full w-full max-w-2xl flex-col overflow-hidden">
           <DrawerHeader className="border-b">
             <DrawerTitle>Live Chat</DrawerTitle>

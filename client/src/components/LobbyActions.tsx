@@ -2,9 +2,8 @@ import { useStore } from "@/stores/sessionStore";
 /* import { useMapStore } from "@/stores/mapStateStore"; */
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
-import { animateCoinConfettiToCanvas } from "@/animation/registry/anim";
 import { pixiTargetLocator } from "@/animation/target-locator";
-import { Sprite } from "pixi.js";
+//import { Sprite } from "pixi.js";
 import { useRef } from "react";
 import { PIXIVFXLayer } from "./vfxOverlayLayer/pixi/vfxEngine";
 
@@ -24,16 +23,16 @@ const LobbyActions = () => {
     setMapID('TEST')
   } */
 
-    const click = ()=>{
-      const sprite = pixiTargetLocator.get<Sprite>('track-tile-0')!
-      const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
-      const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
-      if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
-      const vfxApp = vfxLayer.getApp()!;
-      const boardApp = gameBoard.getApp()!;
-      if (!vfxApp) throw new Error("Pixi Application not found in engine");
-      vfxLayer.animateCoinConfettiOverlay(sprite, ele.current!, boardApp, vfxApp, 50)
-    }
+    // const click = ()=>{
+    //   const sprite = pixiTargetLocator.get<Sprite>('track-tile-0')!
+    //   const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+    //   const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
+    //   if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
+    //   const vfxApp = vfxLayer.getApp()!;
+    //   const boardApp = gameBoard.getApp()!;
+    //   if (!vfxApp) throw new Error("Pixi Application not found in engine");
+    //   vfxLayer.animateCoinConfettiOverlay(sprite, ele.current!, boardApp, vfxApp, 50)
+    // }
 
     const click2 = ()=>{
       const endElement = document.querySelector('[id^="player-money-"]')! as HTMLElement

@@ -7,7 +7,6 @@ import { getTextColor } from "@/lib/utils";
 
 const TickerItem = ({ message }: { message: Message }) => {
     const player = useStore((z) =>
-      // @ts-ignore 
       z.state.game.players ? z.state.game.players[message.senderId] : null,
     );
   
@@ -61,13 +60,13 @@ export function PreviewTicker({ message, isOpen }: PreviewTickerProps) {
   const [prevMsg, setPrevMsg] = useState<Message | null>(null);
 
   // 1. Sync Props to State
-  useEffect(() => {
+  //useEffect(() => {
     // If the message object actually changed
     if (message !== activeMsg) {
       setPrevMsg(activeMsg); // The current one becomes "previous"
       setActiveMsg(message); // The new one becomes "active"
     }
-  }, [message, activeMsg]);
+  // }, [message, activeMsg]);
 
   // 2. GSAP Animation Logic
   useEffect(() => {
