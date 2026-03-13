@@ -76,6 +76,7 @@ export class GameEngine {
     this.handleTileEffect(destTileConfig, player)
 
     player.hasRolled = true;
+    if (this.state.game.turnPhase === 'awaiting-roll') this.state.game.turnPhase = 'awaiting-end-turn'
   }
 
   handleTileEffect(tileConfig: TileConfig, player: PlayerState){
@@ -112,6 +113,7 @@ export class GameEngine {
         break;
       }
       case 'SAFE':
+      case 'NEUTRAL':
       case 'START':  {break;}
       default: throw new Error('invalid/unhandled tile type')
     }

@@ -21,7 +21,9 @@ export const Dice: FC<DiceProps> = ({ quaternion }) => {
       const parent = el.parentElement ?? el;
       console.log('updating dice size based on parent height:', parent.getBoundingClientRect().height);
       const size = Math.round(parent.getBoundingClientRect().height  * 0.6); // match your desired percent
-      el.firstChild && (el.firstChild as HTMLElement).style.setProperty("--dice-side", `${size}px`);
+      if (el.firstChild) {
+        (el.firstChild as HTMLElement).style.setProperty("--dice-side", `${size}px`);
+      }
     };
 
     update();

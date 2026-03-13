@@ -104,6 +104,10 @@ class ZustandSyncManager {
         useStore.getState().setActionState(state)
       }),
 
+      GameEventBus.on('UPDATE_TURN_PHASE', ({turnPhase})=>{
+        useStore.getState().updateTurnPhase(turnPhase)
+      }),
+
       GameEventBus.on('SET_TERRITORY_INFO_DRAWER', ({open})=>{
         useInfoDrawerStore.getState().setTerritoryInfoDrawerOpen(open)
       }),

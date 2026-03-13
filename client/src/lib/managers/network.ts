@@ -116,6 +116,9 @@ class Network {
           GameEventBus.emit("UPDATE_ACTIVE_PLAYER", { playerId: newValue });
           GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'idle'})
         }),
+        $(this.room.state.game).listen('turnPhase', (newValue) => {
+          GameEventBus.emit('UPDATE_TURN_PHASE', {turnPhase: newValue})
+        }),
         $(this.room.state).listen('mapID', (newValue) => {
           GameEventBus.emit("CHANGE_MAP_ID", {mapID: newValue})
         })

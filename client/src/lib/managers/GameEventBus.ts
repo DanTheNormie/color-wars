@@ -1,7 +1,7 @@
 /* ---------------------------------------------
  * 1. DEFINITIONS
  * --------------------------------------------- */
-import type { RoomState, PlayerState, DiceStateMode, RoomPhase } from "@color-wars/shared/src/types/RoomState";
+import type { RoomState, PlayerState, DiceStateMode, RoomPhase, TurnPhase } from "@color-wars/shared/src/types/RoomState";
 import type { NetworkState } from "./network";
 import type { Message } from "@color-wars/shared/src/types/RoomState";
 import type { MapID } from "@color-wars/shared/src/maps";
@@ -14,6 +14,7 @@ export interface LOCAL_EVENT {
   UPDATE_PLAYER_ROLLED_DICE: {id: string; hasRolledDice: boolean};
   UPDATE_CURRENT_PLAYER: { player: PlayerState };
   REMOVE_PLAYER: { id: string };
+  UPDATE_TURN_PHASE: {turnPhase: TurnPhase};
   UPDATE_ROOM_LEADER: { id: string };
   UPDATE_NETWORK_STATE: { state: NetworkState };
   UPDATE_ANIMATION_SPEED: { speedMultiplier: number };

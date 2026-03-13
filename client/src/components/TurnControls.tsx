@@ -21,16 +21,26 @@ const TurnControls = () => {
   const activePlayerId = useStore((z) => z.state.game.activePlayerId);
   const isNOTActivePlayer = currentPlayerID !== activePlayerId;
   const endTurn = useStore((z) => z.endTurn);
+  const setShowDiceRollMessage = useStore((z) => z.setShowDiceRollMessage);
   const actionState = useStore((z)=> z.actionState)
   
   const hasRolledDice = useStore((z) => z.state.game.players[currentPlayerID]?.hasRolled ?? false);
 
+  const endTurnHandler = ()=>{
+    //setShowDiceRoll(false)
+    endTurn()
+  }
+
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
     if (diceMode == "ROLLINGTOFACE") {
       if (diceA.animationRef.current == null) diceA.startPhysicsLoop(nanoid());
       if (diceB.animationRef.current == null) diceB.startPhysicsLoop(nanoid());
       diceA.setMode("spin-to-target", { face: a });
       diceB.setMode("spin-to-target", { face: b });
+      timer = setTimeout(()=>{
+        setShowDiceRollMessage(true)
+      },2200)
     } else if (diceMode == "ACCELERATING" && isNOTActivePlayer) {
       diceA.setMode("accelerate");
       diceB.setMode("accelerate");
@@ -39,6 +49,10 @@ const TurnControls = () => {
     } else if (diceMode == "RAGDOLLING" && isNOTActivePlayer) {
       diceA.setMode("ragdoll");
       diceB.setMode("ragdoll");
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
     }
   }, [diceMode]);
 
@@ -77,7 +91,7 @@ const TurnControls = () => {
       <div className={`${(actionState=='idle') ? '' : 'hidden'} flex w-full h-full flex-1 justify-center items center flex-col gap-2  ${isNOTActivePlayer ? 'hidden' : ''}`}>
         <DiceHoldButton hasRolled={hasRolledDice} onHoldStart={holdStart} onHoldEnd={holdEnd} />
         <div className={`${hasRolledDice ? '' : 'hidden'} w-full flex justify-center`}>
-          <Button onClick={endTurn}>End Turn</Button>
+          <Button onClick={endTurnHandler}>End Turn</Button>
         </div>
       </div>
     </section>

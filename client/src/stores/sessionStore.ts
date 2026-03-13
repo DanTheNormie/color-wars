@@ -9,6 +9,7 @@ import type {
   RoomState,
   GameState,
   RoomPhase,
+  TurnPhase
 } from "@color-wars/shared/src/types/RoomState";
 import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
@@ -30,6 +31,7 @@ interface StoreState {
   state: PlainStateOf<RoomState>;
   isSpectator: boolean;
   actionState: ActionState
+  showDiceRollMessage: boolean;
 }
 
 export const useStore = create(
@@ -48,9 +50,15 @@ export const useStore = create(
             state: {
               playersPings: {},
             },
-            actionState:'idle'
+            actionState: 'idle',
+            showDiceRollMessage: false
           } as StoreState,
           (set, get) => ({
+            setShowDiceRollMessage: (show: boolean) => {
+              set((z) => {
+                z.showDiceRollMessage = show
+              })
+            },
             setPlayerName: (name: string) => {
               set((z) => {
                 z.room ??= {};
@@ -58,7 +66,7 @@ export const useStore = create(
               });
             },
             setActionState: (state: ActionState) => {
-              set((z)=>{
+              set((z) => {
                 z.actionState = state
               })
             },
@@ -109,36 +117,44 @@ export const useStore = create(
                 throw error;
               }
             },
-            setRoomLeader: (playerId: string)=>{
-              set((z)=>{
+            setRoomLeader: (playerId: string) => {
+              set((z) => {
                 z.state.room.leaderId = playerId
               })
             },
-            accelerateDice: ()=>{
-              set((z)=>{
+            accelerateDice: () => {
+              set((z) => {
                 z.state.game.diceState.mode = 'ACCELERATING'
               })
             },
-            ragdollDice: ()=>{
-              set((z)=>{
+            ragdollDice: () => {
+              set((z) => {
                 z.state.game.diceState.mode = 'RAGDOLLING'
               })
             },
-            updateRoomPhase: (phase: RoomPhase)=>{
-              set((z)=>{
+            updateRoomPhase: (phase: RoomPhase) => {
+              set((z) => {
                 z.state.room.phase = phase
               })
             },
-            rollDiceTo: (die1:number, die2: number)=>{
-              set((z)=>{
+            rollDiceTo: (die1: number, die2: number) => {
+              set((z) => {
                 console.log('called rollDiceTo from: ', z.state.game.diceState.mode)
                 z.state.game.diceState.mode = 'ROLLINGTOFACE'
                 z.state.game.diceState.rollTo = [die1, die2]
               })
             },
-            setActivePlayer: (playerId: string)=>{
-              set((z)=>{
+            setActivePlayer: (playerId: string) => {
+              set((z) => {
                 z.state.game.activePlayerId = playerId
+              })
+            },
+            updateTurnPhase: (turnPhase: TurnPhase) => {
+              set((z) => {
+                z.state.game.turnPhase = turnPhase
+                if (turnPhase == 'awaiting-roll') {
+                  z.showDiceRollMessage = false
+                }
               })
             },
             tryAutoReconnect: async () => {
@@ -173,14 +189,14 @@ export const useStore = create(
                 return false;
               }
             },
-            updatePlayerMoney: (playerId: string, amount: number)=>{
-              set((z)=>{
+            updatePlayerMoney: (playerId: string, amount: number) => {
+              set((z) => {
                 z.state.game.players[playerId].money = amount
               })
             },
-            updatePlayerRolledDice: (playerId: string, hasRolledDice: boolean)=>{
-              
-              set((z)=>{
+            updatePlayerRolledDice: (playerId: string, hasRolledDice: boolean) => {
+
+              set((z) => {
                 z.state.game.players[playerId].hasRolled = hasRolledDice
               })
             },
@@ -205,7 +221,7 @@ export const useStore = create(
                 else if (mode == "rag") network.send("RAGDOLL_DICE", {});
                 else if (mode == "roll") {
                   network.send("ROLL_DICE", {});
-                  GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
+                  GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
                 }
               } catch (error) {
                 console.error("[rollDice] Error sending rollDice message:", error);
@@ -221,8 +237,8 @@ export const useStore = create(
             buyTerritory: (territoryId: TerritoryId) => {
               if (!territoryId) return;
               try {
-                network.send('BUY_TERRITORY', {territoryID: territoryId})
-                GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
+                network.send('BUY_TERRITORY', { territoryID: territoryId })
+                GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
               } catch (error) {
                 console.warn("Unable to purchase territory", error);
               }
@@ -230,17 +246,17 @@ export const useStore = create(
             sellTerritory: (territoryId: TerritoryId) => {
               if (!territoryId) return;
               try {
-                network.send('SELL_TERRITORY', {territoryID: territoryId})
-                GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
+                network.send('SELL_TERRITORY', { territoryID: territoryId })
+                GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
               } catch (error) {
                 console.warn("Unable to purchase territory", error);
               }
             },
-            selectCard: (cardID : string) => {
+            selectCard: (cardID: string) => {
               if (!cardID) return;
               try {
-                network.send('SELECT_CARD', {cardID: cardID})
-                GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'awaiting_action_result'})
+                network.send('SELECT_CARD', { cardID: cardID })
+                GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
               } catch (error) {
                 console.warn("Unable to purchase territory", error);
               }
@@ -252,10 +268,10 @@ export const useStore = create(
                 console.warn("Unable to toggle ready", error);
               }
             },
-            kickPlayer: (playerId:string) => {
-              try{
-                network.send('KICK_PLAYER', {playerId, reason:'GTFO'})
-              }catch(err){
+            kickPlayer: (playerId: string) => {
+              try {
+                network.send('KICK_PLAYER', { playerId, reason: 'GTFO' })
+              } catch (err) {
                 console.warn('unable to do action: kick player', playerId)
               }
             },
@@ -267,9 +283,9 @@ export const useStore = create(
               });
             },
             setMapID: (mapID: MapID) => {
-              try{
-                network.send('CHANGE_MAP', {mapID})
-              }catch(err){
+              try {
+                network.send('CHANGE_MAP', { mapID })
+              } catch (err) {
                 console.warn('unable to do action: change map', mapID)
               }
             }

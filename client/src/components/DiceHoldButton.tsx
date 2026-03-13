@@ -67,7 +67,6 @@ export default function DiceHoldButton({ onHoldStart, onHoldEnd, hasRolled }: Di
   };
 
   const handlePressEnd = () => {
-    cleanupTLs();
     safeOnHoldEnd();
     resetLayers();
     gsap.to(buttonRef.current, { scale: 1, duration: 0.2 });

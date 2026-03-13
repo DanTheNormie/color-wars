@@ -123,7 +123,7 @@ export class PIXIVFXLayer {
       overlayApp,
       this.vfxLayer!,
       count,
-      coinSize * 3,
+      coinSize * 10,
       () =>
         new PIXI.Graphics()
           .circle(0, 0, coinSize / 2)
