@@ -22,6 +22,7 @@ export function animateUnitHop(unit: PlayerSprite, pathTiles: PIXI.Sprite[]) {
       t: 1,
       ease: "power1.inOut",
       onStart: () => {
+        unit.stopPulse()
         // Optional: Update logical ID at start of hop, or end?
         // Usually safer to update at end, or update strictly purely visual here.
       },
