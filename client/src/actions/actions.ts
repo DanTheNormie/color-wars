@@ -94,7 +94,7 @@ export class IncrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["INCR_MO
     if (!vfxApp) throw new Error("Pixi Application not found in engine");
 
     // const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
-    const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 50)
+    const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
 
     return ActionHandle.attachCallBack(anim, async () => {
       useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);

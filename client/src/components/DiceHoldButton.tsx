@@ -36,20 +36,20 @@ export default function DiceHoldButton({ onHoldStart, onHoldEnd, hasRolled }: Di
       height: 0,
       duration: RESET_ANIM_TIME,
     });
-    setHelperText("Hold to shake dice");
+    setHelperText("Hold to roll dice");
   };
 
   const handlePressStart = () => {
     holdStartRef.current = performance.now();
     safeOnHoldStart();
-    setHelperText("Hold to shake dice");
+    setHelperText("Keep holding ...");
 
     shakeTl.current = gsap.to(darkLayerRef.current, {
       height: "100%",
       duration: SHAKE_DURATION,
       ease: "linear",
       onComplete: () => {
-        setHelperText("Release to roll dice");
+        setHelperText("Release to throw dice");
         rollTl.current = gsap.to(redLayerRef.current, {
           height: "100%",
           duration: ROLL_DURATION,
