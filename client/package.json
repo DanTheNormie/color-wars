@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@colyseus/schema": "^3.0.70",
+    "@floating-ui/react": "^0.27.19",
     "@gsap/react": "^2.1.2",
     "@pixi/devtools": "^2.0.1",
     "@pixi/layout": "^3.2.0",

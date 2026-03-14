@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react";
 import ChatInterface from "./MobileChat/MobileChat";
-import { TerritoryInfoDrawer } from "./TerritoryInfo";
 import { useStore } from "@/stores/sessionStore";
 
 interface ActionAreaProps {
@@ -36,7 +35,6 @@ const ActionArea = ({ children }: ActionAreaProps) => {
         <div className="bg-secondary flex h-12 items-center justify-center rounded-lg">
           <ChatInterface />
         </div>
-        <TerritoryInfoDrawer />
       </div>
     </div>
   );

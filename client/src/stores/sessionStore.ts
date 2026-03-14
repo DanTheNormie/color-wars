@@ -194,6 +194,19 @@ export const useStore = create(
                 z.state.game.players[playerId].money = amount
               })
             },
+            updateTerritoryOwnership: (territoryId: string, ownerId: string | null) => {
+              set((z) => {
+                z.state.game.territoryOwnership ??= {};
+                if (ownerId) {
+                  z.state.game.territoryOwnership[territoryId] = {
+                    ...(z.state.game.territoryOwnership[territoryId] || {}),
+                    ownerId,
+                  };
+                } else {
+                  delete z.state.game.territoryOwnership[territoryId];
+                }
+              })
+            },
             updatePlayerRolledDice: (playerId: string, hasRolledDice: boolean) => {
 
               set((z) => {

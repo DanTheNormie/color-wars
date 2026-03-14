@@ -1,6 +1,6 @@
-import { GameEventBus } from "@/lib/managers/GameEventBus";
 import { PIXIGameBoard } from "../engine";
 import { useMapStore } from "@/stores/mapStateStore";
+import { useTooltipStore } from "@/stores/tooltipStore";
 import type { Hex } from "@/types/map-types";
 import { FederatedPointerEvent } from "pixi.js";
 
@@ -15,8 +15,6 @@ export class InteractionManager {
 
     const viewport = engine.getViewport();
     if (viewport) {
-      // Use 'pointermove' on the viewport
-      //viewport.on("pointermove", this.onPointerMove);
       viewport.on("pointertap", this.onPointerTap);
 
       // Prevent click triggers while panning
@@ -37,28 +35,9 @@ export class InteractionManager {
     });
   }
 
-  // private onPointerMove = (e: FederatedPointerEvent) => {
-  //   if (this.isDragging) return;
-
-  //   // 1. Get world position from Interaction Event
-  //   const terrain = this.engine.getTerrain();
-  //   if (!terrain) return;
-
-  //   const localPoint = terrain.toLocal(e.global);
-
-  //   // 2. Convert to Axial
-  //   const hex = this.engine.worldToAxial(localPoint.x, localPoint.y, this.hexSize);
-
-  //   // 3. Lookup State
-  //   const territoryID = this.hexLookup.get(`${hex.q},${hex.r}`) || null;
-
-  //   useMapStore.getState().setHoveredTerritory(territoryID);
-  // };
-
   private onPointerTap = (e: FederatedPointerEvent) => {
     if (this.isDragging) return;
 
-    // Re-calculate to be safe (or use cached hover)
     const terrain = this.engine.getTerrain();
     if (!terrain) return;
     const localPoint = terrain.toLocal(e.global);
@@ -66,17 +45,22 @@ export class InteractionManager {
     const territoryID = this.hexLookup.get(`${hex.q},${hex.r}`) || null;
 
     useMapStore.getState().setSelectedTerritory(territoryID);
+
     if (territoryID) {
-      GameEventBus.emit("SET_TERRITORY_INFO_DRAWER", { open: true });
+      // Convert canvas-relative coords to viewport-relative coords
+      const canvas = this.engine.getApp()?.canvas;
+      const rect = canvas?.getBoundingClientRect();
+      const screenX = e.global.x + (rect?.left ?? 0);
+      const screenY = e.global.y + (rect?.top ?? 0);
+      useTooltipStore.getState().openTooltip(screenX, screenY, territoryID);
     } else {
-      GameEventBus.emit("SET_TERRITORY_INFO_DRAWER", { open: false });
+      useTooltipStore.getState().closeTooltip();
     }
   };
 
   public destroy() {
     const viewport = this.engine.getViewport();
     if (viewport) {
-      //viewport.off("pointermove", this.onPointerMove);
       viewport.off("pointertap", this.onPointerTap);
     }
   }

@@ -194,6 +194,7 @@ export class BuyTerritoryAction extends BaseAction<(typeof TURN_ACTION_REGISTRY)
 
     useMapStore.getState().setTerritoryColor(territoryID, playerColor);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
+    useStore.getState().updateTerritoryOwnership(territoryID, playerId);
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),
@@ -209,6 +210,7 @@ export class SellTerritoryAction extends BaseAction<(typeof TURN_ACTION_REGISTRY
 
     useMapStore.getState().removeTerritoryColor(territoryID);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
+    useStore.getState().updateTerritoryOwnership(territoryID, null);
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),

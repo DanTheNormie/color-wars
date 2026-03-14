@@ -10,6 +10,7 @@ import ActionArea from "@/components/ActionArea";
 import { PixiCanvas } from "@/components/NewGameBoard/components/PixiCanvas";
 import { CardSelectionOverlay } from "@/lib/cardOverlay";
 import { VFXLayer } from "@/components/vfxOverlayLayer/vfxLayer";
+import TerritoryTooltip from "@/components/TerritoryTooltip";
 
 const RoomPage = () => {
   const navigate = useNavigate();
@@ -69,6 +70,7 @@ const RoomPage = () => {
         <PixiCanvas />
         <GameStatus />
         <VFXLayer />
+        <TerritoryTooltip />
 
         <ActionArea>
           {roomPhase === "active" && <TurnControls />}
