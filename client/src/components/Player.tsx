@@ -89,7 +89,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
             open={openColor}
             setOpen={setOpenColor}
             enabled={isLobbyPhase && isYou}
-            trigger={<span className={`h-full w-2 self-stretch border ${isYou ? "cursor-pointer" : ""}`} style={{ backgroundColor: player.color }} />}
+            trigger={<div className={`w-2 self-stretch border ${isYou ? "cursor-pointer" : ""}`} style={{ backgroundColor: player.color }} />}
           >
             <div className="grid h-full grid-cols-5 gap-2 p-2">
               {availableColors.map((color) => (
@@ -135,7 +135,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
           open={openColor}
           setOpen={setOpenColor}
           enabled={isLobbyPhase && isYou}
-          trigger={<span className={`h-full w-2 self-stretch border ${isYou ? "cursor-pointer" : ""}`} style={{ backgroundColor: player.color }} />}
+          trigger={<div className={`h-full w-2 self-stretch border ${isYou ? "cursor-pointer" : ""}`} style={{ backgroundColor: player.color }} />}
         >
           <div className="grid h-full grid-cols-5 p-2">
             {availableColors.map((color) => (
