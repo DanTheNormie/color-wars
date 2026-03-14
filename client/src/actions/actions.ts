@@ -127,6 +127,37 @@ export class DecrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["DECR_MO
   }
 }
 
+export class AddCard extends BaseAction<(typeof TURN_ACTION_REGISTRY)["ADD_CARD"]> {
+  execute(): ActionHandle {
+    const { playerId, cardId } = this.payload;
+
+    const unit = pixiTargetLocator.get<PlayerSprite>(playerId);
+    if (!unit) throw new Error("PlayerSprite unit not found for AddCard animation");
+
+    const tileID = unit.currentTileId;
+    if (!tileID) throw new Error("PlayerSprite has no currentTileId for AddCard animation");
+    const tile = pixiTargetLocator.get<Sprite>(tileID)!;
+
+    const ele = document.getElementById(`player-backpack-cards-${playerId}`);
+    if (!ele) throw new Error("Target DOM element for card counter not found");
+
+    const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+    const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
+    if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
+    const vfxApp = vfxLayer.getApp()!;
+    const boardApp = gameBoard.getApp()!;
+    if (!vfxApp) throw new Error("Pixi Application not found in engine");
+
+    // 1 "card" particle flying to the backpack counter
+    const anim = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 4);
+
+    return ActionHandle.attachCallBack(anim, async () => {
+      useStore.getState().addBackpackCard(playerId, cardId);
+      console.log("AddCard animation complete – card added to backpack:", cardId);
+    });
+  }
+}
+
 // --- Action 1: Draw Cards ---
 export class DrawCardsAction extends BaseAction<{ cardIds: string[] }> {
   execute(): ActionHandle {

@@ -4,7 +4,9 @@ import { GameAction, PlayerState, RoomState, TerritoryState } from "@color-wars/
 import { PLAYER } from "@color-wars/shared/src/config/game";
 import { Client, Room } from "colyseus";
 import { StatusEffect } from "@color-wars/shared/src/types/RoomState";
-import { RewardID, StatusEffectID } from "@color-wars/shared/src/types/effectId";
+import { StatusEffectID } from "@color-wars/shared/src/types/effectId";
+import { RewardService } from "./rewardService";
+import { RewardConfig } from "@color-wars/shared/src/types/rewardConfig";
 import { MAPS } from "@color-wars/shared/src/maps";
 import { type TileType, DICE_TRACK, TileConfig} from "@color-wars/shared/src/config/diceTrack"
 
@@ -60,7 +62,7 @@ export class GameEngine {
   handleRoll(client: Client) {
     const die1 = Math.floor(Math.random() * 6) + 1;
     const die2 = Math.floor(Math.random() * 6) + 1;
-    const roll = die1 + die2;
+    const roll = 10;//die1 + die2;
 
     this.state.pushAction("ROLL_DICE", client.sessionId, { die1, die2 });
 
@@ -106,10 +108,13 @@ export class GameEngine {
         break;
       }
       case 'SURPRISE':  {
-        const generatedCardIDs = ["GET_500_CASH", "GET_2000_CASH", "GET_KILL_CARD"] as RewardID[]
+        const generatedCardConfigs = RewardService.generateOptions({ count: 3, allowDuplicates: false });
+        // temporarily store the selected configs in state by serializing them, or simply storing the indices of the pool.
+        // For simplicity now, we can just pack the JSON string to the client.
+        const packedIds = generatedCardConfigs.map(c => JSON.stringify(c));
         this.state.game.turnPhase = 'resolving-draft'
-        this.state.game.generatedCardIDs.push(...generatedCardIDs)
-        this.state.pushAction("DRAW_3_REWARD_CARDS", player.id, { playerId: player.id, cardIds: generatedCardIDs });
+        this.state.game.generatedCardIDs.push(...packedIds)
+        this.state.pushAction("DRAW_3_REWARD_CARDS", player.id, { playerId: player.id, cardIds: packedIds });
         break;
       }
       case 'SAFE':
@@ -158,12 +163,25 @@ export class GameEngine {
     this.state.game.territoryOwnership.delete(territoryID)
   }
 
-  selectCard(client: Client, cardID: string) {
-
-    this.state.game.generatedCardIDs.clear()
-    this.state.pushAction('SELECT_CARD', client.sessionId, {selectedCardId: cardID})
+  selectCard(client: Client, encodedConfig: string) {
+    const player = this.state.game.players.get(client.sessionId)!;
+    this.state.game.generatedCardIDs.clear();
+    
+    // Attempt to decode the config pushed from DRAW_3_REWARD_CARDS
+    const config = JSON.parse(encodedConfig) as RewardConfig;
+    this.state.pushAction('SELECT_CARD', player.id, { selectedCardId: encodedConfig });
   
-    //TODO: apply card effect
+    // apply card effect
+    if (config.type === "INSTANT_CASH") {
+      const amount = this.getRandomNumberWithStep(config.min, config.max, config.step);
+      player.money += amount;
+      this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount });
+    } else if (config.type === "CARD") {
+      player.backpack.cards.push(config.cardId);
+      this.state.pushAction('ADD_CARD', player.id, { playerId: player.id, cardId: config.cardId });
+    }
+    
+    this.state.game.turnPhase = 'awaiting-end-turn';
   }
 
   endTurn() {
@@ -181,20 +199,7 @@ export class GameEngine {
   }
 }
 
-// server/logic/EffectHandlers.ts
-export interface EffectContext {
-  state: RoomState;
-  playerId: string;
-}
-
-export const RewardEffects: Record<RewardID, (ctx: EffectContext) => void> = {
-  GET_500_CASH: (ctx: EffectContext) => {},
-  GET_2000_CASH: (ctx: EffectContext) => {},
-  GET_KILL_CARD: (ctx: EffectContext) => {},
-  GET_SHIELD_CARD: (ctx: EffectContext) => {},
-};
-
-// server/logic/TurnProcessor.ts
+// server/logic/TurnProcessor.ts (inline for reference/completeness based on previous codebase)
 export function processStatusEffects(state: RoomState, playerId: string) {
   const player = state.game.players.get(playerId)!;
 
@@ -204,12 +209,13 @@ export function processStatusEffects(state: RoomState, playerId: string) {
 
     switch (effect.id as StatusEffectID) {
       case "DEBT":
-        // Example: Deduct money each turn
-        player.money -= 100; // Deduct 100 as an example
+        player.money -= 100;
         break;
       case "INCOME":
-        // Example: Add money each turn
-        player.money += 100; // Add 100 as an example
+        player.money += 100;
+        break;
+      case "SHIELD_ACTIVE":
+        // Shield active logic handled when attacked.
         break;
       default:
         break;

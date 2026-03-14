@@ -40,7 +40,24 @@ declare module "react" {
   }
 }
 
+import type { RewardConfig } from "@color-wars/shared/src/types/rewardConfig";
+
 const Card = ({ id }: { id: string }) => {
+  const config = JSON.parse(id) as RewardConfig;
+  const { title, subtitle, colorTheme } = config.ui;
+
+  const themeClasses: Record<string, string> = {
+    "Emerald Green": "from-emerald-600 via-emerald-500 to-teal-700",
+    "Gold / Yellow": "from-amber-400 via-yellow-300 to-orange-500",
+    "Crimson Red": "from-rose-700 via-red-600 to-red-900",
+    "Royal Blue": "from-blue-700 via-blue-500 to-indigo-900",
+    "Industrial Gray": "from-slate-600 via-gray-500 to-zinc-700",
+    "Industrial / Warning": "from-orange-600 via-yellow-600 to-gray-800",
+    "Gold": "from-yellow-600 via-amber-400 to-yellow-800 animate-pulse",
+  };
+
+  const gradient = themeClasses[colorTheme] || "from-gray-600 to-gray-800";
+
   return (
     <div id={id} className="card-wrapper relative flex h-full w-full max-w-120 justify-center rounded-xl select-none">
       <style>{`
@@ -62,8 +79,24 @@ const Card = ({ id }: { id: string }) => {
         tilt-factor="1.5"
         scale-factor="1.1"
       >
-        <div className={`flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-xl bg-gray-600 shadow-2xl p-4`}>
-          <h2 className="text-2xl font-bold">Card {id}</h2>
+        <div className={`flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-xl bg-gradient-to-br ${gradient} shadow-2xl p-8 border-2 border-white/20 backdrop-blur-sm`}>
+          <div className="flex flex-col items-center gap-4 text-center">
+             <div className="bg-white/10 p-4 rounded-full backdrop-blur-md border border-white/20">
+                {config.type === 'INSTANT_CASH' ? '💰' : '🃏'}
+             </div>
+             <h2 className="text-4xl font-extrabold text-white drop-shadow-lg tracking-tight uppercase">
+                {title}
+             </h2>
+             <p className="text-white/80 text-lg font-medium max-w-[250px]">
+                {subtitle}
+             </p>
+          </div>
+          
+          <div className="w-full flex justify-center mt-8 opacity-40">
+             <div className="text-xs font-mono text-white/50 tracking-widest uppercase">
+                {config.type}
+             </div>
+          </div>
         </div>
       </hover-tilt>
     </div>
@@ -71,6 +104,7 @@ const Card = ({ id }: { id: string }) => {
 };
 
 const Thumb = ({ id, idx }: { id: string, idx:number }) => {
+  const config = JSON.parse(id) as RewardConfig;
   const selectedCardId = useCardStore((s) => s.selectedCardId);
   const setSelectedCardId = useCardStore((s) => s.setSelectedCardId);
   const handleOnClick = () => {
@@ -79,9 +113,10 @@ const Thumb = ({ id, idx }: { id: string, idx:number }) => {
   return (
     <div
       onClick={handleOnClick}
-      className={`flex h-16 w-16 cursor-pointer items-center justify-center rounded-md bg-zinc-700 text-white select-none ${selectedCardId == id ? "border-3 border-white" : ""}`}
+      className={`flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-md bg-zinc-700 text-[10px] text-white select-none p-1 text-center transition-all ${selectedCardId == id ? "border-2 border-white scale-110 shadow-lg z-10" : "opacity-60 hover:opacity-100"}`}
     >
-      {idx}
+      <div className="font-bold truncate w-full">{config.ui.title}</div>
+      <div className="text-[8px] opacity-50">{idx + 1}</div>
     </div>
   );
 };
@@ -119,7 +154,7 @@ export const CardSelectionOverlay = () => {
     if (swiperRef.current?.activeIndex !== activeIndex) {
       swiperRef.current?.slideTo(activeIndex, 200);
     }
-  }, [selectedCardId]);
+  }, [selectedCardId, cardIds]);
 
   // 1. Reveal Animation
   useEffect(() => {
@@ -223,16 +258,16 @@ export const CardSelectionOverlay = () => {
           slideShadows: false,
         }}
       >
-        {cardIds.map((id, idx) => (
-          <SwiperSlide>
-            <Card key={id+idx} id={id} />
+        {cardIds.map((id) => (
+          <SwiperSlide key={id}>
+            <Card id={id} />
           </SwiperSlide>
         ))}
       </Swiper>
 
       <Swiper allowTouchMove={false} slidesPerView={3} watchSlidesProgress spaceBetween={12} className="mt-4 w-72">
         {cardIds.map((id, idx) => (
-          <SwiperSlide key={id+idx}>
+          <SwiperSlide key={`thumb-${id}`}>
             <Thumb id={id} idx={idx} />
           </SwiperSlide>
         ))}

@@ -194,6 +194,11 @@ export const useStore = create(
                 z.state.game.players[playerId].money = amount
               })
             },
+            addBackpackCard: (playerId: string, cardId: string) => {
+              set((z) => {
+                z.state.game.players[playerId].backpack.cards.push(cardId);
+              });
+            },
             updateTerritoryOwnership: (territoryId: string, ownerId: string | null) => {
               set((z) => {
                 z.state.game.territoryOwnership ??= {};

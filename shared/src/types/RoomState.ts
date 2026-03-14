@@ -19,8 +19,8 @@ export class TerritoryState extends Schema {
 }
 
 export class StatusEffect extends Schema {
-  @type("string") id: string;
-  @type("number") duration: number;
+  @type("string") id: string; // Cast to StatusEffectID
+  @type("number") duration: number; // e.g. number of rounds remaining
 
   constructor(id: string, duration: number) {
     super();
