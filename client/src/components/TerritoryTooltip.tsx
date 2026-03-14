@@ -14,7 +14,6 @@ import {
 import { useTooltipStore } from "@/stores/tooltipStore";
 import { useMapStore } from "@/stores/mapStateStore";
 import { useStore } from "@/stores/sessionStore";
-import "./TerritoryTooltip.css";
 
 /* ─── Upgrade tier labels ─── */
 const UPGRADE_TIERS = ["CITY", "FACTORY", "MISSILE_SILO"] as const;
@@ -149,7 +148,7 @@ export default function TerritoryTooltip() {
         ref={setFloatingRef}
         style={floatingStyles}
         {...getFloatingProps()}
-        className="territory-tooltip"
+        className="z-9999 bg-[#1c1c1e] border border-[#3a3a3c] rounded-xl py-3 px-[14px] min-w-[180px] max-w-[260px] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] text-[#f5f5f7] pointer-events-auto"
       >
         <FloatingArrow
           ref={setArrowEl}
@@ -162,11 +161,11 @@ export default function TerritoryTooltip() {
         />
 
         {/* ── Header ── */}
-        <div className="territory-tooltip__header">
-          <span className="territory-tooltip__name">{territory.name}</span>
+        <div className="flex justify-between items-baseline mb-2 gap-2">
+          <span className="text-[14px] font-semibold tracking-[0.02em] whitespace-nowrap overflow-hidden text-ellipsis">{territory.name}</span>
           {ownerId && (
             <span
-              className="territory-tooltip__owner"
+              className="text-[11px] font-medium shrink-0"
               style={{ color: ownerPlayer?.color ?? "#888" }}
             >
               {isOwnedByCurrentPlayer ? "You" : ownerPlayer?.name ?? "Unknown"}
@@ -177,16 +176,16 @@ export default function TerritoryTooltip() {
         {/* ── Unowned: show base cost + per round, then Buy button ── */}
         {!ownerId && economy && (
           <>
-            <div className="territory-tooltip__economy">
-              <div className="territory-tooltip__stat">
-                <span className="territory-tooltip__stat-label">Cost</span>
-                <span className="territory-tooltip__stat-value">{baseCost}</span>
+            <div className="flex items-center gap-[10px] py-[6px] mb-2 border-y border-[#2a2a2c]">
+              <div className="flex flex-col items-center flex-1">
+                <span className="text-[10px] text-[#8e8e93] uppercase tracking-[0.06em]">Cost</span>
+                <span className="text-[14px] font-semibold mt-[2px]">{baseCost}</span>
               </div>
-              <div className="territory-tooltip__divider" />
-              <div className="territory-tooltip__stat">
-                <span className="territory-tooltip__stat-label">Per Round</span>
+              <div className="w-px h-[28px] bg-[#2a2a2c] shrink-0" />
+              <div className="flex flex-col items-center flex-1">
+                <span className="text-[10px] text-[#8e8e93] uppercase tracking-[0.06em]">Per Round</span>
                 <span
-                  className="territory-tooltip__stat-value"
+                  className="text-[14px] font-semibold mt-[2px]"
                   style={{ color: baseIncome >= 0 ? "#4ade80" : "#f87171" }}
                 >
                   {baseIncome >= 0 ? "+" : ""}
@@ -194,9 +193,9 @@ export default function TerritoryTooltip() {
                 </span>
               </div>
             </div>
-            <div className="territory-tooltip__actions">
+            <div className="flex gap-[6px]">
               <button
-                className="territory-tooltip__btn territory-tooltip__btn--buy"
+                className="flex-1 py-[6px] rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 hover:opacity-[0.85] active:scale-[0.96] bg-[#34c759] text-black"
                 onClick={handleBuy}
               >
                 Buy
@@ -209,11 +208,11 @@ export default function TerritoryTooltip() {
         {isOwnedByCurrentPlayer && economy && (
           <>
             {/* Per-round summary */}
-            <div className="territory-tooltip__economy">
-              <div className="territory-tooltip__stat">
-                <span className="territory-tooltip__stat-label">Per Round</span>
+            <div className="flex items-center gap-[10px] py-[6px] mb-2 border-y border-[#2a2a2c]">
+              <div className="flex flex-col items-center flex-1">
+                <span className="text-[10px] text-[#8e8e93] uppercase tracking-[0.06em]">Per Round</span>
                 <span
-                  className="territory-tooltip__stat-value"
+                  className="text-[14px] font-semibold mt-[2px]"
                   style={{ color: baseIncome >= 0 ? "#4ade80" : "#f87171" }}
                 >
                   {baseIncome >= 0 ? "+" : ""}
@@ -223,11 +222,11 @@ export default function TerritoryTooltip() {
             </div>
 
             {/* Upgrade buttons row */}
-            <div className="territory-tooltip__upgrades">
+            <div className="flex gap-1 mb-[2px]">
               {UPGRADE_TIERS.map((tier) => (
                 <button
                   key={tier}
-                  className="territory-tooltip__upgrade-btn"
+                  className="flex-1 py-[6px] rounded-md text-[11px] font-semibold text-white cursor-pointer transition-all duration-150 hover:opacity-[0.85] active:scale-[0.96] text-center"
                   style={{ background: TIER_COLORS[tier] }}
                   onClick={() => {
                     // TODO: wire to upgrade message
@@ -239,18 +238,18 @@ export default function TerritoryTooltip() {
             </div>
 
             {/* Upgrade costs row */}
-            <div className="territory-tooltip__upgrade-costs">
+            <div className="flex gap-1 mb-2">
               {UPGRADE_TIERS.map((tier) => (
-                <span key={tier} className="territory-tooltip__upgrade-cost">
+                <span key={tier} className="flex-1 text-center text-[10px] text-[#8e8e93] font-medium">
                   {fmt.format(economy[tier].capEx)}
                 </span>
               ))}
             </div>
 
             {/* Sell button */}
-            <div className="territory-tooltip__actions territory-tooltip__actions--sell">
+            <div className="flex gap-[6px] mt-1">
               <button
-                className="territory-tooltip__btn territory-tooltip__btn--sell"
+                className="flex-1 py-[6px] rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 hover:opacity-[0.85] active:scale-[0.96] bg-[#ff453a] text-white"
                 onClick={handleSell}
               >
                 Sell
@@ -261,7 +260,7 @@ export default function TerritoryTooltip() {
 
         {/* ── Owned by another player ── */}
         {ownerId && !isOwnedByCurrentPlayer && (
-          <span className="territory-tooltip__owned-label">
+          <span className="block text-xs text-[#8e8e93] text-center w-full py-[6px] border-t border-[#2a2a2c] mt-1">
             Owned by {ownerPlayer?.name ?? "Unknown"}
           </span>
         )}
