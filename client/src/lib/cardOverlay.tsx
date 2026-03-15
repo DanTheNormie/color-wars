@@ -104,7 +104,6 @@ const Card = ({ id }: { id: string }) => {
 };
 
 const Thumb = ({ id, idx }: { id: string, idx:number }) => {
-  const config = JSON.parse(id) as RewardConfig;
   const selectedCardId = useCardStore((s) => s.selectedCardId);
   const setSelectedCardId = useCardStore((s) => s.setSelectedCardId);
   const handleOnClick = () => {

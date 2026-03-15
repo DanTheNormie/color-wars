@@ -28,13 +28,18 @@ export class PIXIVFXLayer {
 
   // Layers
   private vfxLayer: PIXI.Container | null = null;
+  private spritesheet: PIXI.Spritesheet | null = null;
 
   // Lifecycle
   private destroyed = false;
   private initToken = 0;
   private initPromise: Promise<void> | null = null;
 
-  private async loadAssets() { }
+  private async loadAssets() {
+    if (this.spritesheet) return;
+
+    this.spritesheet = await PIXI.Assets.load("/spritesheet_data.json");
+  }
 
   // Getters
   getApp() {
@@ -93,7 +98,7 @@ export class PIXIVFXLayer {
     return this.initPromise;
   }
 
-  animateCoinConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5) {
+  animateCoinConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
     // ─────────────────────────────
     // 1️⃣ START POSITION (Board → Screen → Overlay)
     // ─────────────────────────────
@@ -133,7 +138,39 @@ export class PIXIVFXLayer {
     );
   }
 
-  playEnergyTransferAnimation(_startEl: HTMLElement, _endEl: HTMLElement) {
+  animateSpritesheetConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
+    // ─────────────────────────────
+    // 1️⃣ START POSITION
+    // ─────────────────────────────
+    const global = boardSprite.getGlobalPosition();
+    const boardRect = boardApp.canvas.getBoundingClientRect();
+    const overlayRect = overlayApp.canvas.getBoundingClientRect();
+
+    const startX = boardRect.left + global.x - overlayRect.left;
+    const startY = boardRect.top + global.y - overlayRect.top;
+
+    // ─────────────────────────────
+    // 2️⃣ END POSITION
+    // ─────────────────────────────
+    const rect = targetEl.getBoundingClientRect();
+    const endX = rect.left - overlayRect.left + rect.width / 2;
+    const endY = rect.top - overlayRect.top + rect.height / 2;
+
+    const size = boardSprite.width / 2;
+
+    return this.playSpritesheetConfettiAnimation(
+      startX,
+      startY,
+      endX,
+      endY,
+      this.vfxLayer!,
+      count,
+      size * 2,
+      size
+    );
+  }
+
+  playEnergyTransferAnimation(_startEl: HTMLElement, _endEl: HTMLElement): gsap.core.Timeline {
     // ─────────────────────────────
     // 1️⃣ COORDINATE MAPPING
     // ─────────────────────────────
@@ -233,7 +270,7 @@ export class PIXIVFXLayer {
     splashRadius: number,
     createGraphic: () => PIXI.Container,
     trailTint: number = 0xffffff
-  ) {
+  ): gsap.core.Timeline {
     const projectiles: { graphic: PIXI.Container; rope: PIXI.MeshRope; destroy: () => void }[] = [];
     const meta: { x: number; y: number }[] = [];
     const graphics: PIXI.Container[] = [];
@@ -256,56 +293,111 @@ export class PIXIVFXLayer {
       });
     }
 
-    const proxies = graphics.map((_, i) => ({ t: 0, index: i }));
+    const timeline = gsap.timeline({
+      onComplete: () => {
+        projectiles.forEach((p) => p.destroy());
+      },
+    });
 
-    return gsap
-      .timeline({
-        onUpdate: () => {
-          proxies.forEach((proxy) => {
-            const i = proxy.index;
-            const t = proxy.t;
-            const invT = 1 - t;
-            const cp = meta[i];
+    graphics.forEach((graphic, i) => {
+      const targetMeta = meta[i];
+      const rope = ropes[i];
+      const projTimeline = gsap.timeline();
 
-            // Calculate cubic bezier control points so the curve passes exactly through cp at t=0.5
-            const c1x = cp.x + (cp.x - startX) / 3;
-            const c1y = cp.y + (cp.y - startY) / 3;
-
-            const c2x = cp.x + (cp.x - endX) / 3;
-            const c2y = cp.y + (cp.y - endY) / 3;
-
-            graphics[i].x =
-              invT * invT * invT * startX +
-              3 * invT * invT * t * c1x +
-              3 * invT * t * t * c2x +
-              t * t * t * endX;
-
-            graphics[i].y =
-              invT * invT * invT * startY +
-              3 * invT * invT * t * c1y +
-              3 * invT * t * t * c2y +
-              t * t * t * endY;
-          });
-        },
-        onComplete: () => {
-          projectiles.forEach((p) => p.destroy());
-        },
-      })
-      .to(proxies, {
-        t: 1,
-        duration: 0.8,
-        ease: "power2.inOut",
-        stagger: 0.015,
-      })
-      .to(
-        [...graphics, ...ropes],
-        {
+      projTimeline
+        .to(graphic, {
+          x: targetMeta.x,
+          y: targetMeta.y,
+          duration: 0.4,
+          ease: "back.out(1.4)",
+        })
+        .to(graphic, {
+          x: endX,
+          y: endY,
+          duration: 0.6,
+          ease: "power2.inOut",
+        })
+        .to([graphic, rope], {
           alpha: 0,
           duration: 0.2,
           ease: "power2.in",
+        }, "-=0.2");
+
+      timeline.add(projTimeline, i * 0.08); // Stagger the start of each projectile's animation
+    });
+
+    return timeline;
+  }
+
+  playSpritesheetConfettiAnimation(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    layer: PIXI.Container,
+    count: number,
+    splashRadius: number,
+    spriteSize: number
+  ): gsap.core.Timeline {
+    const sprites: PIXI.AnimatedSprite[] = [];
+    const meta: { x: number; y: number }[] = [];
+
+    if (!this.spritesheet) {
+      console.warn("Spritesheet not loaded yet");
+      return gsap.timeline();
+    }
+
+    //const frameWidth = this.spritesheetFrameWidth;
+    //const frameHeight = this.spritesheetFrameHeight;
+
+    for (let i = 0; i < count; i++) {
+      const animatedSprite = new PIXI.AnimatedSprite(this.spritesheet.animations.default);
+      const scale = spriteSize / animatedSprite.width;
+      animatedSprite.anchor.set(0.5);
+      animatedSprite.scale.set(scale / 2);
+
+      animatedSprite.position.set(startX, startY);
+
+      animatedSprite.animationSpeed = 0.7;
+      animatedSprite.play();
+
+      layer.addChild(animatedSprite);
+      sprites.push(animatedSprite);
+
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * splashRadius;
+      meta.push({
+        x: startX + Math.cos(angle) * radius,
+        y: startY + Math.sin(angle) * radius,
+      });
+    }
+
+    const timeline = gsap.timeline()
+      .from(sprites, {
+        alpha: 0,
+        duration: 0.2,
+        x: startX,
+        y: startY,
+      }).to(sprites, {
+        x: (i: number) => meta[i].x,
+        y: (i: number) => meta[i].y,
+        stagger: 0.002,
+        duration: 0.4,
+        ease: "power2.out",
+      }).to(sprites, {
+        x: endX,
+        y: endY,
+        opacity: 0,
+        duration: sprites.length / 12,
+        ease: "power2.in",
+        stagger: 0.05,
+        onComplete: () => {
+          sprites.forEach((s) => s.destroy());
         },
-        "-=0.2"
-      );
+      })
+
+
+    return timeline;
   }
 
   createTrailTexture() {
@@ -361,6 +453,8 @@ export class PIXIVFXLayer {
     window.removeEventListener("resize", this.handleResize);
 
     this.app?.destroy(true, true);
+    this.spritesheet?.destroy();
+    this.spritesheet = null;
 
     pixiTargetLocator.clear();
     pixiTargetLocator.unregister("vfx-engine");

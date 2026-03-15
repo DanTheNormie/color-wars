@@ -49,7 +49,7 @@ export default function DiceHoldButton({ onHoldStart, onHoldEnd, hasRolled }: Di
       duration: SHAKE_DURATION,
       ease: "linear",
       onComplete: () => {
-        setHelperText("Release to throw dice");
+        setHelperText("Release to throw");
         rollTl.current = gsap.to(redLayerRef.current, {
           height: "100%",
           duration: ROLL_DURATION,
@@ -76,7 +76,7 @@ export default function DiceHoldButton({ onHoldStart, onHoldEnd, hasRolled }: Di
 
   return (
     <div className="relative h-full flex items-center justify-center select-none">
-      <div className="mb-2 text-center top-0 absolute text-gray-300 font-medium">{helperText}</div>
+      <div className="mb-2 text-center top-0 absolute text-gray-300 text-[10px] sm:text-xs md:text-sm font-medium">{helperText}</div>
 
       <div className="relative h-[75%] aspect-square self-end">
         <button

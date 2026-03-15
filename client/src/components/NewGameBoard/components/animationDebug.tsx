@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useDiceTrackStore } from "@/stores/diceTrackStore";
-import { HexHop, IncrMoney } from "@/actions/actions";
+//import { HexHop, IncrMoney } from "@/actions/actions";
 
 // ------------------------------------------------------------------
 // 1. MOCK STORE
@@ -172,7 +172,7 @@ const MovePlayerSection = () => {
 
   const handleMove = () => {
     if (targetPlayer && fromTile && toTile) {
-      new HexHop({ fromTile: Number(fromTile), toTile: Number(toTile), tokenId: targetPlayer }).execute();
+      //new HexHop({ fromTile: Number(fromTile), toTile: Number(toTile), tokenId: targetPlayer }).execute();
     }
   };
 
@@ -254,7 +254,7 @@ const AnimateMoney = () => {
 
   const handleAnimate = () => {
     if (selectedTile) {
-      new IncrMoney({ playerId: "unit-0", amount: 50 }).execute();
+      //new IncrMoney({ playerId: "unit-0", amount: 50 }).execute();
     }
   };
 

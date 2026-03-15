@@ -9,21 +9,21 @@ class ToastManager {
       GameEventBus.on("UPDATE_NETWORK_STATE", ({ state }) => {
         switch (state) {
           case "connected":
-            toast.success(state, { toasterId: "center" });
+            //toast.success(state, { toasterId: "center" });
             break;
           case "connecting":
           case "reconnecting":
-            toast.info(state);
+            //toast.info(state);
             break;
           default:
-            toast(state);
+            //toast(state);
         }
       }),
       GameEventBus.on('KICKED', ({reason})=>{
-        toast.success(reason, {toasterId: 'center'})
+        //toast.success(reason, {toasterId: 'center'})
       }),
       GameEventBus.on('TOAST', ({content, type})=>{
-        toast[type](content, { toasterId: "center", duration: 1000 })
+        //toast[type](content, { toasterId: "center", duration: 1000 })
       })
     );
   }

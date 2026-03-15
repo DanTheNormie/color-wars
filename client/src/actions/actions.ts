@@ -99,11 +99,12 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
     if (!vfxApp) throw new Error("Pixi Application not found in engine");
 
     // const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
-    const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
+    //const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
+    const anim2 = vfxLayer.animateSpritesheetConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
     
     this.logAction(playerId);
 
-    return ActionHandle.attachCallBack(anim, async () => {
+    return ActionHandle.attachCallBack(anim2, async () => {
       useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
       console.log("IncrMoney animation complete");
     });
