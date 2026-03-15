@@ -250,6 +250,8 @@ class Network {
     }
 
     return {
+      id: action.id,
+      timestamp: action.timestamp,
       type,
       payload: payload as typeof TURN_ACTION_REGISTRY[typeof type],
     } as ActionData;

@@ -7,31 +7,31 @@ export class ActionFactory {
   static create(data: ActionData): IExecutable {
     switch (data.type) {
       case 'MOVE_PLAYER':
-        return new HexHop(data.payload);
+        return new HexHop(data);
         
       case 'ROLL_DICE':
-        return new RollDice(data.payload);
+        return new RollDice(data);
 
       case 'INCR_MONEY':
-        return new IncrMoney(data.payload);
+        return new IncrMoney(data);
       
       case 'DECR_MONEY':
-        return new DecrMoney(data.payload);
+        return new DecrMoney(data);
       
       case 'DRAW_3_REWARD_CARDS':
-        return new DrawCardsAction(data.payload)
+        return new DrawCardsAction(data);
 
       case 'SELECT_CARD':
-        return new ResolveSelectionAction(data.payload)
+        return new ResolveSelectionAction(data);
 
       case 'ADD_CARD':
-        return new AddCard(data.payload);
+        return new AddCard(data);
 
       case 'BUY_TERRITORY':
-        return new BuyTerritoryAction(data.payload)
+        return new BuyTerritoryAction(data);
         
       case 'SELL_TERRITORY':
-        return new SellTerritoryAction(data.payload)
+        return new SellTerritoryAction(data);
 
       default:
         throw new Error(`Unknown Action Type, unable to create action: ${JSON.stringify(data)}`);

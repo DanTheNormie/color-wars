@@ -11,6 +11,7 @@ import { PixiCanvas } from "@/components/NewGameBoard/components/PixiCanvas";
 import { CardSelectionOverlay } from "@/lib/cardOverlay";
 import { VFXLayer } from "@/components/vfxOverlayLayer/vfxLayer";
 import TerritoryTooltip from "@/components/TerritoryTooltip";
+import NowPlayingHeader from "@/components/NowPlayingHeader";
 
 const RoomPage = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const RoomPage = () => {
     return () => {
       console.log("unmount");
     };
-  }, []);
+  }, [networkState, reconnectionToken, tryAutoReconnect, navigate]);
 
   if (networkState === "connecting" || networkState === "reconnecting") {
     return (
@@ -66,7 +67,8 @@ const RoomPage = () => {
 
   return (
     <div className="flex w-full flex-col items-center justify-center">
-      <div id='game-container' className="w-full max-w-180 pb-[100vh]">
+      <div id='game-container' className="w-full max-w-180 pb-[100vh] relative">
+        <NowPlayingHeader />
         <PixiCanvas />
         <GameStatus />
         <VFXLayer />

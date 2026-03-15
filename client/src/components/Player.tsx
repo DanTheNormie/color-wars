@@ -17,7 +17,7 @@ function PickerPopover({ open, setOpen, enabled, trigger, children }: { open: bo
   );
 }
 
-const AvatarColorMap = {
+export const AvatarColorMap = {
   "#1C1C1E": "/avatars/spy.png",
   "#00E5FF": "/avatars/scientist.png",
   "#D4AF37": "/avatars/rich.png",

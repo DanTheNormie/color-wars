@@ -15,6 +15,8 @@ export type ActionType = keyof typeof TURN_ACTION_REGISTRY;
 
 export type ActionData = {
   [K in ActionType]: {
+    id: number;
+    timestamp: number;
     type: K;
     payload: (typeof TURN_ACTION_REGISTRY)[K];
   };

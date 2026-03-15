@@ -1,6 +1,5 @@
 import { animateCoinConfetti, animateUnitHop } from "@/animation/registry/anim";
 import { BaseAction } from "./core";
-import { TURN_ACTION_REGISTRY } from "@color-wars/shared/src/types/turnActionRegistry";
 import { ActionHandle } from "@/animation/driver/AnimationHandle";
 import { pixiTargetLocator } from "@/animation/target-locator";
 import { PlayerSprite } from "@/components/NewGameBoard/pixi/units/playerSprite";
@@ -13,7 +12,7 @@ import { useCardStore } from "@/stores/cardSelectionStore";
 import { useMapStore } from "@/stores/mapStateStore";
 import type { PIXIVFXLayer } from "@/components/vfxOverlayLayer/pixi/vfxEngine";
 
-export class HexHop extends BaseAction<(typeof TURN_ACTION_REGISTRY)["MOVE_PLAYER"]> {
+export class HexHop extends BaseAction<"MOVE_PLAYER"> {
   execute(): ActionHandle {
     const { fromTile, toTile, tokenId } = this.payload;
     const unit = pixiTargetLocator.get<PlayerSprite>(tokenId);
@@ -53,24 +52,30 @@ export class HexHop extends BaseAction<(typeof TURN_ACTION_REGISTRY)["MOVE_PLAYE
       unit.isAnimating = false;
       useDiceTrackStore.getState().upsertToken({ id: unit.id, tileId: finalTileId });
       useDiceTrackStore.getState().setActiveToken(unit.id);
+      this.logAction(useStore.getState().state.game.activePlayerId);
     });
     return actionHandle;
   }
 }
 
-export class RollDice extends BaseAction<(typeof TURN_ACTION_REGISTRY)["ROLL_DICE"]> {
+export class RollDice extends BaseAction<"ROLL_DICE"> {
   execute(): ActionHandle {
     const { die1, die2 } = this.payload;
     useStore.getState().rollDiceTo(die1, die2);
     return new ActionHandle(
-      new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+      new Promise<void>((resolve) => {
+        setTimeout(() => { 
+          this.logAction(useStore.getState().state.game.activePlayerId);
+          resolve() 
+        }, 2500)
+      }),
       () => {},
       () => {},
     );
   }
 }
 
-export class IncrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["INCR_MONEY"]> {
+export class IncrMoney extends BaseAction<"INCR_MONEY"> {
   execute(): ActionHandle {
     const { playerId, amount } = this.payload;
 
@@ -95,6 +100,8 @@ export class IncrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["INCR_MO
 
     // const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
     const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
+    
+    this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim, async () => {
       useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
@@ -103,7 +110,7 @@ export class IncrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["INCR_MO
   }
 }
 
-export class DecrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["DECR_MONEY"]> {
+export class DecrMoney extends BaseAction<"DECR_MONEY"> {
   execute(): ActionHandle {
     const { playerId, amount } = this.payload;
 
@@ -119,6 +126,8 @@ export class DecrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["DECR_MO
     if (!app) throw new Error("Pixi Application not found in engine");
 
     const anim = animateCoinConfetti(tile!, app, 50);
+    
+    this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim, async () => {
       useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
@@ -127,7 +136,7 @@ export class DecrMoney extends BaseAction<(typeof TURN_ACTION_REGISTRY)["DECR_MO
   }
 }
 
-export class AddCard extends BaseAction<(typeof TURN_ACTION_REGISTRY)["ADD_CARD"]> {
+export class AddCard extends BaseAction<"ADD_CARD"> {
   execute(): ActionHandle {
     const { playerId, cardId } = this.payload;
 
@@ -151,6 +160,8 @@ export class AddCard extends BaseAction<(typeof TURN_ACTION_REGISTRY)["ADD_CARD"
     // 1 "card" particle flying to the backpack counter
     const anim = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 4);
 
+    this.logAction(playerId);
+
     return ActionHandle.attachCallBack(anim, async () => {
       useStore.getState().addBackpackCard(playerId, cardId);
       console.log("AddCard animation complete – card added to backpack:", cardId);
@@ -159,8 +170,9 @@ export class AddCard extends BaseAction<(typeof TURN_ACTION_REGISTRY)["ADD_CARD"
 }
 
 // --- Action 1: Draw Cards ---
-export class DrawCardsAction extends BaseAction<{ cardIds: string[] }> {
+export class DrawCardsAction extends BaseAction<"DRAW_3_REWARD_CARDS"> {
   execute(): ActionHandle {
+    this.logAction(this.payload.playerId);
     // Wrap the store interaction and waiting logic in a Promise
     const drawAnimationTask = new Promise<void>((resolve) => {
       // 1. Trigger the UI to mount and start animating
@@ -188,9 +200,10 @@ export class DrawCardsAction extends BaseAction<{ cardIds: string[] }> {
 }
 
 // --- Action 2: Resolve Selection ---
-export class ResolveSelectionAction extends BaseAction<{ selectedCardId: string }> {
+export class ResolveSelectionAction extends BaseAction<"SELECT_CARD"> {
   execute(): ActionHandle {
     const { selectedCardId } = this.payload;
+    this.logAction(useStore.getState().state.game.activePlayerId);
 
     const resolveAnimationTask = new Promise<void>((resolve) => {
       // 1. Trigger the UI to start the exit/resolution animation
@@ -217,9 +230,10 @@ export class ResolveSelectionAction extends BaseAction<{ selectedCardId: string 
   }
 }
 
-export class BuyTerritoryAction extends BaseAction<(typeof TURN_ACTION_REGISTRY)["BUY_TERRITORY"]> {
+export class BuyTerritoryAction extends BaseAction<"BUY_TERRITORY"> {
   execute(): ActionHandle {
     const { playerId, territoryID, amount } = this.payload;
+    this.logAction(playerId);
 
     const playerColor = useStore.getState().state.game.players[playerId].color;
 
@@ -235,9 +249,10 @@ export class BuyTerritoryAction extends BaseAction<(typeof TURN_ACTION_REGISTRY)
   }
 }
 
-export class SellTerritoryAction extends BaseAction<(typeof TURN_ACTION_REGISTRY)["SELL_TERRITORY"]> {
+export class SellTerritoryAction extends BaseAction<"SELL_TERRITORY"> {
   execute(): ActionHandle {
     const { playerId, territoryID, amount } = this.payload;
+    this.logAction(playerId);
 
     useMapStore.getState().removeTerritoryColor(territoryID);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);

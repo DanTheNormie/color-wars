@@ -18,6 +18,7 @@
 - **Why**: Currently marked as a `TODO`. Card drafts happen but do nothing. Fixing this completes the `SURPRISE` tile mechanic.
 - **Owner**: Backend
 - **Story Points**: 2
+- **Status**: Done
 
 ### 1-B. Implement The Empire Tax & Maintenance (High Value, Med Effort)
 - **Why**: The core driver of gameplay. Players must lose money to create tension. Without this, hoarding empty territories is too powerful.

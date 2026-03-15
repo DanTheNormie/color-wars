@@ -1,14 +1,28 @@
 import { GameEventBus } from "@/lib/managers/GameEventBus";
 import type { ActionHandle } from "@animation/driver/AnimationHandle";
+import { useGameLogStore } from "@/stores/gameLogStore";
+import type { ActionType, ActionData } from "@color-wars/shared/src/types/turnActionRegistry";
 
 export interface IExecutable {
   execute(): ActionHandle;
 }
 
-export abstract class BaseAction<TPayload> implements IExecutable {
-  protected payload: TPayload;
-  constructor(payload: TPayload) {
-    this.payload = payload;
+export abstract class BaseAction<TType extends ActionType> implements IExecutable {
+  protected actionId: number;
+  protected timestamp: number;
+  protected type: TType;
+  protected payload: Extract<ActionData, { type: TType }>["payload"];
+
+  constructor(data: Extract<ActionData, { type: TType }>) {
+    this.actionId = data.id;
+    this.timestamp = data.timestamp;
+    this.type = data.type;
+    // @ts-expect-error TypeScript cannot infer mapped generic payload
+    this.payload = data.payload;
+  }
+
+  protected logAction(playerId: string) {
+    useGameLogStore.getState().addEntry(this.actionId, this.type, playerId, this.payload, this.timestamp);
   }
 
   abstract execute(): ActionHandle;
