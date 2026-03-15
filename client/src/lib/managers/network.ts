@@ -180,6 +180,8 @@ class Network {
 
     // 3. Hard reset local networking
     this.room = null;
+    this.lastPlayedActionID = -1;
+    this.actionQueue.clear("kill");
     this.setState("disconnected");
     GameEventBus.emit("RESET_STATE", {});
 

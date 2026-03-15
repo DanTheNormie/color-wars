@@ -19,7 +19,7 @@ export function PixiCanvas() {
     });
 
     return () => {
-      gameBoard.destroy();
+      engineRef.current?.destroy();
       engineRef.current = null;
     };
   }, [currentMap]);

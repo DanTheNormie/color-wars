@@ -18,11 +18,17 @@ class ZustandSyncManager {
       }),
 
       GameEventBus.on("UPDATE_PLAYER", ({ id, player }) => {
-        const playerExists = useStore.getState().state.game.players[id];
-        if (!playerExists){
-          useDiceTrackStore.getState().upsertToken({ id: player.id, tileId: `track-tile-${player.position}`, color: hexStringToHexNumber(player.color) });
+        const playerExists = useStore.getState().state?.game?.players?.[id];
+        if (!playerExists && player) {
+          useDiceTrackStore.getState().upsertToken({
+            id: player.id,
+            tileId: `track-tile-${player.position}`,
+            color: hexStringToHexNumber(player.color),
+          });
         }
-        useStore.getState().setPlayer(id, player.toJSON());
+        if (player) {
+          useStore.getState().setPlayer(id, player.toJSON());
+        }
       }),
 
       GameEventBus.on("UPDATE_PLAYER_ROLLED_DICE", ({ id, hasRolledDice }) => {

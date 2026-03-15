@@ -48,15 +48,15 @@ export class ActionQueue {
       }
     }
 
-    for (const queued of this.queue) {
-      if (type == "kill") {
+    if (type === "complete") {
+      for (const queued of this.queue) {
         queued.execute().complete();
       }
     }
 
     this.queue = [];
     this.currentAction = null;
-    GameEventBus.emit('UPDATE_ACTION_STATE', {state:'idle'})
+    GameEventBus.emit("UPDATE_ACTION_STATE", { state: "idle" });
   }
 
   private async process() {

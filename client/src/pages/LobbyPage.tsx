@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useStore } from "@/stores/sessionStore";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,11 @@ const LobbyPage = () => {
   const quickMatch = useStore((z) => z.quickMatch);
 
   const navigate = useNavigate();
+  const leaveGame = useStore((z) => z.leaveGame);
+
+  useEffect(() => {
+    leaveGame();
+  }, [leaveGame]);
 
   const handleQuickMatch = async () => {
     console.log("[LobbyPage] handleQuickMatch called");

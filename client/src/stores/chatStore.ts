@@ -32,7 +32,10 @@ export const useChatStore = create(
             }
           },
           addMessage: (message: Message) => {
-            set((z) => {z.messages.push(message)});
+            set((z) => {
+              z.messages ??= [];
+              z.messages.push(message);
+            });
           },
           reset: () => {
             set(useChatStore.getInitialState());

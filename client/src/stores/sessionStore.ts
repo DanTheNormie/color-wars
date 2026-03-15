@@ -92,7 +92,7 @@ export const useStore = create(
             },
             setCurrentPlayer: (player: PlainStateOf<PlayerState>) => {
               set((z) => {
-                z.currentPlayer = player;
+                z.currentPlayer = player || ({} as PlainStateOf<PlayerState>);
               });
             },
             removePlayer: (playerId: string) => {
@@ -196,7 +196,12 @@ export const useStore = create(
             },
             addBackpackCard: (playerId: string, cardId: string) => {
               set((z) => {
-                z.state.game.players[playerId].backpack.cards.push(cardId);
+                const player = z.state?.game?.players?.[playerId];
+                if (player) {
+                  player.backpack ??= { cards: [], money: 0 };
+                  player.backpack.cards ??= [];
+                  player.backpack.cards.push(cardId);
+                }
               });
             },
             updateTerritoryOwnership: (territoryId: string, ownerId: string | null) => {
