@@ -115,8 +115,8 @@ const Thumb = ({ id, idx }: { id: string, idx:number }) => {
       onClick={handleOnClick}
       className={`flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-md bg-zinc-700 text-[10px] text-white select-none p-1 text-center transition-all ${selectedCardId == id ? "border-2 border-white scale-110 shadow-lg z-10" : "opacity-60 hover:opacity-100"}`}
     >
-      <div className="font-bold truncate w-full">{config.ui.title}</div>
-      <div className="text-[8px] opacity-50">{idx + 1}</div>
+      {/* <div className="font-bold truncate w-full">{config.ui.title}</div> */}
+      <div className="text-lg font-bold">{String.fromCharCode(65 + idx)}</div>
     </div>
   );
 };

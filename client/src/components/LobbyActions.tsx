@@ -57,8 +57,8 @@ const LobbyActions = () => {
       <Button variant="destructive" onClick={handleLeaveGame}>
         Leave Game
       </Button>
-      <Button ref={ele} variant='outline' onClick={click2}>coin effect</Button>
       {/* <Button onClick={handleOnClick1}>Load India Map </Button>
+      <Button ref={ele} variant='outline' onClick={click2}>coin effect</Button>
       <Button onClick={handleOnClick2}>Load test Map </Button>
       <Button variant="outline" onClick={ff}>
         Set Territory Color

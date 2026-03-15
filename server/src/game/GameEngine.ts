@@ -62,7 +62,7 @@ export class GameEngine {
   handleRoll(client: Client) {
     const die1 = Math.floor(Math.random() * 6) + 1;
     const die2 = Math.floor(Math.random() * 6) + 1;
-    const roll = 10;//die1 + die2;
+    const roll = die1 + die2;
 
     this.state.pushAction("ROLL_DICE", client.sessionId, { die1, die2 });
 
