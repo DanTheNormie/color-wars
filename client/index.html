@@ -1,13 +1,108 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/tile-icons/skull.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Wars</title>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- Unstable Build Badge -->
+  <div class="cr cr-top cr-right cr-sticky cr-red">Unstable Build</div>
+  <style>
+    .cr {
+      width: 200px;
+      padding: 4px;
+      position: absolute;
+      text-align: center;
+      color: #fff;
+      font-size: 12px;
+      z-index: 9999;
+    }
+
+    .cr-sticky {
+      position: fixed;
+    }
+
+    /* Positions */
+
+    .cr-top {
+      top: 20px;
+    }
+
+    .cr-bottom {
+      bottom: 25px;
+    }
+
+    .cr-left {
+      left: -50px;
+    }
+
+    .cr-right {
+      right: -65px;
+    }
+
+    /* Rotations */
+
+    .cr-top.cr-left,
+    .cr-bottom.cr-right {
+      transform: rotate(-45deg);
+    }
+
+    .cr-top.cr-right,
+    .cr-bottom.cr-left {
+      transform: rotate(45deg);
+    }
+
+    /* Colors */
+
+    .cr-white {
+      background-color: #f0f0f0;
+      color: #444;
+    }
+
+    .cr-black {
+      background-color: #333;
+    }
+
+    .cr-grey {
+      background-color: #999;
+    }
+
+    .cr-blue {
+      background-color: #39d;
+    }
+
+    .cr-green {
+      background-color: #2c7;
+    }
+
+    .cr-turquoise {
+      background-color: #1b9;
+    }
+
+    .cr-purple {
+      background-color: #95b;
+    }
+
+    .cr-red {
+      background-color: rgb(102, 18, 11);
+    }
+
+    .cr-orange {
+      background-color: #e82;
+    }
+
+    .cr-yellow {
+      background-color: #ec0;
+    }
+  </style>
+
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
