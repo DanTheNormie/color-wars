@@ -451,13 +451,14 @@ export class PIXIGameBoard {
 
     window.removeEventListener("resize", this.handleResize);
 
-    this.app?.destroy(true, true);
     this.hoverStateUnsub?.();
     this.selectedStateUnsub?.();
     this.territoryColorUnsub?.();
     this.interaction?.destroy();
     this.viewport?.off("zoomed", this.handleZoom);
-
+    
+    this.app?.destroy(true, true);
+    
     pixiTargetLocator.clear();
     pixiTargetLocator.unregister("game-board-engine");
 
