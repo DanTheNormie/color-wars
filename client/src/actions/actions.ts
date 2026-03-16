@@ -86,7 +86,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for IncrMoney animation");
     const tile = pixiTargetLocator.get<Sprite>(tileID)!;
 
-    const ele = document.getElementById(`player-money-${playerId}`);
+    const ele = document.getElementById(`player-backpack-money-${playerId}`);
     if (!ele) throw new Error("Target DOM element for money transfer not found");
 
 
@@ -105,7 +105,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim2, async () => {
-      useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
+      useStore.getState().updatePlayerBackpackMoney(playerId, useStore.getState().state.game.players[playerId].backpack.money + amount);
       console.log("IncrMoney animation complete");
     });
   }
@@ -131,7 +131,7 @@ export class DecrMoney extends BaseAction<"DECR_MONEY"> {
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim, async () => {
-      useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
+      useStore.getState().updatePlayerBackpackMoney(playerId, useStore.getState().state.game.players[playerId].backpack.money - amount);
       console.log("IncrMoney animation complete");
     });
   }

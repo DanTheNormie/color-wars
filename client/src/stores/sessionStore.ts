@@ -194,6 +194,11 @@ export const useStore = create(
                 z.state.game.players[playerId].money = amount
               })
             },
+            updatePlayerBackpackMoney: (playerId: string, amount: number) => {
+              set((z) => {
+                z.state.game.players[playerId].backpack.money = amount
+              })
+            },
             addBackpackCard: (playerId: string, cardId: string) => {
               set((z) => {
                 const player = z.state?.game?.players?.[playerId];

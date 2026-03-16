@@ -102,7 +102,7 @@ export function LogTicker({ entry, isOpen }: { entry: GameLogEntry | null; isOpe
   if (!activeEntry && !prevEntry) {
     return (
       <div className="flex h-[24px] items-center justify-center w-full gap-3 opacity-80">
-        <span className="text-sm font-medium">No actions yet...</span>
+        <span className="text-sm font-medium"></span>
       </div>
     );
   }

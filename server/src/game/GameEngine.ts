@@ -50,7 +50,7 @@ export class GameEngine {
   startGame() {
     for (const playerID of this.state.game.playerOrder) {
       const player = this.state.game.players.get(playerID)!;
-      player.money = 150000;
+      player.money = 2000;
       player.position = 0;
       player.hasRolled = false;
     }
@@ -85,24 +85,24 @@ export class GameEngine {
     switch(tileConfig.type){
       case 'INCOME': {
         const amount = tileConfig.amount!
-        player.money += amount
+        player.backpack.money += amount
         this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
         break;
       }
       case 'TAX': {
         const amount = tileConfig.amount!
-        player.money -= amount
+        player.backpack.money -= amount
         this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
         break;
       }
       case 'REWARD':{
-        const amount = this.getRandomNumberWithStep(10000, 100000, 10000)
+        const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
         player.money += amount
         this.state.pushAction('INCR_MONEY', player.id, {playerId: player.id, amount: amount})
         break;
       }
       case 'PENALTY':{
-        const amount = this.getRandomNumberWithStep(10000, 100000, 10000)
+        const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
         player.money -= amount
         this.state.pushAction('DECR_MONEY', player.id, {playerId: player.id, amount: amount})
         break;

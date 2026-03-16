@@ -456,15 +456,18 @@ export class PIXIGameBoard {
     this.territoryColorUnsub?.();
     this.interaction?.destroy();
     this.viewport?.off("zoomed", this.handleZoom);
-    
-    this.app?.destroy(true, true);
-    
-    pixiTargetLocator.clear();
-    pixiTargetLocator.unregister("game-board-engine");
 
-    this.app = null;
+    pixiTargetLocator.clear();
+    //this.app = null;
     this.viewport = null;
     this.worldLayer = null;
     this.terrain = null;
+    
+    try{
+      this.app?.destroy(true, true);
+    }catch(error) {
+      console.log(error)
+    }
+    
   }
 }
