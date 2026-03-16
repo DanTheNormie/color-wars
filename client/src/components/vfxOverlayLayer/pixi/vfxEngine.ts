@@ -37,6 +37,13 @@ export class PIXIVFXLayer {
 
   private async loadAssets() {
     if (this.spritesheet) return;
+    
+    const cached = PIXI.Assets.get("/spritesheet_data.json");
+
+    if (cached) {
+      this.spritesheet = cached;
+      return;
+    }
 
     this.spritesheet = await PIXI.Assets.load("/spritesheet_data.json");
   }

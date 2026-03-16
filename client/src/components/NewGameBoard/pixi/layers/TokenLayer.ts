@@ -219,15 +219,15 @@ export class TokenLayer extends PIXI.Container {
     return this.units.get(id);
   }
 
-  public clear() {
+  destroy(options?: PIXI.DestroyOptions) {
     this.units.forEach((unit) => {
       pixiTargetLocator.unregister(unit.id);
       unit.destroy({ children: true });
-    });
+    }); 
     this.unsub();
     this.unsubActive();
     this.units.clear();
-    this.removeChildren();
+    super.destroy(options)
   }
 }
 

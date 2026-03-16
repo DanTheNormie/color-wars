@@ -7,6 +7,8 @@ import { useDiceTrackStore } from "@/stores/diceTrackStore";
 import { hexStringToHexNumber } from "@/utils/color-utils";
 import { useMapStore } from "@/stores/mapStateStore";
 import { useChatStore } from "@/stores/chatStore";
+import { useGameLogStore } from "@/stores/gameLogStore";
+import { pixiTargetLocator } from "@/animation/target-locator";
 
 class ZustandSyncManager {
   private unsubs: (() => void)[] = [];
@@ -82,6 +84,9 @@ class ZustandSyncManager {
         useMapStore.getState().reset()
         useDiceTrackStore.getState().clear()
         useAnimStore.getState().reset()
+        useChatStore.getState().reset()
+        useGameLogStore.getState().reset()
+        pixiTargetLocator.clear()
       }),
 
       GameEventBus.on('RELAY_MESSAGE', (message)=>{

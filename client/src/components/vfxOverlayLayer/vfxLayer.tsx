@@ -11,13 +11,12 @@ export function VFXLayer() {
     const element = containerRef.current;
     if (!element) return;
 
-    const engine = new PIXIVFXLayer();
-    engineRef.current = engine;
+    engineRef.current = new PIXIVFXLayer();
 
-    engine.init(element);
+    engineRef.current.init(element);
 
     return () => {
-      engine.destroy();
+      engineRef.current?.destroy();
       engineRef.current = null;
     };
   }, [currentMap]);
