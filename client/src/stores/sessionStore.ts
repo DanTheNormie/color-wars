@@ -9,7 +9,8 @@ import type {
   RoomState,
   GameState,
   RoomPhase,
-  TurnPhase
+  TurnPhase,
+  TileState
 } from "@color-wars/shared/src/types/RoomState";
 import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
@@ -54,6 +55,11 @@ export const useStore = create(
             showDiceRollMessage: false
           } as StoreState,
           (set, get) => ({
+            setDiceTrack: (diceTrack: TileState[]) => {
+              set((z) => {
+                z.state.game.diceTrack = diceTrack
+              })
+            },
             setShowDiceRollMessage: (show: boolean) => {
               set((z) => {
                 z.showDiceRollMessage = show

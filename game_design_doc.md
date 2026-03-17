@@ -78,6 +78,13 @@ Previously, a `$55,000` average Reward drop equaled 36 rounds of Factory profit,
 *   **Global Emotes:** Players have a 1-second cooldown button to spawn drifting floating emojis (e.g., ☠️) over a targeted hex, immediately celebrating/mocking another player's bankruptcy or Penalty hit.
 *   **Mugging Overlays:** Big textual "SLAM" animations across the screen when a backpack is stolen.
 
+### 4.4 Dynamic Track Decay (The Enrage Timer)
+*   **The Mechanic:** To prevent indefinite stalemates and increase late-game tension, the Dice Track shifts by one tile after every full round of turns. A new tile replaces the shifted one.
+*   **Progressive Toxicity:** The track begins benign (Income, Reward, Safe). Over time, the injected tiles become heavily weighted toward Taxes and Penalties, acting as a deflationary pressure-cooker.
+*   **The Forecast Queue:** To maintain player agency and avoid frustrating RNG deaths, the UI displays a "Forecast Queue" showing the next 3-5 tiles preparing to enter the track. This allows players to brace for impact by managing their Backpack/Safe Account ratios or acquiring mitigation cards.
+*   **Mitigation Tools:** Players can burn Shield cards to negate track penalties, use Movement cards to carefully navigate the toxic late-game track, or use the "City Council" Shop action to spend money to alter the track.
+*   **The Salvation Mechanic:** Building the Capital Monument serves as the ultimate salvation from this decay. Once built, the Capital projects a "Safe Zone" aura, significantly elevating its strategic necessity against the rotting board.
+
 ---
 
 ## 5. End Game States

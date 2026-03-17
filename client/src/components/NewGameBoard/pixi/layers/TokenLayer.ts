@@ -138,6 +138,10 @@ export class TokenLayer extends PIXI.Container {
     });
   }
 
+  public getUnits() {
+    return this.units;
+  }
+
   private _rearrangeTile(tileId: string, animate: boolean) {
     const state = useDiceTrackStore.getState();
     const allTokenIds = getTokensOnTile(state, tileId);

@@ -4,6 +4,7 @@ import { pixiTargetLocator } from "@/animation/target-locator";
 import { BACKGROUND_COLOR } from "../engine";
 import { TokenLayer } from "./TokenLayer";
 import { type TileConfig, type TileType, DICE_TRACK } from "@color-wars/shared/src/config/diceTrack";
+import { useStore } from "@/stores/sessionStore";
 
 type TileTextureConfig = {
   baseHex?: {
@@ -134,6 +135,8 @@ export class DiceTrackLayer extends PIXI.Container {
   constructor() {
     super();
 
+    pixiTargetLocator.register("diceTrackLayer", this);
+
     // 1. Background (The opaque wall with the hole)
     this.background = new PIXI.Graphics();
     this.background.eventMode = "static"; // Block clicks
@@ -151,17 +154,36 @@ export class DiceTrackLayer extends PIXI.Container {
     this.hexTextures = this.generateRoundedHexTextures(app);
 
     // Create Sprites
-    TRACK_COORDINATES.forEach((_, i) => {
-      const sprite = new PIXI.Sprite(this.hexTextures[this.getTileTextureCacheKey(DICE_TRACK[i])]);
-      sprite.anchor.set(0.5);
-      const targetID = `track-tile-${i}`;
-      if (!sprite.destroyed) pixiTargetLocator.register(targetID, sprite); // register for animation
-      sprite.label = targetID; // Debug label
-      this.sprites.push(sprite);
-      this.trackContainer.addChild(sprite);
-    });
+    const diceTrack = useStore.getState().state.game.diceTrack;
+    if (diceTrack && diceTrack.length > 0) {
+      diceTrack.forEach((t, i) => {
+        let cacheKey = this.getTileTextureCacheKey(t as TileConfig);
+        if (!this.hexTextures[cacheKey]) {
+          this.hexTextures[cacheKey] = this.getHexTexture(t as TileConfig, app);
+        }
+        const sprite = new PIXI.Sprite(this.hexTextures[cacheKey]);
+        sprite.anchor.set(0.5);
+        const targetID = `track-tile-${i}`;
+        pixiTargetLocator.register(targetID, sprite);
+        sprite.label = targetID;
+        this.sprites.push(sprite);
+        this.trackContainer.addChild(sprite);
+      });
+    } else {
+      TRACK_COORDINATES.forEach((_, i) => {
+        const sprite = new PIXI.Sprite(this.hexTextures[this.getTileTextureCacheKey(DICE_TRACK[i])]);
+        sprite.anchor.set(0.5);
+        const targetID = `track-tile-${i}`;
+        if (!sprite.destroyed) pixiTargetLocator.register(targetID, sprite); // register for animation
+        sprite.label = targetID; // Debug label
+        this.sprites.push(sprite);
+        this.trackContainer.addChild(sprite);
+      });
+    }
 
     this.tokenLayer = new TokenLayer();
+    this.tokenLayer.zIndex = 100;
+    this.trackContainer.sortableChildren = true;
     pixiTargetLocator.register("tokenLayer", this.tokenLayer);
     this.trackContainer.addChild(this.tokenLayer);
   }
@@ -170,8 +192,39 @@ export class DiceTrackLayer extends PIXI.Container {
     return this.trackContainer;
   }
 
+  public getTrackSprites(): PIXI.Sprite[] {
+    return this.sprites;
+  }
+
   public getTokenLayer() {
     return this.tokenLayer;
+  }
+
+  public prepareNewTileSprite(newTile: TileConfig, app: PIXI.Application): PIXI.Sprite {
+    let cacheKey = this.getTileTextureCacheKey(newTile);
+    if (!this.hexTextures[cacheKey]) {
+      this.hexTextures[cacheKey] = this.getHexTexture(newTile, app);
+    }
+    
+    const newSprite = new PIXI.Sprite(this.hexTextures[cacheKey]);
+    newSprite.anchor.set(0.5);
+    newSprite.scale.copyFrom(this.sprites[0].scale);
+    newSprite.position.set(this.sprites[0].x, this.sprites[0].y);
+    newSprite.alpha = 0;
+    newSprite.zIndex = 0;
+    this.trackContainer.addChildAt(newSprite, 0);
+    return newSprite;
+  }
+
+  public commitTrackShift(vanishingSprite: PIXI.Sprite, newSprite: PIXI.Sprite) {
+    vanishingSprite.destroy();
+    this.sprites.splice(1, 1);
+    this.sprites.push(newSprite);
+    this.sprites.forEach((s, idx) => {
+      const targetID = `track-tile-${idx}`;
+      s.label = targetID;
+      pixiTargetLocator.register(targetID, s);
+    });
   }
 
   /**

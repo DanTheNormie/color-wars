@@ -1,6 +1,10 @@
 import * as PIXI from "pixi.js";
 import gsap from "@/lib/gsap";
 import { PlayerSprite } from "@/components/NewGameBoard/pixi/units/playerSprite";
+import type { TileConfig } from "@color-wars/shared/src/config/diceTrack";
+import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackLayer";
+import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
+import { pixiTargetLocator } from "../target-locator";
 
 /**
  * Animation Recipe: token hop
@@ -422,4 +426,63 @@ export function animateCounter(el: HTMLSpanElement, animatedValue: { val: number
       el.textContent = Math.floor(animatedValue.val).toString();
     },
   });
+}
+
+export function buildTrackShiftAnimation(trackLayer: DiceTrackLayer, tokenLayer: TokenLayer, newTile: TileConfig, app: PIXI.Application) {
+  const tl = gsap.timeline({ paused: true });
+  
+  const sprites = trackLayer.getTrackSprites();
+  const targetCoords: {x: number, y: number}[] = [];
+  sprites.forEach(s => targetCoords.push({x: s.position.x, y: s.position.y}));
+
+  const vanishingSprite = sprites[1];
+  const newSprite = trackLayer.prepareNewTileSprite(newTile, app);
+
+  tl.eventCallback("onComplete", () => {
+     trackLayer.commitTrackShift(vanishingSprite, newSprite);
+  });
+
+  tl.to(vanishingSprite, {
+    pixi: { x: targetCoords[0].x, y: targetCoords[0].y, alpha: 0 },
+    duration: 2, ease: "power2.inOut"
+  }, 0);
+
+  sprites[0].zIndex = 10;
+  vanishingSprite.zIndex = 1;
+  trackLayer.getTrackLayer().sortableChildren = true;
+
+  for (let i = 2; i < sprites.length; i++) {
+    tl.to(sprites[i], {
+      pixi: { x: targetCoords[i - 1].x, y: targetCoords[i - 1].y },
+      duration: 2, ease: "power2.inOut"
+    }, 0);
+  }
+
+  tl.to(newSprite, {
+    pixi: { x: targetCoords[targetCoords.length - 1].x, y: targetCoords[targetCoords.length - 1].y, alpha: 1 },
+    duration: 2, ease: "power2.inOut"
+  }, 0);
+
+  tokenLayer.getUnits().forEach((unit) => {
+    const tileId = unit.currentTileId;
+    if (tileId && tileId.startsWith("track-tile-")) {
+      const idx = parseInt(tileId.split("-")[2]);
+      if (idx >= 1) {
+        const targetTileId = `track-tile-${idx - 1}`;
+        const currentTileSprite = pixiTargetLocator.get<PIXI.Sprite>(tileId);
+        const targetTileSprite = pixiTargetLocator.get<PIXI.Sprite>(targetTileId);
+        if (currentTileSprite && targetTileSprite) {
+           const dx = targetTileSprite.x - currentTileSprite.x;
+           const dy = targetTileSprite.y - currentTileSprite.y;
+           tl.to(unit, {
+             pixi: { x: unit.x + dx, y: unit.y + dy },
+             duration: 2, ease: "power2.inOut"
+           }, '<');
+           unit.currentTileId = targetTileId;
+        }
+      }
+    }
+  });
+
+  return tl;
 }

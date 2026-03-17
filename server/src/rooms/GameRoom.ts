@@ -116,7 +116,10 @@ export class GameRoom extends Room<RoomState> {
           ? playerOrder[idx % playerOrder.length]
           : "null";
   
-      if (isActive) game.activePlayerId = next;
+      if (isActive) {
+        game.activePlayerId = next;
+        this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: next });
+      }
       if (isLeader){ 
         console.log('isLeader: true', room.leaderId, next)
         room.leaderId = next;

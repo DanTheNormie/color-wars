@@ -3,10 +3,11 @@
 ## Sprint Goal
 **Deliver the Minimum Viable Product (MVP) core loop**: Execute on the "Tension & Bleed" pillar by finalizing the dynamic economy, basic territory upgrades, and the bankruptcy elimination condition. This ensures the game is fully playable with a definitive win/loss state without needing complex asymmetric features like trading or missiles right away.
 
-## Prioritization Framework Used
+## Prioritization Framework Used (sprint-prioritizer)
 **Value vs Effort Matrix + RICE**
 - High Value / Low Effort: Fixing Card Effects, Empire Tax.
-- High Value / High Effort: Development Upgrades, Bankruptcy System.
+- High Value / High Effort: Development Upgrades, Bankruptcy System, Dynamic Track Decay Engine.
+- Med Value / Med Effort: Track Decay Mitigation Tools (Shield Expansion, City Council).
 - Low Value for MVP / High Effort: Trading System, Missile Silos (Pushed to later sprints).
 
 ---
@@ -37,18 +38,28 @@
 
 ---
 
-## 🏃 Sprint 2: The Spectacle & The Capital
-*Focus: Providing the primary win condition and the Permit shop.*
+## 🏃 Sprint 2: The Spectacle & The Enrage Timer
+*Focus: Providing the primary win condition, the Permit shop, and the Dynamic Track Decay to force endgame resolution.*
 
 ### 2-A. The Permit Shop UI & Logic
 - **Why**: Players need a reliable (but expensive) way to get Permits without relying on `SURPRISE` tile RNG.
 - **Owner**: Frontend
 - **Story Points**: 3
 
-### 2-B. The Capital Monument & Panic Mode
-- **Why**: The primary win condition. Requires stitching together permits, cards, money, and a full-round survival check.
+### 2-B. The Capital Monument & Panic Mode (Salvation)
+- **Why**: The primary win condition. Requires stitching together permits, cards, money, and a full-round survival check. Now includes **Salvation Aura** that suspends Track Decay.
 - **Owner**: Fullstack
 - **Story Points**: 5
+
+### 2-D. Dynamic Track Decay Engine & Forecast Queue (High Value, High Effort)
+- **Why**: The global "enrage timer" that prevents stalemates. Slowly poisons the dice track while giving players a 3-5 tile forecast queue to strategize.
+- **Owner**: Fullstack
+- **Story Points**: 8
+
+### 2-E. Mitigation Tools: Shield & City Council (Med Value, Med Effort)
+- **Why**: Gives targeted agency to players suffering from Track Decay RNG.
+- **Owner**: Fullstack
+- **Story Points**: 3
 
 ### 2-C. VFX Triggers (Capital Built, Bankruptcy)
 - **Why**: The game needs to fulfill its "Viral Spectacle" pillar. Red sirens for Panic Mode, massive text slams for bankruptcies.
@@ -79,5 +90,5 @@
 
 ## Capacity & Risk Assessment
 - **Primary Risk**: Client desync during complex transactions (Upgrades + Bankruptcy simultaneous execution).
-- **Mitigation**: Rely strictly on `validateOrThrow()` composable rules before mutating `RoomState`.
-- **MVP Validation**: At the end of Sprint 1, we should be able to play a full game where players eventually bleed out to the Empire Tax if they don't draw good cards.
+- **Mitigation**: Rely strictly on `validateOrThrow()` composable rules before mutating `RoomState`. Implement a `GameState.IS_SHIFTING` boolean lock.
+- **MVP Validation**: At the end of Sprint 2, the game will have a fully functioning enrage timer and win condition.

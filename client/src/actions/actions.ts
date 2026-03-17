@@ -11,6 +11,9 @@ import { PIXIGameBoard } from "@/components/NewGameBoard/pixi/engine";
 import { useCardStore } from "@/stores/cardSelectionStore";
 import { useMapStore } from "@/stores/mapStateStore";
 import type { PIXIVFXLayer } from "@/components/vfxOverlayLayer/pixi/vfxEngine";
+import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackLayer";
+import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
+import { buildTrackShiftAnimation } from "../animation/registry/anim";
 
 export class HexHop extends BaseAction<"MOVE_PLAYER"> {
   execute(): ActionHandle {
@@ -64,13 +67,29 @@ export class RollDice extends BaseAction<"ROLL_DICE"> {
     useStore.getState().rollDiceTo(die1, die2);
     return new ActionHandle(
       new Promise<void>((resolve) => {
-        setTimeout(() => { 
+        setTimeout(() => {
           this.logAction(useStore.getState().state.game.activePlayerId);
-          resolve() 
+          resolve()
         }, 2500)
       }),
-      () => {},
-      () => {},
+      () => { },
+      () => { },
+    );
+  }
+}
+
+export class UpdateActivePlayer extends BaseAction<"UPDATE_ACTIVE_PLAYER"> {
+  execute(): ActionHandle {
+    const { playerId } = this.payload;
+    return new ActionHandle(
+      new Promise<void>((resolve) => {
+        useStore.getState().setActionState('idle')
+        useDiceTrackStore.getState().setActiveToken(playerId)
+        useStore.getState().setActivePlayer(playerId)
+        resolve();
+      }),
+      () => { },
+      () => { },
     );
   }
 }
@@ -81,7 +100,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
 
     const unit = pixiTargetLocator.get<PlayerSprite>(playerId);
     if (!unit) throw new Error("PlayerSprite unit not found for IncrMoney animation");
-    
+
     const tileID = unit.currentTileId;
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for IncrMoney animation");
     const tile = pixiTargetLocator.get<Sprite>(tileID)!;
@@ -101,7 +120,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
     // const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
     //const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
     const anim2 = vfxLayer.animateSpritesheetConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
-    
+
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim2, async () => {
@@ -127,7 +146,7 @@ export class DecrMoney extends BaseAction<"DECR_MONEY"> {
     if (!app) throw new Error("Pixi Application not found in engine");
 
     const anim = animateCoinConfetti(tile!, app, 50);
-    
+
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim, async () => {
@@ -194,8 +213,8 @@ export class DrawCardsAction extends BaseAction<"DRAW_3_REWARD_CARDS"> {
     // Return the ActionHandle with empty cancel/fast-forward callbacks for now
     return new ActionHandle(
       drawAnimationTask,
-      () => {},
-      () => {},
+      () => { },
+      () => { },
     );
   }
 }
@@ -225,8 +244,8 @@ export class ResolveSelectionAction extends BaseAction<"SELECT_CARD"> {
 
     return new ActionHandle(
       resolveAnimationTask,
-      () => {},
-      () => {},
+      () => { },
+      () => { },
     );
   }
 }
@@ -244,8 +263,8 @@ export class BuyTerritoryAction extends BaseAction<"BUY_TERRITORY"> {
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),
-      () => {},
-      () => {},
+      () => { },
+      () => { },
     );
   }
 }
@@ -261,8 +280,44 @@ export class SellTerritoryAction extends BaseAction<"SELL_TERRITORY"> {
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),
+      () => { },
+      () => { },
+    );
+  }
+}
+
+export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
+  execute(): ActionHandle {
+    const { newTile } = this.payload;
+    const trackLayer = pixiTargetLocator.get<DiceTrackLayer>("diceTrackLayer");
+    const tokenLayer = pixiTargetLocator.get<TokenLayer>("tokenLayer");
+    const engine = pixiTargetLocator.get("game-board-engine") as any;
+    
+    if (!trackLayer || !tokenLayer || !engine) throw new Error("Missing dependencies for SHIFT_TRACK");
+    const app = engine.getApp();
+
+    this.logAction("");
+    //TODO: find out side effects of upsertToken
+    return new ActionHandle(
+      (async () => {
+         const tl = buildTrackShiftAnimation(trackLayer, tokenLayer, newTile, app);
+         await tl.play();
+         Object.values(useDiceTrackStore.getState().tokens).forEach((token) => {
+          const tileId = token.tileId;
+          if (tileId && tileId.startsWith("track-tile-")) {
+            const idx = parseInt(tileId.split("-")[2]);
+            if (idx >= 1) {
+              const targetTileId = `track-tile-${idx - 1}`;
+              useDiceTrackStore.getState().upsertToken({
+                id: token.id,
+                tileId: targetTileId,
+              });
+            }
+          }
+         });
+      })(),
       () => {},
-      () => {},
+      () => {}
     );
   }
 }

@@ -21,13 +21,23 @@ There are two places your money can be: your **Backpack** and your **Safe Accoun
 
 ## 3. The Dice Track
 The edge of the board contains 34 tiles.
-*   **START**: Crossing this banks your Backpack cash and cards into your Safe Account.
+*   **START**: Crossing this banks your Backpack cash and cards into your Safe Account. (This tile is permanent and never shifts or decays).
 *   **INCOME**: Instantly adds a fixed amount of cash to your Backpack.
 *   **TAX**: Instantly deducts a fixed amount of cash.
 *   **REWARD**: Grants a windfall of randomized cash.
 *   **PENALTY**: Deducts a devastating amount of randomized cash.
 *   **SURPRISE**: Reveals 3 cards from the deck. You must choose 1 to keep in your Backpack.
 *   **SAFE / NEUTRAL**: No effect. Take a breath.
+
+### 3.1 Dynamic Track Decay & Forecasting
+*   **The Shift:** After every full set of player turns (one round), the entire track shifts by one tile, and a new tile enters the board.
+*   **Progressive Toxicity:** The tiles introduced early in the game are safe and profitable (`INCOME`, `REWARD`, `SAFE`). As the rounds progress, the deck of incoming tiles becomes increasingly toxic, heavily weighted towards `TAX` and `PENALTY` tiles. 
+*   **The Forecast Queue:** Players can see the next 3 to 5 tiles queued to enter the track, allowing for strategic planning and panicked asset liquidation.
+*   **Track Manipulation (City Council):** During the Action Phase, a player may pay an exorbitant fee at the Shop to either permanently freeze a specific tile from shifting or overwrite a shifting tile with a `SAFE` tile.
+
+### 3.2 Mitigation Hooks
+*   **Shielding:** A Shield Card can be burned to completely negate the effects of a `TAX` or `PENALTY` tile.
+*   **Movement Control:** Players can acquire consumable cards that grant micro-agency over their movement (e.g., "Move +1/-1 space", "Roll 1d6 instead of 2d6") to sidestep hazards or intentionally land on other players.
 
 ## 4. Territory, Development & The Shop
 The map is constructed of varying-sized Territories. Any unoccupied territory you land on or pass adjacent to can be purchased.

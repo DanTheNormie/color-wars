@@ -3,7 +3,7 @@
  * --------------------------------------------- */
 import type { RoomState, PlayerState, DiceStateMode, RoomPhase, TurnPhase } from "@color-wars/shared/src/types/RoomState";
 import type { NetworkState } from "./network";
-import type { Message } from "@color-wars/shared/src/types/RoomState";
+import type { Message, TileState } from "@color-wars/shared/src/types/RoomState";
 import type { MapID } from "@color-wars/shared/src/maps";
 
 export interface LOCAL_EVENT {
@@ -32,6 +32,7 @@ export interface LOCAL_EVENT {
   UPDATE_ACTION_STATE: {state: 'resolving_action' | 'idle' | 'awaiting_action_result'}
   SET_TERRITORY_INFO_DRAWER: {open: boolean}
   CHANGE_MAP_ID: {mapID: MapID}
+  UPDATE_DICE_TRACK: {diceTrack: TileState[]}
 }
 
 export type LocalEventType = Extract<keyof LOCAL_EVENT, string>;

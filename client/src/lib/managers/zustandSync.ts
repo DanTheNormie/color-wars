@@ -120,6 +120,10 @@ class ZustandSyncManager {
 
       GameEventBus.on('CHANGE_MAP_ID', ({mapID}) => {
         useMapStore.getState().setMapID(mapID)
+      }),
+
+      GameEventBus.on('UPDATE_DICE_TRACK', ({diceTrack}) => {
+        useStore.getState().setDiceTrack(diceTrack)
       })
     )
   }

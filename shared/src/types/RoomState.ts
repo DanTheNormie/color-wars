@@ -2,17 +2,31 @@ import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
 import type { ActionType, TURN_ACTION_REGISTRY } from "./turnActionRegistry";
 import { type MapID } from "../maps";
 import type { DevelopmentType } from "./economyTypes";
+import type { TileType } from "../config/diceTrack";
 
 export type RoomPhase = "lobby" | "active" | "finished";
 export type RoomVisibility = "private" | "public";
 export type TradeStatus = "pending" | "accepted" | "rejected";
-export type TurnPhase = "awaiting-roll" | "resolving-draft" | "resolving-bankruptcy" | "awaiting-end-turn" | "game-over";
+export type TurnPhase = "awaiting-roll" | "resolving-draft" | "resolving-bankruptcy" | "awaiting-end-turn" | "game-over" | "resolving-shift";
+
+export class TileState extends Schema {
+  @type("string") type: TileType;
+  @type("number") amount?: number;
+  @type("string") label?: string;
+
+  constructor(type: TileType, amount?: number, label?: string) {
+    super();
+    this.type = type;
+    if (amount !== undefined) this.amount = amount;
+    if (label !== undefined) this.label = label;
+  }
+}
 
 export class TerritoryState extends Schema {
   @type("string") ownerId: string;
   @type("string") buildingType: DevelopmentType = "BASE";
 
-  constructor(playerID: string){
+  constructor(playerID: string) {
     super();
     this.ownerId = playerID
   }
@@ -163,6 +177,7 @@ export class GameState extends Schema {
   @type("number") currentRound: number = 0;
   @type(["string"]) trackOrder = new ArraySchema<string>();
   @type(["string"]) generatedCardIDs = new ArraySchema<string>();
+  @type([TileState]) diceTrack = new ArraySchema<TileState>();
 }
 
 export class RoomState extends Schema {
@@ -187,7 +202,7 @@ export class RoomState extends Schema {
     const action = new GameAction(type as string, playerId, JSON.stringify(payload), Date.now(), this._nextActionId++);
     this.turnActionHistory.push(action);
   }
-  
+
   clearTurnHistory() {
     this.turnActionHistory.clear();
     this._nextActionId = 0;

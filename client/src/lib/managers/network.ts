@@ -113,8 +113,10 @@ class Network {
           GameEventBus.emit("UPDATE_ROOM_LEADER", { id: newValue });
         }),
         $(this.room.state.game).listen("activePlayerId", (newValue) => {
-          GameEventBus.emit("UPDATE_ACTIVE_PLAYER", { playerId: newValue });
-          GameEventBus.emit('UPDATE_ACTION_STATE', {state: 'idle'})
+         
+        }),
+        $(this.room.state.game).listen("diceTrack", (newValue) => {
+          GameEventBus.emit("UPDATE_DICE_TRACK", { diceTrack: newValue });
         }),
         $(this.room.state.game).listen('turnPhase', (newValue) => {
           GameEventBus.emit('UPDATE_TURN_PHASE', {turnPhase: newValue})

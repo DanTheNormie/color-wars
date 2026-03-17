@@ -7,7 +7,6 @@ import {Avatar, AvatarImage} from "@/components/ui/avatar";
 import { AvatarColorMap } from "../Player";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import type { GameLogEntry } from "@/stores/gameLogStore";
-import { DICE_TRACK } from "@color-wars/shared/src/config/diceTrack";
 
 // --- Subcomponents ---
 
@@ -44,23 +43,32 @@ const LogMessageItem = ({ entry }: { entry: GameLogEntry }) => {
   switch (entry.type) {
     case "ROLL_DICE":
       return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> rolled {payload.die1 + payload.die2} 🎲 ({payload.die1} + {payload.die2})</div>;
-    case "INCR_MONEY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received <span className="text-green-600">${payload.amount?.toLocaleString()}</span></div>;
-    case "DECR_MONEY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> paid <span className="text-red-600">${payload.amount?.toLocaleString()}</span></div>;
-    case "BUY_TERRITORY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> bought <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()}</div>;
-    case "SELL_TERRITORY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> sold <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()}</div>;
-    case "DRAW_3_REWARD_CARDS":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> drew 3 reward cards.</div>;
-    case "ADD_CARD":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received a card.</div>;
-    case "MOVE_PLAYER":
-      const tile = DICE_TRACK[payload.toTile % DICE_TRACK.length];
+      case "INCR_MONEY":
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received <span className="text-green-600">${payload.amount?.toLocaleString()}</span></div>;
+      case "DECR_MONEY":
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> paid <span className="text-red-600">${payload.amount?.toLocaleString()}</span></div>;
+      case "BUY_TERRITORY":
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> bought <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()}</div>;
+      case "SELL_TERRITORY":
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> sold <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()}</div>;
+      case "DRAW_3_REWARD_CARDS":
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> drew 3 reward cards.</div>;
+      case "ADD_CARD":
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received a card.</div>;
+      case "MOVE_PLAYER":{
+        const diceTrack = useStore((z) => z.state.game.diceTrack);
+        if (!diceTrack || diceTrack.length === 0) return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on a tile.</div>;
+        const tile = diceTrack[payload.toTile % diceTrack.length];
+        const tileName = tile.type.toLowerCase()
+        return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on {tileName == "start" ? `the` : `a`} {tileName} tile.</div>
+    }
+    case "SHIFT_TRACK":{
+      const diceTrack = useStore((z) => z.state.game.diceTrack);
+      const tile = diceTrack[diceTrack.length-1]
       const tileName = tile.type.toLowerCase()
-      return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on {tileName == "start" ? `the` : `a`} {tileName} tile.</div>
-      default:
+      return <div className={logMessageStyle}> The track shifted 🔄. A new {tileName} tile has been added.</div>
+    }
+    default:
       return <div className={logMessageStyle}>{`<!-- log for action type: "${entry.type}" not implemented -->`}</div>;
   }
 };
