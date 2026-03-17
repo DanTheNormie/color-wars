@@ -11,7 +11,8 @@ export const TURN_ACTION_REGISTRY = {
   BUY_TERRITORY: {} as { playerId: string, territoryID: string, amount: number },
   SELL_TERRITORY: {} as { playerId: string, territoryID: string, amount: number },
   SHIFT_TRACK: {} as { newTile: TileConfig },
-  UPDATE_ACTIVE_PLAYER: {} as { playerId: string }
+  UPDATE_ACTIVE_PLAYER: {} as { playerId: string },
+  BANK_BACKPACK_ITEMS: {} as { playerId: string, money: number, cards: string[] }
 
 } as const;
 

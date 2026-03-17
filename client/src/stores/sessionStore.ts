@@ -215,6 +215,23 @@ export const useStore = create(
                 }
               });
             },
+            clearPlayerBackpackCards: (playerId: string) => {
+              set((z) => {
+                const player = z.state?.game?.players?.[playerId];
+                if (player && player.backpack) {
+                  player.backpack.cards = [];
+                }
+              });
+            },
+            addPlayerCards: (playerId: string, cards: string[]) => {
+              set((z) => {
+                const player = z.state?.game?.players?.[playerId];
+                if (player) {
+                  player.cards ??= [];
+                  player.cards.push(...cards);
+                }
+              });
+            },
             updateTerritoryOwnership: (territoryId: string, ownerId: string | null) => {
               set((z) => {
                 z.state.game.territoryOwnership ??= {};

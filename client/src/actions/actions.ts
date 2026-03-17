@@ -14,6 +14,7 @@ import type { PIXIVFXLayer } from "@/components/vfxOverlayLayer/pixi/vfxEngine";
 import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackLayer";
 import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
 import { buildTrackShiftAnimation } from "../animation/registry/anim";
+import gsap from "@/lib/gsap";
 
 export class HexHop extends BaseAction<"MOVE_PLAYER"> {
   execute(): ActionHandle {
@@ -319,5 +320,63 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
       () => {},
       () => {}
     );
+  }
+}
+
+export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
+  execute(): ActionHandle {
+    const { playerId, money, cards } = this.payload;
+
+    if (money === 0 && cards.length === 0) {
+      return new ActionHandle(Promise.resolve(), () => {}, () => {});
+    }
+
+    // 1. Update backpack state to empty (optimistic frontend update)
+    
+
+    const backpackMoneyEle = document.getElementById(`player-backpack-money-${playerId}`);
+    const safeMoneyEle = document.getElementById(`player-money-${playerId}`);
+    const backpackCardsEle = document.getElementById(`player-backpack-cards-${playerId}`);
+    const safeCardsEle = document.getElementById(`player-cards-${playerId}`);
+
+    const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+    const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
+    
+    if (!vfxLayer || !gameBoard) {
+       throw new Error ('Missing pixi engine')
+    }
+    
+    const vfxApp = vfxLayer.getApp()!;
+    const boardApp = gameBoard.getApp()!;
+    const master = gsap.timeline({ paused: true });
+    debugger
+    const promise = new Promise<void>((resolve) => {
+
+      if (money > 0 && backpackMoneyEle && safeMoneyEle) {
+        useStore.getState().updatePlayerBackpackMoney(playerId, 0);
+        const tl = vfxLayer.animateCoinConfettiOverlay(backpackMoneyEle, safeMoneyEle, boardApp, vfxApp, 1);
+        tl.eventCallback("onComplete", () => {
+          useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + money);
+        });
+        master.add(tl);
+      }
+      
+      if (cards.length > 0 && backpackCardsEle && safeCardsEle) {
+        useStore.getState().clearPlayerBackpackCards(playerId);
+        const tl = vfxLayer.animateCoinConfettiOverlay(backpackCardsEle, safeCardsEle, boardApp, vfxApp, 1);
+        tl.eventCallback("onComplete", () => {
+          useStore.getState().addPlayerCards(playerId, cards);
+        });
+        master.add(tl);
+      }
+
+      master.eventCallback("onComplete", () => {
+        resolve();
+      });
+      master.play();
+    });
+
+    this.logAction(playerId);
+    return new ActionHandle(promise, () => {}, () => {});
   }
 }

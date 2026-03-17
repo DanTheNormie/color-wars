@@ -105,17 +105,24 @@ export class PIXIVFXLayer {
     return this.initPromise;
   }
 
-  animateCoinConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
+  animateCoinConfettiOverlay(boardSprite: PIXI.Sprite | HTMLElement, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
     // ─────────────────────────────
     // 1️⃣ START POSITION (Board → Screen → Overlay)
     // ─────────────────────────────
-    const global = boardSprite.getGlobalPosition();
-
-    const boardRect = boardApp.canvas.getBoundingClientRect();
     const overlayRect = overlayApp.canvas.getBoundingClientRect();
+    let startX: number;
+    let startY: number;
 
-    const startX = boardRect.left + global.x - overlayRect.left;
-    const startY = boardRect.top + global.y - overlayRect.top;
+    if (boardSprite instanceof HTMLElement) {
+      const rect = boardSprite.getBoundingClientRect();
+      startX = rect.left - overlayRect.left + rect.width / 2;
+      startY = rect.top - overlayRect.top + rect.height / 2;
+    } else {
+      const global = boardSprite.getGlobalPosition();
+      const boardRect = boardApp.canvas.getBoundingClientRect();
+      startX = boardRect.left + global.x - overlayRect.left;
+      startY = boardRect.top + global.y - overlayRect.top;
+    }
 
     // ─────────────────────────────
     // 2️⃣ END POSITION (DOM → Overlay)
@@ -125,7 +132,7 @@ export class PIXIVFXLayer {
     const endX = rect.left - overlayRect.left + rect.width / 2;
     const endY = rect.top - overlayRect.top + rect.height / 2;
 
-    const coinSize = boardSprite.width / 4;
+    const coinSize = boardSprite instanceof HTMLElement ? 20 : boardSprite.width / 4;
 
     return this.playConfettiAnimation(
       startX,

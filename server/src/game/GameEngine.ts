@@ -81,6 +81,25 @@ export class GameEngine {
     player.position = toTile;
     this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
 
+    if ((fromTile + roll) >= this.state.game.diceTrack.length) {
+      const backpackMoney = player.backpack.money;
+      const backpackCards = [...player.backpack.cards];
+      
+      if (backpackMoney > 0 || backpackCards.length > 0) {
+        player.money += backpackMoney;
+        player.cards.push(...backpackCards);
+        
+        player.backpack.money = 0;
+        player.backpack.cards.clear();
+        
+        this.state.pushAction("BANK_BACKPACK_ITEMS", client.sessionId, { 
+          playerId: client.sessionId, 
+          money: backpackMoney, 
+          cards: backpackCards 
+        });
+      }
+    }
+
     this.handleTileEffect(destTileConfig, player)
 
     player.hasRolled = true;
