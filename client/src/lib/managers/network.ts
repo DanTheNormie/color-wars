@@ -112,9 +112,6 @@ class Network {
         $(this.room.state.room).listen("leaderId", (newValue) => {
           GameEventBus.emit("UPDATE_ROOM_LEADER", { id: newValue });
         }),
-        $(this.room.state.game).listen("activePlayerId", (newValue) => {
-         
-        }),
         $(this.room.state.game).listen("diceTrack", (newValue) => {
           GameEventBus.emit("UPDATE_DICE_TRACK", { diceTrack: newValue });
         }),
