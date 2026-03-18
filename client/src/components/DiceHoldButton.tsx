@@ -16,7 +16,7 @@ export default function DiceHoldButton({ onHoldStart, onHoldEnd, hasRolled }: Di
   const safeOnHoldStart = typeof onHoldStart === "function" ? onHoldStart : () => {};
   const safeOnHoldEnd = typeof onHoldEnd === "function" ? onHoldEnd : () => {};
 
-  const [helperText, setHelperText] = useState("Hold to shake dice");
+  const [helperText, setHelperText] = useState("Hold to roll dice");
   const holdStartRef = useRef<number | null>(null);
   const darkLayerRef = useRef<HTMLDivElement | null>(null);
   const redLayerRef = useRef<HTMLDivElement | null>(null);
