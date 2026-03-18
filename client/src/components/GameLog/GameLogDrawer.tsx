@@ -63,10 +63,15 @@ const LogMessageItem = ({ entry }: { entry: GameLogEntry }) => {
         return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on {tileName == "start" ? `the` : `a`} {tileName} tile.</div>
     }
     case "SHIFT_TRACK":{
-      const diceTrack = useStore((z) => z.state.game.diceTrack);
-      const tile = diceTrack[diceTrack.length-1]
-      const tileName = tile.type.toLowerCase()
-      return <div className={logMessageStyle}> The track shifted 🔄. A new {tileName} tile has been added.</div>
+      const direction = payload.shiftDirection === "forward" ? "counter-clockwise" : "clockwise";
+      const count = payload.newTiles.length;
+      let message = ""
+      if(count > 1){
+        message = `The track shifted ${direction}. ${count} new tiles have been added`
+      }else{
+        message = `The track shifted ${direction}. A new tile has been added`
+      }
+      return <div className={`${logMessageStyle} text-sm`}> {message}</div>
     }
     default:
       return <div className={logMessageStyle}>{`<!-- log for action type: "${entry.type}" not implemented -->`}</div>;

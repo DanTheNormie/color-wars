@@ -82,28 +82,33 @@ export class GameEngine {
     this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
 
     if ((fromTile + roll) >= this.state.game.diceTrack.length) {
-      const backpackMoney = player.backpack.money;
-      const backpackCards = [...player.backpack.cards];
-      
-      if (backpackMoney > 0 || backpackCards.length > 0) {
-        player.money += backpackMoney;
-        player.cards.push(...backpackCards);
-        
-        player.backpack.money = 0;
-        player.backpack.cards.clear();
-        
-        this.state.pushAction("BANK_BACKPACK_ITEMS", client.sessionId, { 
-          playerId: client.sessionId, 
-          money: backpackMoney, 
-          cards: backpackCards 
-        });
-      }
+      this.bankBackpack(client.sessionId);
     }
 
     this.handleTileEffect(destTileConfig, player)
 
     player.hasRolled = true;
     if (this.state.game.turnPhase === 'awaiting-roll') this.state.game.turnPhase = 'awaiting-end-turn'
+  }
+
+  bankBackpack(playerId: string) {
+    const player = this.state.game.players.get(playerId)!;
+    const backpackMoney = player.backpack.money;
+    const backpackCards = [...player.backpack.cards];
+    
+    if (backpackMoney > 0 || backpackCards.length > 0) {
+      player.money += backpackMoney;
+      player.cards.push(...backpackCards);
+      
+      player.backpack.money = 0;
+      player.backpack.cards.clear();
+      
+      this.state.pushAction("BANK_BACKPACK_ITEMS", playerId, { 
+        playerId: playerId, 
+        money: backpackMoney, 
+        cards: backpackCards 
+      });
+    }
   }
 
   handleTileEffect(tileConfig: TileConfig | TileState, player: PlayerState) {
@@ -249,6 +254,54 @@ export class GameEngine {
     return { type: selectedType, amount };
   }
 
+  shiftTrack(direction: "forward" | "backward", count: number = 1) {
+    const newTiles: TileConfig[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      const newTileConfig = this.generateNextTile();
+      newTiles.push(newTileConfig);
+      
+      if (direction === 'forward') {
+        this.state.game.diceTrack.splice(1, 1);
+        this.state.game.diceTrack.push(new TileState(newTileConfig.type, newTileConfig.amount, newTileConfig.label));
+      } else {
+        this.state.game.diceTrack.pop();
+        this.state.game.diceTrack.unshift(new TileState(newTileConfig.type, newTileConfig.amount, newTileConfig.label));
+        this.state.game.diceTrack.move((cards)=>{
+          [cards[0], cards[1]] = [cards[1], cards[0]]
+        })
+      }
+    }
+    newTiles.reverse();
+
+    const playersToBank: string[] = [];
+
+    // Update player positions
+    for (const [, player] of this.state.game.players) {
+      if (player.position >= 1) {
+        if (direction === 'forward') {
+          player.position = Math.max(0, player.position - count);
+        } else {
+          const newPosition = player.position + count;
+          if(newPosition > this.state.game.diceTrack.length - 1){
+            player.position = 0;
+            playersToBank.push(player.id);
+          } else {
+            player.position = newPosition;
+          }
+        }
+      }
+    }
+    
+    this.state.pushAction('SHIFT_TRACK', this.state.game.activePlayerId, { newTiles, shiftDirection: direction });
+    
+    for (const playerId of playersToBank) {
+      this.bankBackpack(playerId);
+    }
+
+    this.state.game.turnPhase = 'resolving-shift';
+  }
+
   endTurn() {
     const currentIdx = this.state.game.playerOrder.indexOf(this.state.game.activePlayerId);
 
@@ -259,17 +312,8 @@ export class GameEngine {
       this.state.game.currentRound += 1;
       for (const [, player] of this.state.game.players) {
         player.hasRolled = false;
-        if (player.position >= 1) {
-          player.position -= 1;
-        }
       }
-      
-      const newTileConfig = this.generateNextTile();
-      this.state.game.diceTrack.splice(1, 1);
-      this.state.game.diceTrack.push(new TileState(newTileConfig.type, newTileConfig.amount, newTileConfig.label));
-      
-      this.state.pushAction('SHIFT_TRACK', this.state.game.activePlayerId, { newTile: newTileConfig });
-      this.state.game.turnPhase = 'resolving-shift';
+      this.shiftTrack('backward', 6);
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }

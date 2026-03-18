@@ -4,7 +4,6 @@ import { PlayerSprite } from "@/components/NewGameBoard/pixi/units/playerSprite"
 import type { TileConfig } from "@color-wars/shared/src/config/diceTrack";
 import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackLayer";
 import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
-import { pixiTargetLocator } from "../target-locator";
 
 /**
  * Animation Recipe: token hop
@@ -428,61 +427,194 @@ export function animateCounter(el: HTMLSpanElement, animatedValue: { val: number
   });
 }
 
-export function buildTrackShiftAnimation(trackLayer: DiceTrackLayer, tokenLayer: TokenLayer, newTile: TileConfig, app: PIXI.Application) {
+export function buildTrackShiftAnimation(trackLayer: DiceTrackLayer, tokenLayer: TokenLayer, newTiles: TileConfig[], shiftDirection: 'forward' | 'backward', app: PIXI.Application) {
   const tl = gsap.timeline({ paused: true });
   
   const sprites = trackLayer.getTrackSprites();
   const targetCoords: {x: number, y: number}[] = [];
   sprites.forEach(s => targetCoords.push({x: s.position.x, y: s.position.y}));
 
-  const vanishingSprite = sprites[1];
-  const newSprite = trackLayer.prepareNewTileSprite(newTile, app);
+  // Create new sprites for all new tiles
+  const newSprites = newTiles.map(nt => trackLayer.prepareNewTileSprite(nt, app));
+
+  const count = newTiles.length;
 
   tl.eventCallback("onComplete", () => {
-     trackLayer.commitTrackShift(vanishingSprite, newSprite);
+     trackLayer.commitTrackShift(count, shiftDirection, newSprites);
   });
-
-  tl.to(vanishingSprite, {
-    pixi: { x: targetCoords[0].x, y: targetCoords[0].y, alpha: 0 },
-    duration: 2, ease: "power2.inOut"
-  }, 0);
 
   sprites[0].zIndex = 10;
-  vanishingSprite.zIndex = 1;
   trackLayer.getTrackLayer().sortableChildren = true;
 
-  for (let i = 2; i < sprites.length; i++) {
-    tl.to(sprites[i], {
-      pixi: { x: targetCoords[i - 1].x, y: targetCoords[i - 1].y },
-      duration: 2, ease: "power2.inOut"
-    }, 0);
-  }
+  if (shiftDirection === 'forward') {
+    // 1. Existing Track Sprites
+    for (let i = 1; i < sprites.length; i++) {
+        const keys = [];
+        let isVanishing = (i <= count);
+        for (let step = 1; step <= count; step++) {
+            const stepIdx = Math.max(0, i - step);
+            const key: any = { pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y } };
+            if (isVanishing && stepIdx === 0) {
+                key.pixi.alpha = 0;
+            }
+            keys.push(key);
+        }
+        tl.to(sprites[i], {
+            keyframes: keys,
+            duration: 2,
+            ease: "power2.inOut"
+        }, 0);
+        if (isVanishing) {
+            sprites[i].zIndex = 1;
+        }
+    }
 
-  tl.to(newSprite, {
-    pixi: { x: targetCoords[targetCoords.length - 1].x, y: targetCoords[targetCoords.length - 1].y, alpha: 1 },
-    duration: 2, ease: "power2.inOut"
-  }, 0);
+    // 2. New Sprites
+    newSprites.forEach((ns, idx) => {
+        ns.position.set(targetCoords[targetCoords.length - 1].x, targetCoords[targetCoords.length - 1].y);
+        ns.scale.copyFrom(sprites[0].scale);
+        ns.alpha = 0;
+        ns.zIndex = 0;
+        
+        let keys = [];
+        for (let step = 1; step <= count; step++) {
+            const activeSteps = step - idx;
+            if (activeSteps <= 0) {
+                keys.push({ pixi: { x: targetCoords[targetCoords.length - 1].x, y: targetCoords[targetCoords.length - 1].y, alpha: 0 } });
+            } else {
+                const stepIdx = targetCoords.length - activeSteps;
+                keys.push({ pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y, alpha: 1 } });
+            }
+        }
+        tl.to(ns, {
+            keyframes: keys,
+            duration: 2,
+            ease: "power2.inOut"
+        }, 0);
+    });
 
-  tokenLayer.getUnits().forEach((unit) => {
-    const tileId = unit.currentTileId;
-    if (tileId && tileId.startsWith("track-tile-")) {
-      const idx = parseInt(tileId.split("-")[2]);
-      if (idx >= 1) {
-        const targetTileId = `track-tile-${idx - 1}`;
-        const currentTileSprite = pixiTargetLocator.get<PIXI.Sprite>(tileId);
-        const targetTileSprite = pixiTargetLocator.get<PIXI.Sprite>(targetTileId);
-        if (currentTileSprite && targetTileSprite) {
-           const dx = targetTileSprite.x - currentTileSprite.x;
-           const dy = targetTileSprite.y - currentTileSprite.y;
-           tl.to(unit, {
-             pixi: { x: unit.x + dx, y: unit.y + dy },
-             duration: 2, ease: "power2.inOut"
-           }, '<');
-           unit.currentTileId = targetTileId;
+    // 3. Tokens
+    tokenLayer.getUnits().forEach((unit) => {
+      const tileId = unit.currentTileId;
+      if (tileId && tileId.startsWith("track-tile-")) {
+        const idx = parseInt(tileId.split("-")[2]);
+        if (idx > 0) {
+          const targetIdx = Math.max(0, idx - count);
+          const targetTileId = `track-tile-${targetIdx}`;
+          
+          const unitKeys = [];
+          for (let step = 1; step <= count; step++) {
+             const stepIdx = Math.max(0, idx - step);
+             const tileCoord = targetCoords[stepIdx];
+             const originalTileCoord = targetCoords[idx];
+             const dx = tileCoord.x - originalTileCoord.x;
+             const dy = tileCoord.y - originalTileCoord.y;
+             unitKeys.push({ pixi: { x: unit.x + dx, y: unit.y + dy } });
+          }
+
+          if (unitKeys.length > 0) {
+            tl.to(unit, {
+              keyframes: unitKeys,
+              duration: 2,
+              ease: "power2.inOut",
+              onComplete: () => {
+                unit.currentTileId = targetTileId;
+              }
+            }, 0);
+          } else {
+            unit.currentTileId = targetTileId;
+          }
         }
       }
+    });
+
+  } else {
+    // Backward shift
+    // 1. Existing Track Sprites
+    for (let i = 1; i < sprites.length; i++) {
+        const keys = [];
+        let isVanishing = (i >= sprites.length - count);
+        for (let step = 1; step <= count; step++) {
+            let key: any;
+            const stepIdx = (i + step) > sprites.length-1 ? 0 : i + step;
+            key = { pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y } };
+            if (isVanishing && stepIdx === 0) {
+                key.pixi.alpha = 0;
+            }
+            keys.push(key);
+        }
+        tl.to(sprites[i], {
+            keyframes: keys,
+            duration: 2,
+            ease: "power2.inOut"
+        }, 0);
+        if (isVanishing) {
+            sprites[i].zIndex = 1;
+        }
     }
-  });
+
+    // 2. New Sprites
+    newSprites.forEach((ns, idx) => {
+        ns.position.set(targetCoords[0].x, targetCoords[0].y);
+        ns.scale.copyFrom(sprites[0].scale);
+        ns.alpha = 0;
+        ns.zIndex = 0;
+        
+        let keys = [];
+        for (let step = 1; step <= count; step++) {
+            const activeSteps = step - (count - 1 - idx); 
+            
+            if (activeSteps <= 0) {
+                keys.push({ pixi: { x: targetCoords[1].x, y: targetCoords[1].y, alpha: 0 } });
+            } else {
+                const stepIdx = Math.min(sprites.length - 1, activeSteps);
+                keys.push({ pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y, alpha: 1 } });
+            }
+        }
+        tl.to(ns, {
+            keyframes: keys,
+            duration: 2,
+            ease: "power2.inOut"
+        }, 0);
+    });
+
+    // 3. Tokens
+    tokenLayer.getUnits().forEach((unit) => {
+      const tileId = unit.currentTileId;
+      if (tileId && tileId.startsWith("track-tile-")) {
+        const idx = parseInt(tileId.split("-")[2]);
+        if (idx > 0) {
+          let targetIdx = idx + count;
+          if (targetIdx > sprites.length - 1) targetIdx = 0;
+          const targetTileId = `track-tile-${targetIdx}`;
+          
+          const unitKeys = [];
+          for (let step = 1; step <= count; step++) {
+             const stepPos = idx + step;
+             const stepIdx = stepPos > sprites.length - 1 ? 0 : stepPos;
+             const tileCoord = targetCoords[stepIdx];
+             const originalTileCoord = targetCoords[idx];
+             const dx = tileCoord.x - originalTileCoord.x;
+             const dy = tileCoord.y - originalTileCoord.y;
+             unitKeys.push({ pixi: { x: unit.x + dx, y: unit.y + dy } });
+          }
+
+          if (unitKeys.length > 0) {
+            tl.to(unit, {
+              keyframes: unitKeys,
+              duration: 2,
+              ease: "power2.inOut",
+              onComplete: () => {
+                unit.currentTileId = targetTileId;
+              }
+            }, 0);
+          } else {
+            unit.currentTileId = targetTileId;
+          }
+        }
+      }
+    });
+  }
 
   return tl;
 }

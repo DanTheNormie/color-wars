@@ -289,7 +289,7 @@ export class SellTerritoryAction extends BaseAction<"SELL_TERRITORY"> {
 
 export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
   execute(): ActionHandle {
-    const { newTile } = this.payload;
+    const { newTiles, shiftDirection } = this.payload;
     const trackLayer = pixiTargetLocator.get<DiceTrackLayer>("diceTrackLayer");
     const tokenLayer = pixiTargetLocator.get<TokenLayer>("tokenLayer");
     const engine = pixiTargetLocator.get("game-board-engine") as any;
@@ -301,14 +301,27 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
     //TODO: find out side effects of upsertToken
     return new ActionHandle(
       (async () => {
-         const tl = buildTrackShiftAnimation(trackLayer, tokenLayer, newTile, app);
+         const tl = buildTrackShiftAnimation(trackLayer, tokenLayer, newTiles, shiftDirection, app);
          await tl.play();
+         const count = newTiles.length;
          Object.values(useDiceTrackStore.getState().tokens).forEach((token) => {
           const tileId = token.tileId;
           if (tileId && tileId.startsWith("track-tile-")) {
             const idx = parseInt(tileId.split("-")[2]);
             if (idx >= 1) {
-              const targetTileId = `track-tile-${idx - 1}`;
+              const numTiles = trackLayer.getTrackSprites().length;
+              let targetIdx = idx;
+              if (shiftDirection === 'forward') {
+                targetIdx = Math.max(0, idx - count);
+              } else {
+                const newPosition = idx + count;
+                if(newPosition > numTiles - 1){
+                  targetIdx = 0;
+                } else {
+                  targetIdx = newPosition;
+                }
+              }
+              const targetTileId = `track-tile-${targetIdx}`;
               useDiceTrackStore.getState().upsertToken({
                 id: token.id,
                 tileId: targetTileId,

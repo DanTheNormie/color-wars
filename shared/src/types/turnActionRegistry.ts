@@ -10,7 +10,7 @@ export const TURN_ACTION_REGISTRY = {
   ADD_CARD: {} as { playerId: string, cardId: string },
   BUY_TERRITORY: {} as { playerId: string, territoryID: string, amount: number },
   SELL_TERRITORY: {} as { playerId: string, territoryID: string, amount: number },
-  SHIFT_TRACK: {} as { newTile: TileConfig },
+  SHIFT_TRACK: {} as { newTiles: TileConfig[], shiftDirection: "forward" | "backward" },
   UPDATE_ACTIVE_PLAYER: {} as { playerId: string },
   BANK_BACKPACK_ITEMS: {} as { playerId: string, money: number, cards: string[] }
 

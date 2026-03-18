@@ -216,10 +216,17 @@ export class DiceTrackLayer extends PIXI.Container {
     return newSprite;
   }
 
-  public commitTrackShift(vanishingSprite: PIXI.Sprite, newSprite: PIXI.Sprite) {
-    vanishingSprite.destroy();
-    this.sprites.splice(1, 1);
-    this.sprites.push(newSprite);
+  public commitTrackShift(count: number, direction: 'forward' | 'backward', newSprites: PIXI.Sprite[]) {
+    if (direction === 'forward') {
+      const vanishing = this.sprites.splice(1, count);
+      vanishing.forEach(v => v.destroy());
+      this.sprites.push(...newSprites);
+    } else {
+      const vanishing = this.sprites.splice(this.sprites.length - count, count);
+      vanishing.forEach(v => v.destroy());
+      this.sprites.splice(1, 0, ...newSprites);
+    }
+    
     this.sprites.forEach((s, idx) => {
       const targetID = `track-tile-${idx}`;
       s.label = targetID;
