@@ -1,4 +1,5 @@
 import { type TileConfig } from "../config/diceTrack";
+import { type TileState } from "./RoomState";
 
 export const TURN_ACTION_REGISTRY = {
   MOVE_PLAYER: {} as { fromTile: number, toTile: number, tokenId: string },
@@ -10,7 +11,7 @@ export const TURN_ACTION_REGISTRY = {
   ADD_CARD: {} as { playerId: string, cardId: string },
   BUY_TERRITORY: {} as { playerId: string, territoryID: string, amount: number },
   SELL_TERRITORY: {} as { playerId: string, territoryID: string, amount: number },
-  SHIFT_TRACK: {} as { newTiles: TileConfig[], shiftDirection: "forward" | "backward" },
+  SHIFT_TRACK: {} as { newTiles: TileConfig[], shiftDirection: "forward" | "backward", diceTrack: TileState[] },
   UPDATE_ACTIVE_PLAYER: {} as { playerId: string },
   BANK_BACKPACK_ITEMS: {} as { playerId: string, money: number, cards: string[] }
 

@@ -289,7 +289,7 @@ export class SellTerritoryAction extends BaseAction<"SELL_TERRITORY"> {
 
 export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
   execute(): ActionHandle {
-    const { newTiles, shiftDirection } = this.payload;
+    const { newTiles, shiftDirection, diceTrack } = this.payload;
     const trackLayer = pixiTargetLocator.get<DiceTrackLayer>("diceTrackLayer");
     const tokenLayer = pixiTargetLocator.get<TokenLayer>("tokenLayer");
     const engine = pixiTargetLocator.get("game-board-engine") as any;
@@ -304,6 +304,7 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
          const tl = buildTrackShiftAnimation(trackLayer, tokenLayer, newTiles, shiftDirection, app);
          await tl.play();
          const count = newTiles.length;
+         useStore.getState().setDiceTrack(diceTrack);
          Object.values(useDiceTrackStore.getState().tokens).forEach((token) => {
           const tileId = token.tileId;
           if (tileId && tileId.startsWith("track-tile-")) {
@@ -362,7 +363,6 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
     const vfxApp = vfxLayer.getApp()!;
     const boardApp = gameBoard.getApp()!;
     const master = gsap.timeline({ paused: true });
-    debugger
     const promise = new Promise<void>((resolve) => {
 
       if (money > 0 && backpackMoneyEle && safeMoneyEle) {

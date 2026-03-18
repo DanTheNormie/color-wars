@@ -127,13 +127,13 @@ export class GameEngine {
       }
       case 'REWARD': {
         const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-        player.money += amount
+        player.backpack.money += amount
         this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'PENALTY': {
         const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-        player.money -= amount
+        player.backpack.money -= amount
         this.state.pushAction('DECR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
@@ -204,7 +204,7 @@ export class GameEngine {
     // apply card effect
     if (config.type === "INSTANT_CASH") {
       const amount = this.getRandomNumberWithStep(config.min, config.max, config.step);
-      player.money += amount;
+      player.backpack.money += amount;
       this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount });
     } else if (config.type === "CARD") {
       player.backpack.cards.push(config.cardId);
@@ -293,7 +293,7 @@ export class GameEngine {
       }
     }
     
-    this.state.pushAction('SHIFT_TRACK', this.state.game.activePlayerId, { newTiles, shiftDirection: direction });
+    this.state.pushAction('SHIFT_TRACK', this.state.game.activePlayerId, { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) });
     
     for (const playerId of playersToBank) {
       this.bankBackpack(playerId);
