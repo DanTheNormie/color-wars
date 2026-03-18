@@ -73,6 +73,9 @@ const LogMessageItem = ({ entry }: { entry: GameLogEntry }) => {
       }
       return <div className={`${logMessageStyle} text-sm`}> {message}</div>
     }
+    case "BANK_BACKPACK_ITEMS": {
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> banked items from backpack.</div>;
+    }
     default:
       return <div className={logMessageStyle}>{`<!-- log for action type: "${entry.type}" not implemented -->`}</div>;
   }
