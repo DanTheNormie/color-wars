@@ -15,30 +15,30 @@ import { useTooltipStore } from "@/stores/tooltipStore";
 import { useMapStore } from "@/stores/mapStateStore";
 import { useStore } from "@/stores/sessionStore";
 
-/* ─── Upgrade tier labels ─── */
-const UPGRADE_TIERS = ["CITY", "FACTORY", "MISSILE_SILO"] as const;
-type UpgradeTier = (typeof UPGRADE_TIERS)[number];
-
-const TIER_LABELS: Record<UpgradeTier, string> = {
-  CITY: "City",
-  FACTORY: "Factory",
-  MISSILE_SILO: "Silo",
-};
-
-const TIER_COLORS: Record<UpgradeTier, string> = {
-  CITY: "#5e5ce6",
-  FACTORY: "#ff9f0a",
-  MISSILE_SILO: "#ff453a",
-};
-
 /* ─── Number formatter ─── */
 const fmt = new Intl.NumberFormat("en", {
   notation: "compact",
   compactDisplay: "short",
 });
 
-/* ─── Tooltip Component ─── */
+/* ─── UI config ─── */
+const UPGRADES = [
+  { id: "BASE", label: "without upgrade", icon: null, key: "BASE" },
+  { id: "CITY", label: "with City", icon: "/building-icons/city.svg", key: "CITY" },
+  { id: "FACTORY", label: "with Factory", icon: "/building-icons/factory.svg", key: "FACTORY" },
+  { id: "MISSILE_SILO", label: "with Missile Silo", icon: "/building-icons/missile.svg", key: "MISSILE_SILO" },
+  { id: "CAPITAL_MONUMENT", label: "with Capital Monument", icon: "/building-icons/monument.svg", key: "CAPITAL_MONUMENT" },
+];
 
+const SELL_LABELS: Record<string, string> = {
+  BASE: "Territory",
+  CITY: "City",
+  FACTORY: "Factory",
+  MISSILE_SILO: "Missile Silo",
+  CAPITAL_MONUMENT: "Capital Monument",
+};
+
+/* ─── Tooltip Component ─── */
 export default function TerritoryTooltip() {
   const [arrowEl, setArrowEl] = useState<SVGSVGElement | null>(null);
 
@@ -113,6 +113,10 @@ export default function TerritoryTooltip() {
   const ownerId = ownership?.ownerId ?? null;
   const ownerPlayer = ownerId ? players?.[ownerId] : null;
   const isOwnedByCurrentPlayer = ownerId != null && ownerId === currentPlayerId;
+  
+  // Ownership building logic
+  const buildingType = ownership ? (ownership as any).buildingType ?? "BASE" : "BASE";
+  const sellLabel = SELL_LABELS[buildingType] || "Territory";
 
   let economy: ReturnType<typeof getEconomyData> | null = null;
   try {
@@ -138,9 +142,13 @@ export default function TerritoryTooltip() {
   /* ── Don't render if closed ── */
   if (!isOpen || !territory) return null;
 
-  /* ── Economy values ── */
   const baseCost = economy ? fmt.format(economy.BASE.capEx) : "—";
-  const baseIncome = economy ? economy.BASE.revenue - economy.BASE.opEx : 0;
+  
+  // Try to determine sell value roughly as half capEx. If not applicable, blank.
+  const capExObj = economy ? economy[buildingType as keyof typeof economy] : null;
+  const sellValue = (capExObj && buildingType !== "CAPITAL_MONUMENT") 
+      ? fmt.format((capExObj as any).capEx / 2) 
+      : "";
 
   return (
     <FloatingPortal>
@@ -148,7 +156,7 @@ export default function TerritoryTooltip() {
         ref={setFloatingRef}
         style={floatingStyles}
         {...getFloatingProps()}
-        className="z-9999 bg-[#1c1c1e] border border-[#3a3a3c] rounded-xl py-3 px-[14px] min-w-[180px] max-w-[260px] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] text-[#f5f5f7] pointer-events-auto"
+        className="z-9999 bg-[#1c1c1e] border border-[#3a3a3c] rounded-xl p-4 w-[280px] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] text-[#f5f5f7] pointer-events-auto"
       >
         <FloatingArrow
           ref={setArrowEl}
@@ -161,109 +169,135 @@ export default function TerritoryTooltip() {
         />
 
         {/* ── Header ── */}
-        <div className="flex justify-between items-baseline mb-2 gap-2">
-          <span className="text-[14px] font-semibold tracking-[0.02em] whitespace-nowrap overflow-hidden text-ellipsis">{territory.name}</span>
-          {ownerId && (
-            <span
-              className="text-[11px] font-medium shrink-0"
-              style={{ color: ownerPlayer?.color ?? "#888" }}
-            >
-              {isOwnedByCurrentPlayer ? "You" : ownerPlayer?.name ?? "Unknown"}
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex flex-col gap-1 items-start mt-[-2px]">
+            <span className="text-[17px] font-medium tracking-[0.01em] text-white whitespace-nowrap overflow-hidden text-ellipsis">
+              {territory.name}
             </span>
-          )}
-        </div>
-
-        {/* ── Unowned: show base cost + per round, then Buy button ── */}
-        {!ownerId && economy && (
-          <>
-            <div className="flex items-center gap-[10px] py-[6px] mb-2 border-y border-[#2a2a2c]">
-              <div className="flex flex-col items-center flex-1">
-                <span className="text-[10px] text-[#8e8e93] uppercase tracking-[0.06em]">Cost</span>
-                <span className="text-[14px] font-semibold mt-[2px]">{baseCost}</span>
-              </div>
-              <div className="w-px h-[28px] bg-[#2a2a2c] shrink-0" />
-              <div className="flex flex-col items-center flex-1">
-                <span className="text-[10px] text-[#8e8e93] uppercase tracking-[0.06em]">Per Round</span>
-                <span
-                  className="text-[14px] font-semibold mt-[2px]"
-                  style={{ color: baseIncome >= 0 ? "#4ade80" : "#f87171" }}
-                >
-                  {baseIncome >= 0 ? "+" : ""}
-                  {fmt.format(baseIncome)}
-                </span>
-              </div>
-            </div>
-            <div className="flex gap-[6px]">
-              <button
-                className="flex-1 py-[6px] rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 hover:opacity-[0.85] active:scale-[0.96] bg-[#34c759] text-black"
-                onClick={handleBuy}
-              >
-                Buy
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* ── Owned by current player: show per-round + upgrade tiers + sell ── */}
-        {isOwnedByCurrentPlayer && economy && (
-          <>
-            {/* Per-round summary */}
-            <div className="flex items-center gap-[10px] py-[6px] mb-2 border-y border-[#2a2a2c]">
-              <div className="flex flex-col items-center flex-1">
-                <span className="text-[10px] text-[#8e8e93] uppercase tracking-[0.06em]">Per Round</span>
-                <span
-                  className="text-[14px] font-semibold mt-[2px]"
-                  style={{ color: baseIncome >= 0 ? "#4ade80" : "#f87171" }}
-                >
-                  {baseIncome >= 0 ? "+" : ""}
-                  {fmt.format(baseIncome)}
-                </span>
-              </div>
-            </div>
-
-            {/* Upgrade buttons row */}
-            <div className="flex gap-1 mb-[2px]">
-              {UPGRADE_TIERS.map((tier) => (
-                <button
-                  key={tier}
-                  className="flex-1 py-[6px] rounded-md text-[11px] font-semibold text-white cursor-pointer transition-all duration-150 hover:opacity-[0.85] active:scale-[0.96] text-center"
-                  style={{ background: TIER_COLORS[tier] }}
-                  onClick={() => {
-                    // TODO: wire to upgrade message
-                  }}
-                >
-                  {TIER_LABELS[tier]}
-                </button>
-              ))}
-            </div>
-
-            {/* Upgrade costs row */}
-            <div className="flex gap-1 mb-2">
-              {UPGRADE_TIERS.map((tier) => (
-                <span key={tier} className="flex-1 text-center text-[10px] text-[#8e8e93] font-medium">
-                  {fmt.format(economy[tier].capEx)}
-                </span>
-              ))}
-            </div>
-
-            {/* Sell button */}
-            <div className="flex gap-[6px] mt-1">
-              <button
-                className="flex-1 py-[6px] rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 hover:opacity-[0.85] active:scale-[0.96] bg-[#ff453a] text-white"
+            {isOwnedByCurrentPlayer && (
+              <div 
+                className="bg-[#c22d2d] text-white text-[9px] font-semibold px-[5px] py-[2px] rounded uppercase cursor-pointer hover:bg-[#dc2626] transition-colors"
                 onClick={handleSell}
               >
-                Sell
-              </button>
-            </div>
-          </>
+                Sell {sellLabel} {sellValue ? `for ${sellValue}` : ""}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col items-end shrink-0 gap-[16px]">
+            {ownerId ? (
+              <span className="text-[10px] text-[#a1a1aa]">
+                Owned by{" "}
+                <span className="font-medium" style={{ color: ownerPlayer?.color ?? "#fff" }}>
+                  {isOwnedByCurrentPlayer ? "You" : ownerPlayer?.name ?? "Unknown"}
+                </span>
+              </span>
+            ) : (
+              <span className="text-[10px] text-[#a1a1aa] h-[15px]" />
+            )}
+            <span className="text-[10px] text-[#8e8e93]">per round</span>
+          </div>
+        </div>
+
+        {/* ── Economy Stats List ── */}
+        {economy && (
+          <div className="flex flex-col gap-[8px] mb-4 mt-1">
+            {UPGRADES.map((upgrade) => {
+              let valStr = "???";
+              let color = "#8e8e93"; 
+              if (upgrade.id !== "CAPITAL_MONUMENT" && economy) {
+                const layer = economy[upgrade.key as keyof typeof economy] as any;
+                if (layer) {
+                  const val = layer.revenue - layer.opEx;
+                  valStr = (val >= 0 ? "+" : "") + fmt.format(val);
+                  color = val >= 0 ? "#4ade80" : "#f87171";
+                  if (val === 0) {
+                      color = "#f5f5f7";
+                      valStr = "0";
+                  }
+                }
+              }
+
+              return (
+                <div key={upgrade.id} className="flex justify-between items-center text-[12px]">
+                  <div className="flex items-center gap-[6px] text-[#e5e5ea]">
+                    {upgrade.label}
+                    {/* {upgrade.icon && (
+                      <img src={upgrade.icon} alt="" className="w-4 h-4 invert opacity-80" />
+                    )} */}
+                  </div>
+                  <span className="font-medium" style={{ color }}>{valStr}</span>
+                </div>
+              );
+            })}
+          </div>
         )}
 
-        {/* ── Owned by another player ── */}
-        {ownerId && !isOwnedByCurrentPlayer && (
-          <span className="block text-xs text-[#8e8e93] text-center w-full py-[6px] border-t border-[#2a2a2c] mt-1">
-            Owned by {ownerPlayer?.name ?? "Unknown"}
-          </span>
-        )}
+        {/* ── Action Buttons ── */}
+        <div>
+          {!ownerId ? (
+            <button
+              className="w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold cursor-pointer transition-all duration-150 hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a] text-white"
+              onClick={handleBuy}
+            >
+              Purchase Territory for {baseCost}
+            </button>
+          ) : isOwnedByCurrentPlayer ? (
+            buildingType === "BASE" ? (
+              <div className="flex gap-2 justify-between">
+                <button 
+                  className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
+                  onClick={() => {/* TODO: Wire to upgrade action */}}
+                >
+                  Build City
+                </button>
+                <button 
+                  className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
+                  onClick={() => {/* TODO: Wire to upgrade action */}}
+                >
+                  Build Factory
+                </button>
+                <button 
+                  className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
+                  onClick={() => {/* TODO: Wire to upgrade action */}}
+                >
+                  Build Missile Silo
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="w-[60%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-black cursor-pointer transition-all duration-150 hover:bg-[#facc15] active:scale-[0.97] bg-[#eab308]"
+                onClick={() => {/* TODO: Wire to upgrade action */}}
+              >
+                Build Capital Monument
+              </button>
+            )
+          ) : null}
+        </div>
+
+        {/* ── Footer Icons & Prices ── */}
+        <div className="flex justify-between items-center pt-3 mt-1 
+border-none gap-2 px-1">
+          {[
+            { id: "CITY", icon: "/building-icons/city.svg" },
+            { id: "FACTORY", icon: "/building-icons/factory.svg" },
+            { id: "MISSILE_SILO", icon: "/building-icons/missile.svg" },
+            { id: "CAPITAL_MONUMENT", icon: "/building-icons/monument.svg" },
+          ].map((item) => {
+            let priceStr = "???";
+            if (item.id !== "CAPITAL_MONUMENT" && economy) {
+              const layer = economy[item.id as keyof typeof economy] as any;
+              if (layer) {
+                priceStr = fmt.format(layer.capEx);
+              }
+            }
+            return (
+              <div key={item.id} className="flex flex-col items-center gap-[6px] flex-1">
+                <img src={item.icon} alt={item.id} className="w-5 h-5 opacity-80 object-contain" />
+                <span className="text-[10px] text-[#8e8e93] font-medium h-[15px]">{priceStr}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </FloatingPortal>
   );
