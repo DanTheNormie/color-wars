@@ -53,6 +53,11 @@ const LogMessageItem = ({ entry }: { entry: GameLogEntry }) => {
         return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> sold <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()}</div>;
       case "DRAW_3_REWARD_CARDS":
         return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> drew 3 reward cards.</div>;
+      case "SELECT_CARD":{
+        const card = JSON.parse(payload.selectedCardId);
+        console.log(card)
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> selected a {card.ui.title} card.</div>;
+      }
       case "ADD_CARD":
         return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received a card.</div>;
       case "MOVE_PLAYER":{
