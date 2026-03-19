@@ -50,7 +50,7 @@ export class GameEngine {
   startGame() {
     for (const playerID of this.state.game.playerOrder) {
       const player = this.state.game.players.get(playerID)!;
-      player.money = 2000;
+      player.money = 10000;
       player.position = 0;
       player.hasRolled = false;
     }
@@ -216,10 +216,23 @@ export class GameEngine {
 
   generateNextTile(): TileConfig {
     const round = this.state.game.currentRound;
-    const incomeWeight = Math.max(10, 50 - round * 2);
-    const safeWeight = Math.max(5, 30 - round);
-    const taxWeight = Math.min(40, 5 + round * 2);
-    const penaltyWeight = Math.min(30, round);
+
+    // INCOME: dip in mid, rise again late
+    const incomeWeight = Math.max(
+      15,
+      Math.min(60, 50 - round * 2 + round * round * 0.08)
+    );
+
+    // SAFE: steadily dies
+    const safeWeight = Math.max(3, 30 - round * 1.5);
+
+    // TAX: ramps hard
+    const taxWeight = Math.min(50, 5 + round * 2.5);
+
+    // PENALTY: ramps too
+    const penaltyWeight = Math.min(40, round * 1.5);
+
+    // keep these
     const surpriseWeight = 10;
     const rewardWeight = 5;
 
@@ -246,9 +259,13 @@ export class GameEngine {
 
     let amount = undefined;
     if (selectedType === 'INCOME') {
-      amount = this.getRandomNumberWithStep(500, 2000, 500);
-    } else if (selectedType === 'TAX') {
-      amount = this.getRandomNumberWithStep(100, 1000, 100);
+      const max = 5000 + round * 200;
+      amount = this.getRandomNumberWithStep(1000, max, 1000);
+    }
+
+    if (selectedType === 'TAX') {
+      const max = 2500 + round * 150;
+      amount = this.getRandomNumberWithStep(500, max, 500);
     }
 
     return { type: selectedType, amount };
@@ -313,7 +330,7 @@ export class GameEngine {
       for (const [, player] of this.state.game.players) {
         player.hasRolled = false;
       }
-      this.shiftTrack('backward', 6);
+      this.shiftTrack('backward', this.state.game.currentRound);
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }
