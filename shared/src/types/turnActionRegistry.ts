@@ -1,5 +1,5 @@
 import { type TileConfig } from "../config/diceTrack";
-import { type TileState } from "./RoomState";
+import { type TileState, FinancialStatus } from "./RoomState";
 
 export const TURN_ACTION_REGISTRY = {
   MOVE_PLAYER: {} as { fromTile: number, toTile: number, tokenId: string },
@@ -13,7 +13,9 @@ export const TURN_ACTION_REGISTRY = {
   SELL_TERRITORY: {} as { playerId: string, territoryID: string, amount: number },
   SHIFT_TRACK: {} as { newTiles: TileConfig[], shiftDirection: "forward" | "backward", diceTrack: TileState[] },
   UPDATE_ACTIVE_PLAYER: {} as { playerId: string },
-  BANK_BACKPACK_ITEMS: {} as { playerId: string, money: number, cards: string[] }
+  BANK_BACKPACK_ITEMS: {} as { playerId: string, money: number, cards: string[] },
+  UPDATE_FINANCIAL_STATUS: {} as { playerId: string, financialStatus: FinancialStatus},
+  PAY_OFF_DEBT: {} as { playerId: string, amount: number },
 
 } as const;
 

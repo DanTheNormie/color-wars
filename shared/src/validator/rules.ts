@@ -32,6 +32,18 @@ export const requireEnoughMoneyToBuyTerritory = (s: PlainStateOf<RoomState>, ctx
   if(player.money < economy.BASE.capEx) throw new Error("Player does not have enough money to make this purchase")
 }
 
+export const requirePlayerInDebt = (s: PlainStateOf<RoomState>, ctx: WithPlayer) => {
+  const player = s.game.players[ctx.senderId]
+  if(player.backpack.money >= 0) throw new Error("Player is not in debt")
+}
+
+export const requireEnoughMoneyToPayOffDebt = (s: PlainStateOf<RoomState>, ctx: WithPlayer) => {
+  const player = s.game.players[ctx.senderId]
+  const debt = player.backpack.money
+  
+  if(player.money < Math.abs(debt)) throw new Error("Player does not have enough money to pay off debt")
+}
+
 export const requireTerritoryVacant = (s: PlainStateOf<RoomState>, ctx: WithTerritoryID) => {
   const territoryState = s.game.territoryOwnership[ctx.territoryID]
   if(territoryState) throw new Error(`Territory with id: ${ctx.territoryID}, is not vacant`)

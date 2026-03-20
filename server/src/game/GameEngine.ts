@@ -87,8 +87,34 @@ export class GameEngine {
 
     this.handleTileEffect(destTileConfig, player)
 
+    this.updateFinancialStatus(client.sessionId)
+
     player.hasRolled = true;
     if (this.state.game.turnPhase === 'awaiting-roll') this.state.game.turnPhase = 'awaiting-end-turn'
+  }
+
+  updateFinancialStatus(playerId: string) {
+    const player = this.state.game.players.get(playerId)!;
+    if((player.backpack.money >= 0 ) && player.financialStatus !== "healthy"){
+      player.financialStatus = "healthy"
+      this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "healthy" })
+    }else if((player.backpack.money < 0) && player.financialStatus !== "in-debt"){
+      player.financialStatus = "in-debt"
+      this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "in-debt" })
+    }
+  }
+    
+
+  payOffDebt(client: Client) {
+    const player = this.state.game.players.get(client.sessionId)!;
+    const debt = player.backpack.money;
+    if (debt < 0) {
+      player.money += debt;
+      player.backpack.money = 0;
+      this.updateFinancialStatus(client.sessionId)
+      this.state.pushAction("PAY_OFF_DEBT", client.sessionId, { playerId: client.sessionId, amount: debt });
+
+    }
   }
 
   bankBackpack(playerId: string) {

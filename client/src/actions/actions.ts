@@ -293,7 +293,7 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
     const trackLayer = pixiTargetLocator.get<DiceTrackLayer>("diceTrackLayer");
     const tokenLayer = pixiTargetLocator.get<TokenLayer>("tokenLayer");
     const engine = pixiTargetLocator.get("game-board-engine") as any;
-    
+
     if (!trackLayer || !tokenLayer || !engine) throw new Error("Missing dependencies for SHIFT_TRACK");
     const app = engine.getApp();
 
@@ -301,11 +301,11 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
     //TODO: find out side effects of upsertToken
     return new ActionHandle(
       (async () => {
-         const tl = buildTrackShiftAnimation(trackLayer, tokenLayer, newTiles, shiftDirection, app);
-         await tl.play();
-         const count = newTiles.length;
-         useStore.getState().setDiceTrack(diceTrack);
-         Object.values(useDiceTrackStore.getState().tokens).forEach((token) => {
+        const tl = buildTrackShiftAnimation(trackLayer, tokenLayer, newTiles, shiftDirection, app);
+        await tl.play();
+        const count = newTiles.length;
+        useStore.getState().setDiceTrack(diceTrack);
+        Object.values(useDiceTrackStore.getState().tokens).forEach((token) => {
           const tileId = token.tileId;
           if (tileId && tileId.startsWith("track-tile-")) {
             const idx = parseInt(tileId.split("-")[2]);
@@ -329,7 +329,7 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
               });
             }
           }
-         });
+        });
       })(),
       () => {},
       () => {}
@@ -346,7 +346,7 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
     }
 
     // 1. Update backpack state to empty (optimistic frontend update)
-    
+
 
     const backpackMoneyEle = document.getElementById(`player-backpack-money-${playerId}`);
     const safeMoneyEle = document.getElementById(`player-money-${playerId}`);
@@ -355,11 +355,11 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
 
     const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
     const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
-    
+
     if (!vfxLayer || !gameBoard) {
        throw new Error ('Missing pixi engine')
     }
-    
+
     const vfxApp = vfxLayer.getApp()!;
     const boardApp = gameBoard.getApp()!;
     const master = gsap.timeline({ paused: true });
@@ -373,7 +373,7 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
         });
         master.add(tl);
       }
-      
+
       if (cards.length > 0 && backpackCardsEle && safeCardsEle) {
         useStore.getState().clearPlayerBackpackCards(playerId);
         const tl = vfxLayer.animateCoinConfettiOverlay(backpackCardsEle, safeCardsEle, boardApp, vfxApp, 1);
@@ -390,6 +390,24 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
     });
 
     this.logAction(playerId);
-    return new ActionHandle(promise, () => {}, () => {});
+    return new ActionHandle(promise, () => { }, () => { });
+  }
+}
+
+export class UpdateFinancialStatusAction extends BaseAction<"UPDATE_FINANCIAL_STATUS"> {
+  execute(): ActionHandle {
+    const { playerId, financialStatus } = this.payload;
+    useStore.getState().updatePlayerFinancialStatus(playerId, financialStatus);
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
+  }
+}
+
+export class PayOffDebtAction extends BaseAction<"PAY_OFF_DEBT"> {
+  execute(): ActionHandle {
+    const { playerId, amount } = this.payload;
+    useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
+    useStore.getState().updatePlayerBackpackMoney(playerId, 0);
+    this.logAction(playerId);
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }

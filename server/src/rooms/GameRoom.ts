@@ -219,6 +219,10 @@ export class GameRoom extends Room<RoomState> {
     this.onAction('SELECT_CARD', (client, {cardID})=>{
       this.gameEngine.selectCard(client, cardID)
     })
+
+    this.onAction('PAY_OFF_DEBT', (client)=>{
+      this.gameEngine.payOffDebt(client)
+    })
   }
 
   onAuth(client: Client<any, any>, options: any, context: AuthContext) {

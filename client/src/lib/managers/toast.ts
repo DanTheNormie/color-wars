@@ -1,6 +1,6 @@
 // SoundManager.ts
 import { GameEventBus } from "@/lib/managers/GameEventBus";
-// import { toast } from "sonner";
+import { toast } from "sonner";
 class ToastManager {
   private unsubs: (() => void)[] = [];
 
@@ -22,8 +22,8 @@ class ToastManager {
       GameEventBus.on('KICKED', () => {
         //toast.success(reason, {toasterId: 'center'})
       }),
-      GameEventBus.on('TOAST', () => {
-        //toast[type](content, { toasterId: "center", duration: 1000 })
+      GameEventBus.on('TOAST', ({content, type, duration}) => {
+        toast[type](content, { toasterId: "center", duration: duration ?? 1000 })
       })
     );
   }

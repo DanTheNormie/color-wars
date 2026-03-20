@@ -174,8 +174,8 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
         <div className="mx-2 sm:ml-4 md:mr-6 flex flex-col justify-around h-full">
           <div className="flex items-center gap-1 justify-start whitespace-nowrap">
             <span className={textSizeClass}> 🎒Backpack </span>
-            {/* <span className={textSizeClass}> &middot; </span>
-            <span className={textSizeClass}> This run </span> */}
+            <span className={textSizeClass}> &middot; </span>
+            <span className={textSizeClass}> {player.financialStatus} </span>
           </div>
 
           <div className="flex w-full gap-3">

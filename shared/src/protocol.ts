@@ -13,6 +13,8 @@ export interface ClientMessages {
   END_TURN: {};
   CHANGE_MAP: {mapID: MapID}
   SELECT_CARD: {cardID: string}
+  PAY_OFF_DEBT: {};
+  
 }
 
 export interface ServerMessages {

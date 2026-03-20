@@ -1,7 +1,22 @@
 // src/actions/ActionFactory.ts
 import type { ActionData } from "@color-wars/shared/src/types/turnActionRegistry";
 import type { IExecutable } from "./core";
-import { HexHop, IncrMoney, RollDice, DecrMoney, AddCard, DrawCardsAction, ResolveSelectionAction, BuyTerritoryAction, SellTerritoryAction, ShiftTrackAction, UpdateActivePlayer, BankBackpackItemsAction } from "./actions";
+import {
+  HexHop,
+  IncrMoney,
+  RollDice,
+  DecrMoney,
+  AddCard,
+  DrawCardsAction,
+  ResolveSelectionAction,
+  BuyTerritoryAction,
+  SellTerritoryAction,
+  ShiftTrackAction, 
+  UpdateActivePlayer, 
+  BankBackpackItemsAction,
+  UpdateFinancialStatusAction,
+  PayOffDebtAction
+} from "./actions";
 
 export class ActionFactory {
   static create(data: ActionData): IExecutable {
@@ -41,6 +56,12 @@ export class ActionFactory {
 
       case 'BANK_BACKPACK_ITEMS':
         return new BankBackpackItemsAction(data);
+
+      case 'UPDATE_FINANCIAL_STATUS':
+        return new UpdateFinancialStatusAction(data);
+
+      case "PAY_OFF_DEBT":
+        return new PayOffDebtAction(data);
 
       default:
         throw new Error(`Unknown Action Type, unable to create action: ${JSON.stringify(data)}`);

@@ -48,6 +48,8 @@ export class BackPack extends Schema {
   @type(["string"]) cards: ArraySchema<string> = new ArraySchema<string>();
 }
 
+export type FinancialStatus = "healthy" | "in-debt" | "bankrupt";
+
 export class PlayerState extends Schema {
   @type("string") id: string;
   @type("string") name: string;
@@ -59,6 +61,7 @@ export class PlayerState extends Schema {
   @type("boolean") ready: boolean = false;
   @type("boolean") connected: boolean = true;
   @type("boolean") hasRolled: boolean = true;
+  @type("string") financialStatus: FinancialStatus = "healthy";
   @type(["string"]) cards: ArraySchema<string> = new ArraySchema<string>();
   @type([StatusEffect]) statusEffects: ArraySchema<StatusEffect> = new ArraySchema<StatusEffect>();
   @type(BackPack) backpack = new BackPack()

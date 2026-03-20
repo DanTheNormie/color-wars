@@ -10,7 +10,8 @@ import type {
   GameState,
   RoomPhase,
   TurnPhase,
-  TileState
+  TileState,
+  FinancialStatus
 } from "@color-wars/shared/src/types/RoomState";
 import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
@@ -59,6 +60,18 @@ export const useStore = create(
               set((z) => {
                 z.state.game.diceTrack = diceTrack
               })
+            },
+            updatePlayerFinancialStatus: (playerId: string, financialStatus: FinancialStatus) => {
+              set((z) => {
+                z.state.game.players[playerId].financialStatus = financialStatus
+              })
+            },
+            payOffDebt: () => {
+              try{
+                network.send('PAY_OFF_DEBT', {})
+              }catch(err){
+                console.log(err)
+              }
             },
             setShowDiceRollMessage: (show: boolean) => {
               set((z) => {

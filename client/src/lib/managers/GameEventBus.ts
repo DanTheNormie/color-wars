@@ -28,7 +28,7 @@ export interface LOCAL_EVENT {
   ROLL_DICE_TO: {die1: number, die2: number};
   UPDATE_ACTIVE_PLAYER: {playerId: string}
   UPDATE_ROOM_PHASE: {phase: RoomPhase}
-  TOAST: {content:string, type:'success'|'error'|'warning'|'info'}
+  TOAST: {content:string, type:'success'|'error'|'warning'|'info', duration?: number}
   UPDATE_ACTION_STATE: {state: 'resolving_action' | 'idle' | 'awaiting_action_result'}
   SET_TERRITORY_INFO_DRAWER: {open: boolean}
   CHANGE_MAP_ID: {mapID: MapID}
