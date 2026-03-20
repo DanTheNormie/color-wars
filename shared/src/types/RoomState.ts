@@ -49,6 +49,7 @@ export class BackPack extends Schema {
 }
 
 export type FinancialStatus = "healthy" | "in-debt" | "bankrupt";
+export type PlayerStatus = "active" | "bankrupt" | "spectator";
 
 export class PlayerState extends Schema {
   @type("string") id: string;

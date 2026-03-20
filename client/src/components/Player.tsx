@@ -126,7 +126,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
       style={{
         backgroundColor: `color-mix(in srgb, var(--secondary) 20%, ${player.color} 10%)`
       }}
-      className={`player border-r border-y border-[#ffffff10] flex w-full items-center justify-around rounded-r-md transition-opacity ${!player.connected ? "opacity-40" : ""}`}
+      className={`player border-r border-y border-[#ffffff10] flex w-full items-center justify-around rounded-r-md transition-opacity ${!player.connected ? "opacity-40" : ""} ${player.financialStatus === 'bankrupt' ? "opacity-50 grayscale pointer-events-none" : ""}`}
     >
       {/* LEFT — Player Info */}
       <div className="flex h-full w-full gap-2 items-center ">

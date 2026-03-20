@@ -397,7 +397,24 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
 export class UpdateFinancialStatusAction extends BaseAction<"UPDATE_FINANCIAL_STATUS"> {
   execute(): ActionHandle {
     const { playerId, financialStatus } = this.payload;
-    useStore.getState().updatePlayerFinancialStatus(playerId, financialStatus);
+    const store = useStore.getState();
+    store.updatePlayerFinancialStatus(playerId, financialStatus);
+    
+    if (financialStatus === 'bankrupt') {
+      useDiceTrackStore.getState().removeToken(playerId);
+      
+      // Clear all territories owned by this player
+      const territoryOwnership = store.state.game.territoryOwnership;
+      if (territoryOwnership) {
+        Object.entries(territoryOwnership).forEach(([territoryId, territory]) => {
+          if (territory.ownerId === playerId) {
+            store.updateTerritoryOwnership(territoryId, null);
+            useMapStore.getState().removeTerritoryColor(territoryId);
+          }
+        });
+      }
+    }
+    
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }
@@ -408,6 +425,22 @@ export class PayOffDebtAction extends BaseAction<"PAY_OFF_DEBT"> {
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
     useStore.getState().updatePlayerBackpackMoney(playerId, 0);
     this.logAction(playerId);
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
+  }
+}
+
+export class UpdatePlayerMoneyAction extends BaseAction<"UPDATE_PLAYER_MONEY"> {
+  execute(): ActionHandle {
+    const { playerId, amount } = this.payload;
+    useStore.getState().updatePlayerMoney(playerId, amount);
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
+  }
+}
+
+export class UpdatePlayerBackpackMoneyAction extends BaseAction<"UPDATE_PLAYER_BACKPACK_MONEY"> {
+  execute(): ActionHandle {
+    const { playerId, amount } = this.payload;
+    useStore.getState().updatePlayerBackpackMoney(playerId, amount);
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }

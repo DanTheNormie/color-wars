@@ -62,6 +62,9 @@ const ACTION_RULES: {
     rules.requireHasRolledDice,
     rules.requirePlayerInDebt,
     rules.requireEnoughMoneyToPayOffDebt
+  ],
+  DECLARE_BANKRUPTCY: [
+    rules.requirePlayerExists,
   ]
 };
 

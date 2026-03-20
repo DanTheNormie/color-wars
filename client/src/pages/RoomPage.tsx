@@ -2,7 +2,7 @@ import { useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "@/stores/sessionStore";
 import TurnControls from "@/components/TurnControls";
-import GameStatus from "@/components/GameStatus";
+import PlayersStatus from "@/components/playersStatus";
 import { useNetworkStore } from "@/stores/networkStore";
 import { useCountdown } from "@/hooks/useCountdown";
 import LobbyActions from "@/components/LobbyActions";
@@ -12,6 +12,7 @@ import { CardSelectionOverlay } from "@/lib/cardOverlay";
 import { VFXLayer } from "@/components/vfxOverlayLayer/vfxLayer";
 import TerritoryTooltip from "@/components/TerritoryTooltip";
 import NowPlayingHeader from "@/components/NowPlayingHeader";
+import GameActions from "@/components/gameActions";
 
 const RoomPage = () => {
   const navigate = useNavigate();
@@ -70,7 +71,8 @@ const RoomPage = () => {
       <div id='game-container' className="w-full max-w-180 pb-[100vh] relative">
         <NowPlayingHeader />
         <PixiCanvas />
-        <GameStatus />
+        <PlayersStatus />
+        <GameActions />
         <VFXLayer />
         <TerritoryTooltip />
 
@@ -78,7 +80,7 @@ const RoomPage = () => {
           {roomPhase === "active" && <TurnControls />}
           {roomPhase === "lobby" && <LobbyActions />}
         </ActionArea>
-        <CardSelectionOverlay/>
+        <CardSelectionOverlay />
       </div>
     </div>
   );

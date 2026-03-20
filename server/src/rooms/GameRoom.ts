@@ -223,6 +223,10 @@ export class GameRoom extends Room<RoomState> {
     this.onAction('PAY_OFF_DEBT', (client)=>{
       this.gameEngine.payOffDebt(client)
     })
+
+    this.onAction('DECLARE_BANKRUPTCY', (client)=>{
+      this.gameEngine.declareBankruptcy(client)
+    })
   }
 
   onAuth(client: Client<any, any>, options: any, context: AuthContext) {

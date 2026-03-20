@@ -14,7 +14,7 @@ export interface ClientMessages {
   CHANGE_MAP: {mapID: MapID}
   SELECT_CARD: {cardID: string}
   PAY_OFF_DEBT: {};
-  
+  DECLARE_BANKRUPTCY: {};
 }
 
 export interface ServerMessages {

@@ -73,6 +73,13 @@ export const useStore = create(
                 console.log(err)
               }
             },
+            declareBackruptcy: () => {
+              try{
+                network.send('DECLARE_BANKRUPTCY', {})
+              }catch(err){
+                console.log(err)
+              }
+            },
             setShowDiceRollMessage: (show: boolean) => {
               set((z) => {
                 z.showDiceRollMessage = show

@@ -15,7 +15,9 @@ import {
   UpdateActivePlayer, 
   BankBackpackItemsAction,
   UpdateFinancialStatusAction,
-  PayOffDebtAction
+  PayOffDebtAction,
+  UpdatePlayerMoneyAction,
+  UpdatePlayerBackpackMoneyAction
 } from "./actions";
 
 export class ActionFactory {
@@ -62,6 +64,12 @@ export class ActionFactory {
 
       case "PAY_OFF_DEBT":
         return new PayOffDebtAction(data);
+
+      case "UPDATE_PLAYER_MONEY":
+        return new UpdatePlayerMoneyAction(data);
+
+      case "UPDATE_PLAYER_BACKPACK_MONEY":
+        return new UpdatePlayerBackpackMoneyAction(data);
 
       default:
         throw new Error(`Unknown Action Type, unable to create action: ${JSON.stringify(data)}`);

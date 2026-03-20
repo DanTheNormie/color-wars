@@ -1,7 +1,7 @@
 import Player from "./Player";
 import { useStore } from "@/stores/sessionStore";
 
-const GameStatus = () => {
+const PlayersStatus = () => {
   const players = useStore((z) => z.state.game.players);
 
   return (
@@ -15,4 +15,4 @@ const GameStatus = () => {
   );
 };
 
-export default GameStatus;
+export default PlayersStatus;

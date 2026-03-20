@@ -16,6 +16,8 @@ export const TURN_ACTION_REGISTRY = {
   BANK_BACKPACK_ITEMS: {} as { playerId: string, money: number, cards: string[] },
   UPDATE_FINANCIAL_STATUS: {} as { playerId: string, financialStatus: FinancialStatus},
   PAY_OFF_DEBT: {} as { playerId: string, amount: number },
+  UPDATE_PLAYER_MONEY: {} as { playerId: string, amount: number },
+  UPDATE_PLAYER_BACKPACK_MONEY: {} as { playerId: string, amount: number },
 
 } as const;
 

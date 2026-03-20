@@ -240,6 +240,33 @@ export class GameEngine {
     this.state.game.turnPhase = 'awaiting-end-turn';
   }
 
+  declareBankruptcy(client: Client) {
+    const player = this.state.game.players.get(client.sessionId)!;
+    player.financialStatus = "bankrupt"
+    
+    // 1. Lose all money
+    player.money = 0;
+    player.backpack.money = 0;
+    player.backpack.cards.clear();
+    
+    // 2. Lose all territories
+    this.state.game.territoryOwnership.forEach((territory, territoryId) => {
+      if (territory.ownerId === player.id) {
+        this.state.game.territoryOwnership.delete(territoryId);
+      }
+    });
+
+    // 3. Update status
+    this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: player.financialStatus });
+    this.state.pushAction("UPDATE_PLAYER_MONEY", player.id, { playerId: player.id, amount: 0 });
+    this.state.pushAction("UPDATE_PLAYER_BACKPACK_MONEY", player.id, { playerId: player.id, amount: 0 });
+
+    // 4. Pass turn if it's their turn
+    if (this.state.game.activePlayerId === player.id) {
+      this.endTurn();
+    }
+  }
+
   generateNextTile(): TileConfig {
     const round = this.state.game.currentRound;
 
@@ -347,20 +374,40 @@ export class GameEngine {
 
   endTurn() {
     const currentIdx = this.state.game.playerOrder.indexOf(this.state.game.activePlayerId);
+    let nextIdx = (currentIdx + 1) % this.state.game.playerOrder.length;
 
-    const nextIdx = (currentIdx + 1) % this.state.game.playerOrder.length;
+    // Skip bankrupt players
+    let attempts = 0;
+    while (
+      this.state.game.players.get(this.state.game.playerOrder[nextIdx])?.financialStatus === "bankrupt" &&
+      attempts < this.state.game.playerOrder.length
+    ) {
+      nextIdx = (nextIdx + 1) % this.state.game.playerOrder.length;
+      attempts++;
+    }
+
+    // Check if the game is over (only one player left)
+    // const activePlayers = Array.from(this.state.game.players.values()).filter(p => p.financialStatus !== "bankrupt");
+    // if (activePlayers.length <= 1) {
+    //   this.state.game.turnPhase = "game-over";
+    //   // Handle game over logic
+    //   return;
+    // }
+
     this.state.game.activePlayerId = this.state.game.playerOrder[nextIdx];
 
     if (nextIdx === 0) {
       this.state.game.currentRound += 1;
       for (const [, player] of this.state.game.players) {
-        player.hasRolled = false;
+        if (player.financialStatus !== "bankrupt") {
+          player.hasRolled = false;
+        }
       }
       this.shiftTrack('backward', this.state.game.currentRound);
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }
-    this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: this.state.game.playerOrder[nextIdx] });
+    this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: this.state.game.activePlayerId });
   }
 }
 
