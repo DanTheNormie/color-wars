@@ -1,7 +1,7 @@
 import { DEVELOPMENT_TYPES, type EconomyConfig } from "../../types/economyTypes";
 
 export const INDIA_ECONOMY: EconomyConfig = {
-  basePricePerSize: 100,
+  basePricePerSize: 50,
   baseMaintenanceMultiplier: 0.2,
 
   developments: {

@@ -34,6 +34,7 @@ interface StoreState {
   isSpectator: boolean;
   actionState: ActionState
   showDiceRollMessage: boolean;
+  winnerId: string | null;
 }
 
 export const useStore = create(
@@ -53,7 +54,8 @@ export const useStore = create(
               playersPings: {},
             },
             actionState: 'idle',
-            showDiceRollMessage: false
+            showDiceRollMessage: false,
+            winnerId: null,
           } as StoreState,
           (set, get) => ({
             setDiceTrack: (diceTrack: TileState[]) => {
@@ -359,7 +361,12 @@ export const useStore = create(
               } catch (err) {
                 console.warn('unable to do action: change map', mapID)
               }
-            }
+            },
+            setWinnerId: (winnerId: string) => {
+              set((z) => {
+                z.winnerId = winnerId;
+              });
+            },
           }),
         ),
       ),

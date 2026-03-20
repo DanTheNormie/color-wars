@@ -18,6 +18,7 @@ export const TURN_ACTION_REGISTRY = {
   PAY_OFF_DEBT: {} as { playerId: string, amount: number },
   UPDATE_PLAYER_MONEY: {} as { playerId: string, amount: number },
   UPDATE_PLAYER_BACKPACK_MONEY: {} as { playerId: string, amount: number },
+  GAME_OVER: {} as { winnerId: string },
 
 } as const;
 

@@ -444,3 +444,12 @@ export class UpdatePlayerBackpackMoneyAction extends BaseAction<"UPDATE_PLAYER_B
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }
+
+export class GameOverAction extends BaseAction<"GAME_OVER"> {
+  execute(): ActionHandle {
+    const { winnerId } = this.payload;
+    useStore.getState().setWinnerId(winnerId);
+    this.logAction(winnerId);
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
+  }
+}

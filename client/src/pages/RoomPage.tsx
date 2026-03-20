@@ -13,6 +13,7 @@ import { VFXLayer } from "@/components/vfxOverlayLayer/vfxLayer";
 import TerritoryTooltip from "@/components/TerritoryTooltip";
 import NowPlayingHeader from "@/components/NowPlayingHeader";
 import GameActions from "@/components/gameActions";
+import GameOverOverlay from "@/components/GameOverOverlay";
 
 const RoomPage = () => {
   const navigate = useNavigate();
@@ -81,6 +82,7 @@ const RoomPage = () => {
           {roomPhase === "lobby" && <LobbyActions />}
         </ActionArea>
         <CardSelectionOverlay />
+        <GameOverOverlay />
       </div>
     </div>
   );

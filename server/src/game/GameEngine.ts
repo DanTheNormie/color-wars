@@ -264,6 +264,19 @@ export class GameEngine {
     // 4. Pass turn if it's their turn
     if (this.state.game.activePlayerId === player.id) {
       this.endTurn();
+    } else {
+      this.checkGameOver();
+    }
+  }
+
+  checkGameOver() {
+    const activePlayers = Array.from(this.state.game.players.values()).filter(p => p.financialStatus !== "bankrupt");
+    
+    // If only one player is left, they win
+    if (activePlayers.length === 1) {
+      const winner = activePlayers[0];
+      this.state.game.turnPhase = "game-over";
+      this.state.pushAction("GAME_OVER", winner.id, { winnerId: winner.id });
     }
   }
 
@@ -387,12 +400,10 @@ export class GameEngine {
     }
 
     // Check if the game is over (only one player left)
-    // const activePlayers = Array.from(this.state.game.players.values()).filter(p => p.financialStatus !== "bankrupt");
-    // if (activePlayers.length <= 1) {
-    //   this.state.game.turnPhase = "game-over";
-    //   // Handle game over logic
-    //   return;
-    // }
+    this.checkGameOver();
+    if (this.state.game.turnPhase === "game-over") {
+      return;
+    }
 
     this.state.game.activePlayerId = this.state.game.playerOrder[nextIdx];
 

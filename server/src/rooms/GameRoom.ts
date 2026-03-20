@@ -128,6 +128,7 @@ export class GameRoom extends Room<RoomState> {
   
       players.delete(client.sessionId);
       this.state.playersPings.delete(client.sessionId);
+      this.gameEngine.checkGameOver();
     };
   
     const idx = playerOrder.indexOf(client.sessionId);
