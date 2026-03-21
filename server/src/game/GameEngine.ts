@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { GameAction, PlayerState, RoomState, TerritoryState, TileState } from "@color-wars/shared/src/types/RoomState";
+import { PlayerState, RoomState, TerritoryState, TileState } from "@color-wars/shared/src/types/RoomState";
 import { PLAYER } from "@color-wars/shared/src/config/game";
 import { Client, Room } from "colyseus";
 import { StatusEffect } from "@color-wars/shared/src/types/RoomState";

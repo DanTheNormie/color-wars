@@ -17,12 +17,21 @@ export interface ClientMessages {
   DECLARE_BANKRUPTCY: {};
 }
 
+export interface QueuedAction<TPayload = unknown> {
+  type: string;
+  payload: TPayload;
+  serverTimestamp: number;
+  sequence: number;
+  checksum: string;
+}
+
 export interface ServerMessages {
   PING: { serverT1: number };
   PING_PONG: { serverT1: number; clientT2: number; serverT3: number };
   ACCELERATE_DICE: {};
   RAGDOLL_DICE: {};
-  RELAY_MESSAGE: {senderId: string, content: string, timeStamp: number}
+  RELAY_MESSAGE: {senderId: string, content: string, timeStamp: number};
+  action: QueuedAction;
 }
 
 // Helper Types

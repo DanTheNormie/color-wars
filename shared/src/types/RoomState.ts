@@ -1,5 +1,6 @@
 import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
 import type { ActionType, TURN_ACTION_REGISTRY } from "./turnActionRegistry";
+import type { QueuedAction } from "../protocol";
 import { type MapID } from "../maps";
 import type { DevelopmentType } from "./economyTypes";
 import type { TileType } from "../config/diceTrack";
@@ -163,6 +164,8 @@ export class GameAction extends Schema {
   }
 }
 
+
+
 export class GameState extends Schema {
   @type("string") activePlayerId: string = "";
   @type("string") turnPhase: TurnPhase = "awaiting-roll";
@@ -186,6 +189,7 @@ export class GameState extends Schema {
 
 export class RoomState extends Schema {
   private _nextActionId: number = 0;
+  public _pendingActions: QueuedAction[] = [];
   @type(Room) room: Room;
   @type({ map: "number" }) playersPings = new MapSchema<number>();
   @type(GameState) game = new GameState();
@@ -207,9 +211,21 @@ export class RoomState extends Schema {
     this.turnActionHistory.push(action);
   }
 
+  queueAction<T = unknown>(type: string, payload: T, checksum: string) {
+    const action: QueuedAction = {
+      type: type as string,
+      payload,
+      serverTimestamp: 0,
+      sequence: 0,
+      checksum,
+    };
+    this._pendingActions.push(action);
+  }
+
   clearTurnHistory() {
     this.turnActionHistory.clear();
     this._nextActionId = 0;
+    this._pendingActions = [];
   }
 }
 

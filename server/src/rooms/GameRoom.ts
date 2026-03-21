@@ -17,6 +17,7 @@ import {
 export class GameRoom extends Room<RoomState> {
   private gameEngine!: GameEngine;
   private pinger: Delayed | null = null;
+  private actionSequence = 0;
 
   private onAction<K extends ClientActionType>(
     action: K,
@@ -33,6 +34,17 @@ export class GameRoom extends Room<RoomState> {
 
         // Execute
         handler(client, ctx);
+
+        // Flush and broadcast pending actions generated synchronously
+        if (this.state._pendingActions && this.state._pendingActions.length > 0) {
+          const now = Date.now();
+          for (const queuedAction of this.state._pendingActions) {
+            queuedAction.serverTimestamp = now;
+            queuedAction.sequence = this.actionSequence++;
+            this.broadcast("action", queuedAction);
+          }
+          this.state._pendingActions = [];
+        }
       } catch (err) {
         console.error(`Error handling action ${action}:`, err);
       }
