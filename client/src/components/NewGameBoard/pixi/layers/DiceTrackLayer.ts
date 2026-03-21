@@ -390,7 +390,7 @@ export class DiceTrackLayer extends PIXI.Container {
       g.roundPoly(0, 0, FINAL_RADIUS, 6, 10, Math.PI / 6);
       g.fill(textureCfg.baseHex?.fill ?? 0x262626);
       if(textureCfg.baseHex?.stroke){
-        g.stroke({ width: STROKEWIDTH, color: textureCfg.baseHex?.stroke, alignment: 1 });
+        //g.stroke({ width: STROKEWIDTH, color: textureCfg.baseHex?.stroke, alignment: 1 });
       }
       // FILL PATH
       //g.roundPoly(0, 0, FINAL_RADIUS - STROKEWIDTH, 6, 10, Math.PI / 6);
