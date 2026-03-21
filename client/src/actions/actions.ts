@@ -15,6 +15,7 @@ import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackL
 import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
 import { buildTrackShiftAnimation } from "../animation/registry/anim";
 import gsap from "@/lib/gsap";
+import { network } from "@/lib/managers/network";
 
 export class HexHop extends BaseAction<"MOVE_PLAYER"> {
   execute(): ActionHandle {
@@ -194,6 +195,7 @@ export class AddCard extends BaseAction<"ADD_CARD"> {
 export class DrawCardsAction extends BaseAction<"DRAW_3_REWARD_CARDS"> {
   execute(): ActionHandle {
     this.logAction(this.payload.playerId);
+    
     // Wrap the store interaction and waiting logic in a Promise
     const drawAnimationTask = new Promise<void>((resolve) => {
       // 1. Trigger the UI to mount and start animating

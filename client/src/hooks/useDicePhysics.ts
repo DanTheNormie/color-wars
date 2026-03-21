@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Quaternion, Vector3 } from "@/lib/diceMath";
 import { DiceRotationCalculator } from "../lib/rotationCalculator";
 import { getRandomVertexAxis } from "@/lib/diceMath";
@@ -246,6 +246,15 @@ export const useDicePhysics = () => {
 
     animLoop();
   };
+
+  // CLEANUP ON UNMOUNT
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
 
   return {
     quat,

@@ -1,26 +1,32 @@
-// src/components/Dice.tsx
-// Pure visual dice component — no physics, no logic
-
-import {type FC, useLayoutEffect, useRef} from "react";
-import { Quaternion } from "@/lib/diceMath";
+import { useLayoutEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { useDicePhysics, type DiceMode } from "@/hooks/useDicePhysics";
 import styles from "@components/Dice.module.css";
 
-export interface DiceProps {
-  quaternion: Quaternion;
+export interface DiceController {
+  startPhysicsLoop: (id: string) => void;
+  setMode: (mode: DiceMode, payload?: { face: number }) => void;
+  animationRef: React.MutableRefObject<number | null>;
 }
 
-export const Dice: FC<DiceProps> = ({ quaternion }) => {
-  const transform = quaternion.toCSSMatrix();
-  const ref = useRef<HTMLDivElement | null>(null);
+const BetterDice = forwardRef<DiceController, {}>((_, ref) => {
+  const dice = useDicePhysics();
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    startPhysicsLoop: dice.startPhysicsLoop,
+    setMode: dice.setMode,
+    animationRef: dice.animationRef,
+  }));
+
+  const transform = dice.quat.toCSSMatrix();
+
   useLayoutEffect(() => {
-    console.log('setting up ResizeObserver for dice sizing');
-    const el = ref.current;
+    const el = wrapperRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
 
     const update = () => {
       const parent = el.parentElement ?? el;
-      console.log('updating dice size based on parent height:', parent.getBoundingClientRect().height);
-      const size = Math.round(parent.getBoundingClientRect().height  * 0.6); // match your desired percent
+      const size = Math.round(parent.getBoundingClientRect().height * 0.6);
       if (el.firstChild) {
         (el.firstChild as HTMLElement).style.setProperty("--dice-side", `${size}px`);
       }
@@ -31,8 +37,9 @@ export const Dice: FC<DiceProps> = ({ quaternion }) => {
     ro.observe(el.parentElement ?? el);
     return () => ro.disconnect();
   }, []);
+
   return (
-    <div ref={ref} className={styles.diceWrap}>
+    <div ref={wrapperRef} className={styles.diceWrap}>
       <div className={styles.dice} style={{ transform }}>
         <div className={`${styles.diceFace} ${styles.face1}`}></div>
         <div className={`${styles.diceFace} ${styles.face2}`}></div>
@@ -43,6 +50,8 @@ export const Dice: FC<DiceProps> = ({ quaternion }) => {
       </div>
     </div>
   );
-};
+});
 
-export default Dice;
+BetterDice.displayName = "BetterDice";
+
+export default BetterDice;
