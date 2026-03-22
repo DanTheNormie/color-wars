@@ -9,3 +9,4 @@ shared/node_modules
 client/node_modules
 helpers/hex-map-editor/node_modules
 .env*
+ai_temp
