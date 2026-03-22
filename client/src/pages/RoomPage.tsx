@@ -22,14 +22,17 @@ const RoomPage = () => {
   const tryAutoReconnect = useStore((z) => z.tryAutoReconnect);
   const reconnectionToken = useStore((z) => z.room.reconnectionToken);
   const { remainingSeconds } = useCountdown(autoReconnect.nextRetryAt);
-
+  const rehydrated = useStore((z) => z.rehydrated);
   useLayoutEffect(() => {
     const tryReconnect = async () => {
       await tryAutoReconnect();
     };
     if (networkState === "disconnected") {
-      if (reconnectionToken) tryReconnect();
-      else navigate("/");
+      if (reconnectionToken) { tryReconnect(); }
+      else if (rehydrated) {
+        console.log("navigating to lobby")
+        //navigate("/");
+      }
     } else {
       //happy path
     }
@@ -38,7 +41,7 @@ const RoomPage = () => {
     };
   }, [networkState, reconnectionToken, tryAutoReconnect, navigate]);
 
-  if (networkState === "connecting" || networkState === "reconnecting") {
+  if (!rehydrated || networkState === "connecting" || networkState === "reconnecting") {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <p className="text-4xl">Connecting to room...</p>

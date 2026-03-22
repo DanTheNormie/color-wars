@@ -1,5 +1,5 @@
 import { type TileConfig } from "../config/diceTrack";
-import { type TileState, FinancialStatus } from "./RoomState";
+import { type TileState, type FinancialStatus } from "./RoomState";
 
 export const TURN_ACTION_REGISTRY = {
   MOVE_PLAYER: {} as { fromTile: number, toTile: number, tokenId: string },

@@ -15,7 +15,7 @@ import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackL
 import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
 import { buildTrackShiftAnimation } from "../animation/registry/anim";
 import gsap from "@/lib/gsap";
-import { network } from "@/lib/managers/network";
+//import { network } from "@/lib/managers/network";
 
 export class HexHop extends BaseAction<"MOVE_PLAYER"> {
   execute(): ActionHandle {

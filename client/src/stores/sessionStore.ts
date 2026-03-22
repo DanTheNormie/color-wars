@@ -35,6 +35,7 @@ interface StoreState {
   actionState: ActionState
   showDiceRollMessage: boolean;
   winnerId: string | null;
+  rehydrated: boolean;
 }
 
 export const useStore = create(
@@ -56,6 +57,7 @@ export const useStore = create(
             actionState: 'idle',
             showDiceRollMessage: false,
             winnerId: null,
+            rehydrated: false,
           } as StoreState,
           (set, get) => ({
             setDiceTrack: (diceTrack: TileState[]) => {
@@ -375,6 +377,9 @@ export const useStore = create(
         partialize: (state) => ({
           room: state.room,
         }),
+        onRehydrateStorage: (state) => {
+          state.rehydrated = true;
+        }
       },
     ),
     { name: "Store" },

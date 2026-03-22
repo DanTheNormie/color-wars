@@ -378,7 +378,7 @@ export class DiceTrackLayer extends PIXI.Container {
   private getHexTexture(tileConfig: TileConfig, app: PIXI.Application) {
       const RADIUS = 64;
       const GAP = 0.05;
-      const STROKEWIDTH = 4;
+      //const STROKEWIDTH = 4;
       const FINAL_RADIUS = RADIUS * (1 - GAP);
       const textureCfg = TILE_TEXTURE_CONFIG[tileConfig.type]
 
