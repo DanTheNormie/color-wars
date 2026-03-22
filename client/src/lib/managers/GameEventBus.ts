@@ -55,7 +55,7 @@ class GameEventBusSingleton {
    * Usage: bus.emit(CLIENT_EVENT.PLAYER_ADDED, { id: '1', name: 'Neo' })
    */
   public emit<K extends LocalEventType>(event: K, payload: LOCAL_EVENT[K]): void {
-    console.debug('Emit Event: ', event, payload)
+    console.log('Emit Event: ', event, payload)
     const handlers = this.events.get(event) as Set<LocalEventHandler<K>> | undefined;
     if (handlers) {
       handlers.forEach((fn) => fn(payload));

@@ -3,7 +3,7 @@ import type { ActionType, TURN_ACTION_REGISTRY } from "./turnActionRegistry";
 import type { QueuedAction } from "../protocol";
 import { type MapID } from "../maps";
 import type { DevelopmentType } from "./economyTypes";
-import type { TileType } from "../config/diceTrack";
+import { type TileType, DICE_TRACK } from "../config/diceTrack";
 
 export type RoomPhase = "lobby" | "active" | "finished";
 export type RoomVisibility = "private" | "public";
@@ -184,7 +184,15 @@ export class GameState extends Schema {
   @type("number") currentRound: number = 0;
   @type(["string"]) trackOrder = new ArraySchema<string>();
   @type(["string"]) generatedCardIDs = new ArraySchema<string>();
-  @type([TileState]) diceTrack = new ArraySchema<TileState>();
+  @type([TileState]) diceTrack: ArraySchema<TileState>;
+
+  constructor() {
+    super();
+    this.diceTrack = new ArraySchema<TileState>();
+    DICE_TRACK.forEach((tileConfig) => {
+      this.diceTrack.push(new TileState(tileConfig.type, tileConfig.amount, tileConfig.label));
+    });
+  }
 }
 
 export class RoomState extends Schema {

@@ -109,7 +109,7 @@ export const TILE_TEXTURE_CONFIG: Record<TileType, TileTextureConfig> = {
       offset: { x: 0, y: 0 },
     },
     text: {
-      prefix:'-',
+      prefix: '-',
       style: {
         fill: {
           color: 0xff4d4d,
@@ -170,6 +170,7 @@ export class DiceTrackLayer extends PIXI.Container {
         this.trackContainer.addChild(sprite);
       });
     } else {
+      console.warn("No dice track found, using default")
       TRACK_COORDINATES.forEach((_, i) => {
         const sprite = new PIXI.Sprite(this.hexTextures[this.getTileTextureCacheKey(DICE_TRACK[i])]);
         sprite.anchor.set(0.5);
@@ -205,7 +206,7 @@ export class DiceTrackLayer extends PIXI.Container {
     if (!this.hexTextures[cacheKey]) {
       this.hexTextures[cacheKey] = this.getHexTexture(newTile, app);
     }
-    
+
     const newSprite = new PIXI.Sprite(this.hexTextures[cacheKey]);
     newSprite.anchor.set(0.5);
     newSprite.scale.copyFrom(this.sprites[0].scale);
@@ -226,7 +227,7 @@ export class DiceTrackLayer extends PIXI.Container {
       vanishing.forEach(v => v.destroy());
       this.sprites.splice(1, 0, ...newSprites);
     }
-    
+
     this.sprites.forEach((s, idx) => {
       const targetID = `track-tile-${idx}`;
       s.label = targetID;
@@ -374,68 +375,68 @@ export class DiceTrackLayer extends PIXI.Container {
     };
   }
 
-  
+
   private getHexTexture(tileConfig: TileConfig, app: PIXI.Application) {
-      const RADIUS = 64;
-      const GAP = 0.05;
-      //const STROKEWIDTH = 4;
-      const FINAL_RADIUS = RADIUS * (1 - GAP);
-      const textureCfg = TILE_TEXTURE_CONFIG[tileConfig.type]
+    const RADIUS = 64;
+    const GAP = 0.05;
+    //const STROKEWIDTH = 4;
+    const FINAL_RADIUS = RADIUS * (1 - GAP);
+    const textureCfg = TILE_TEXTURE_CONFIG[tileConfig.type]
 
-      const container = new PIXI.Container();
+    const container = new PIXI.Container();
 
-      // HEX Shape
-      const g = new PIXI.Graphics();
-      // INNER STROKE PATH
-      g.roundPoly(0, 0, FINAL_RADIUS, 6, 10, Math.PI / 6);
-      g.fill(textureCfg.baseHex?.fill ?? 0x262626);
-      if(textureCfg.baseHex?.stroke){
-        //g.stroke({ width: STROKEWIDTH, color: textureCfg.baseHex?.stroke, alignment: 1 });
+    // HEX Shape
+    const g = new PIXI.Graphics();
+    // INNER STROKE PATH
+    g.roundPoly(0, 0, FINAL_RADIUS, 6, 10, Math.PI / 6);
+    g.fill(textureCfg.baseHex?.fill ?? 0x262626);
+    if (textureCfg.baseHex?.stroke) {
+      //g.stroke({ width: STROKEWIDTH, color: textureCfg.baseHex?.stroke, alignment: 1 });
+    }
+    // FILL PATH
+    //g.roundPoly(0, 0, FINAL_RADIUS - STROKEWIDTH, 6, 10, Math.PI / 6);
+    container.addChild(g);
+    // Icon
+    if (textureCfg.icon) {
+      const iconCfg = textureCfg.icon
+      const icon = new PIXI.Sprite(PIXI.Texture.from(iconCfg.path));
+      if (iconCfg.anchor) {
+        const { x, y } = iconCfg.anchor
+        icon.anchor.set(x, y);
+      } else {
+        icon.anchor.set(0.5);
       }
-      // FILL PATH
-      //g.roundPoly(0, 0, FINAL_RADIUS - STROKEWIDTH, 6, 10, Math.PI / 6);
-      container.addChild(g);
-      // Icon
-      if(textureCfg.icon){
-        const iconCfg = textureCfg.icon
-        const icon = new PIXI.Sprite(PIXI.Texture.from(iconCfg.path));
-        if(iconCfg.anchor){
-          const {x, y} = iconCfg.anchor
-          icon.anchor.set(x, y);
-        }else{
-          icon.anchor.set(0.5);
-        }
-        if(iconCfg.scale) icon.scale.set(iconCfg.scale);
-        container.addChild(icon);
-      }
+      if (iconCfg.scale) icon.scale.set(iconCfg.scale);
+      container.addChild(icon);
+    }
 
-      if(textureCfg.text){
-        const textCfg = textureCfg.text
-        const text = new PIXI.Text({
-          text: `${textCfg.prefix??""}${tileConfig.amount??""}`,
-          style: {
-            fontSize:24 - (tileConfig.amount!>999? 2: 0),
-            ...textCfg.style
-          },
-        })
-        text.anchor.set(0.5)
-        const {x, y} = textCfg.pos
-        text.position.set(x, y)
-        
-        container.addChild(text)
-      }
-      
+    if (textureCfg.text) {
+      const textCfg = textureCfg.text
+      const text = new PIXI.Text({
+        text: `${textCfg.prefix ?? ""}${tileConfig.amount ?? ""}`,
+        style: {
+          fontSize: 24 - (tileConfig.amount! > 999 ? 2 : 0),
+          ...textCfg.style
+        },
+      })
+      text.anchor.set(0.5)
+      const { x, y } = textCfg.pos
+      text.position.set(x, y)
 
-      return app.renderer.textureGenerator.generateTexture({
-        target: container,
-        resolution: window.devicePixelRatio || 1,
-        antialias: true,
-      });
-    };
+      container.addChild(text)
+    }
+
+
+    return app.renderer.textureGenerator.generateTexture({
+      target: container,
+      resolution: window.devicePixelRatio || 1,
+      antialias: true,
+    });
+  };
 
   private generateRoundedHexTextures(app: PIXI.Application) {
     const hexTextures: Partial<Record<string, PIXI.Texture>> = {};
-    DICE_TRACK.forEach((t)=>{
+    DICE_TRACK.forEach((t) => {
       const key = this.getTileTextureCacheKey(t)
       hexTextures[key] = this.getHexTexture(t, app)
     })
