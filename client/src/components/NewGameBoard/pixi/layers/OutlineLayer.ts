@@ -1,8 +1,10 @@
 import * as PIXI from "pixi.js";
+import gsap from "@/lib/gsap";
 import type { GameMap, Hex } from "@/types/map-types";
 import { MAP_BACKGROUND_COLOR, MAP_SECONDARY_COLOR } from "../engine";
 import { useMapStore } from "@/stores/mapStateStore";
-
+import { getAdjacent } from "@/utils/map-utils";
+import { hexNumberToHexString } from "@/utils/color-utils";
 export class OutlineLayer extends PIXI.Container {
   private bordersContainer: PIXI.Container;
   private fillsContainer: PIXI.Container;
@@ -13,6 +15,7 @@ export class OutlineLayer extends PIXI.Container {
   // Interaction State
   private activeHoverId: string | null = null;
   private activeSelectId: string | null = null;
+  private pulseTweens: Map<string, gsap.core.Tween> = new Map();
 
   constructor() {
     super();
@@ -28,6 +31,7 @@ export class OutlineLayer extends PIXI.Container {
     this.fillsContainer.removeChildren();
     this.bordersContainer.removeChildren();
     this.stateGraphics.clear();
+    this.stopAllPulses();
 
     const { hexSize } = map.grid;
     const hexMap = new Map<string, string>();
@@ -141,14 +145,69 @@ export class OutlineLayer extends PIXI.Container {
   public updateSelection(hoverId: string | null, selectId: string | null) {
     // Reset previous
     if (this.activeHoverId) this.toggleBorder(this.activeHoverId, false);
-    if (this.activeSelectId) this.toggleBorder(this.activeSelectId, false);
+    if (this.activeSelectId) {
+      this.toggleBorder(this.activeSelectId, false);
+      this.toggleFill(this.activeSelectId, false);
+    }
+
+    // Stop all pulses before applying new selection
+    this.stopAllPulses();
 
     // Set new
-    if (hoverId) this.toggleBorder(hoverId, true, 0xffd700); // Greyish hover
-    if (selectId) this.toggleBorder(selectId, true, 0xffffff); // Gold select
+    if (hoverId) this.toggleBorder(hoverId, true, 0xffd700); // Gold hover
+    if (selectId) {
+      this.toggleFill(selectId, true, 0xffffff); // White select
+
+      // Pulse neighbors
+      const currentMap = useMapStore.getState().current_map;
+      const neighbors = getAdjacent(selectId, currentMap);
+      neighbors.forEach((neighborId) => {
+        this.startPulse(neighborId);
+      });
+    }
 
     this.activeHoverId = hoverId;
     this.activeSelectId = selectId;
+  }
+
+  private startPulse(territoryID: string) {
+    const obj = this.stateGraphics.get(territoryID);
+    if (!obj) return;
+
+    // Kill any existing pulse for this specific territory just in case
+    if (this.pulseTweens.has(territoryID)) {
+      this.pulseTweens.get(territoryID)?.kill();
+    }
+
+    // Pulse the FILL tint between default and gold
+    const tween = gsap.to(obj.fill, {
+      pixi: { tint: 0xffd700 }, // Gold
+      duration: 1.0,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+
+
+    this.pulseTweens.set(territoryID, tween);
+  }
+
+  private stopAllPulses() {
+    this.pulseTweens.forEach((tween, id) => {
+      tween.kill();
+      const obj = this.stateGraphics.get(id);
+      if (obj) {
+        // Restore fill alpha and color
+        obj.fill.alpha = 1.0;
+        const color = useMapStore.getState().colorMap.get(id);
+        if (color) this.setTerritoryColor(id, color);
+        else this.setTerritoryColor(id, hexNumberToHexString(MAP_SECONDARY_COLOR));
+
+        // Restore border tint
+        obj.border.tint = MAP_BACKGROUND_COLOR;
+      }
+    });
+    this.pulseTweens.clear();
   }
 
   private toggleBorder(territoryID: string, isVisible: boolean, tint: number = MAP_BACKGROUND_COLOR) {
@@ -165,6 +224,24 @@ export class OutlineLayer extends PIXI.Container {
     }
   }
 
+  private toggleFill(territoryID: string, isVisible: boolean, tint: number = MAP_SECONDARY_COLOR) {
+    const obj = this.stateGraphics.get(territoryID);
+    if (!obj) return;
+
+    if (isVisible) {
+      obj.fill.tint = tint;
+      // Bring to top within its container
+      this.fillsContainer.addChild(obj.fill);
+    } else {
+      const color = useMapStore.getState().colorMap.get(territoryID);
+      if (color) {
+        this.setTerritoryColor(territoryID, color);
+      } else {
+        obj.fill.tint = tint;
+      }
+    }
+  }
+
   setTerritoryColor(territoryID: string, color: string) {
     const obj = this.stateGraphics.get(territoryID)
     if (!obj) return;
@@ -172,3 +249,4 @@ export class OutlineLayer extends PIXI.Container {
     obj.fill.tint = color
   }
 }
+

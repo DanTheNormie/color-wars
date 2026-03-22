@@ -14,7 +14,7 @@ import {
 import { useTooltipStore } from "@/stores/tooltipStore";
 import { useMapStore } from "@/stores/mapStateStore";
 import { useStore } from "@/stores/sessionStore";
-
+import { getAdjacent, getAdjacentOwnedByPlayer } from "@/utils/map-utils";
 /* ─── Number formatter ─── */
 const fmt = new Intl.NumberFormat("en", {
   notation: "compact",
@@ -61,6 +61,8 @@ export default function TerritoryTooltip() {
   const players = useStore((s) => s.state.game?.players);
   const currentPlayerId = useStore((s) => s.currentPlayer?.id);
 
+  const adjacentTerritories = getAdjacent(territoryId, currentMap);
+  const adjacentOwnedByPlayer = getAdjacentOwnedByPlayer(currentPlayerId, territoryId, currentMap, territoryOwnership);
   /* ── Floating UI setup ── */
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -242,7 +244,22 @@ export default function TerritoryTooltip() {
               Purchase Territory for {baseCost}
             </button>
           ) : isOwnedByCurrentPlayer ? (
-            buildingType === "BASE" ? (
+            (adjacentOwnedByPlayer.length < adjacentTerritories.length) ? (
+              (adjacentOwnedByPlayer.length === 0) ? (
+                <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
+                  {adjacentTerritories.length === 1 
+                    ? "you need to own the adjacent territory to upgrade" 
+                    : `you need to own all ${adjacentTerritories.length} adjacent territories to upgrade`}
+                </div>
+              ) : (
+                <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
+                  {adjacentTerritories.length - adjacentOwnedByPlayer.length === 1 
+                    ? "purchase the last adjacent territory to upgrade" 
+                    : `purchase remaining ${adjacentTerritories.length - adjacentOwnedByPlayer.length} adjacent territories to upgrade`}
+                </div>
+              )
+            ) : (
+              buildingType === "BASE" ? (
               <div className="flex gap-2 justify-between">
                 <button 
                   className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
@@ -270,6 +287,7 @@ export default function TerritoryTooltip() {
               >
                 Build Capital Monument
               </button>
+            )
             )
           ) : null}
         </div>

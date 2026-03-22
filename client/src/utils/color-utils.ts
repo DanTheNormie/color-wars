@@ -53,3 +53,8 @@ export function hexStringToHexNumber(hexString: string): number {
 
   return parseInt(cleanHex, 16);
 }
+
+export function hexNumberToHexString(hex: number): string {
+  return `#${hex.toString(16).padStart(6, "0")}`;
+}
+
