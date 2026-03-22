@@ -13,6 +13,7 @@ import type {
   TileState,
   FinancialStatus
 } from "@color-wars/shared/src/types/RoomState";
+import type { DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
 import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
 import type { MapID } from "@color-wars/shared/src/maps";
@@ -256,13 +257,13 @@ export const useStore = create(
                 }
               });
             },
-            updateTerritoryOwnership: (territoryId: string, ownerId: string | null) => {
+            updateTerritoryOwnership: (territoryId: string, ownerId: string | null, buildingType: DevelopmentType = "BASE") => {
               set((z) => {
                 z.state.game.territoryOwnership ??= {};
                 if (ownerId) {
                   z.state.game.territoryOwnership[territoryId] = {
-                    ...(z.state.game.territoryOwnership[territoryId] || {}),
                     ownerId,
+                    buildingType
                   };
                 } else {
                   delete z.state.game.territoryOwnership[territoryId];

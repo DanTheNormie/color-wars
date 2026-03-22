@@ -1,8 +1,8 @@
 // network.ts
 import { Client, Room, getStateCallbacks } from "colyseus.js";
 import { wsEndpoint } from "../serverConfig";
-import { GameAction, RoomState } from "@color-wars/shared/src/types/RoomState";
-import type { ClientMessages, ServerMessages, ClientActionType, ServerActionType, PlayerJoinPayload } from "@color-wars/shared/src/protocol";
+import { RoomState } from "@color-wars/shared/src/types/RoomState";
+import type { ClientMessages, ServerMessages, ClientActionType, ServerActionType, PlayerJoinPayload, QueuedAction } from "@color-wars/shared/src/protocol";
 import { DEFAULT_ROOM_TYPE } from "@color-wars/shared/src/config/room";
 import { GameEventBus } from "./GameEventBus";
 import { ActionQueue } from "@/actions/core";
@@ -71,6 +71,10 @@ class Network {
       GameEventBus.emit("RAGDOLL_DICE", {});
     });
 
+    this.onMessage("action", (queuedAction) => {
+      this.handleQueuedAction(queuedAction);
+    });
+
     this.room.onStateChange.once((state) => {
       if (!this.room?.roomId) return;
       this.setState("connected");
@@ -106,9 +110,9 @@ class Network {
             GameEventBus.emit("UPDATE_PLAYER", { id: player.id, player });
           });
         }),
-        $(this.room.state).turnActionHistory.onAdd((action) => {
-          this.handleActionHistory(action);
-        }),
+        // $(this.room.state).turnActionHistory.onAdd((action) => {
+        //   this.handleActionHistory(action);
+        // }),
         $(this.room.state.room).listen("leaderId", (newValue) => {
           GameEventBus.emit("UPDATE_ROOM_LEADER", { id: newValue });
         }),
@@ -189,78 +193,60 @@ class Network {
     GameEventBus.emit("UPDATE_NETWORK_STATE", { state });
   }
 
-  private handleActionHistory(action: GameAction) {
-    console.log("lastPlayedActionID: ", this.lastPlayedActionID, "currentActionID", action.id, "action type:", action.type);
-    if (this.lastPlayedActionID >= action.id) return; // already played
 
-    const mode = this.getPlaybackMode(action.timestamp);
+  private handleQueuedAction(queuedAction: QueuedAction) {
+    // Skip if we've already processed this action (based on sequence number)
+    if (this.lastPlayedActionID >= queuedAction.sequence) return;
+
+    // Calculate playback mode based on timestamp delay
+    const mode = this.getPlaybackModeFromTimestamp(queuedAction.serverTimestamp);
 
     if (mode === "skip") {
-      // Hard-sync: kill queue, apply state instantly
-      console.warn("Skipping animations due to heavy desync");
-      this.actionQueue.clear("complete"); // complete everything instantly
-      this.restoreSpeed(); // make sure we don’t stay in fast mode
-      this.playActionInstantly(action);
-      this.lastPlayedActionID = action.id;
+      // Hard desync detected - trigger recovery
+      console.warn("Hard desync detected, triggering state recovery");
+      this.handleDesyncRecovery();
       return;
-    } else if (mode == "fast") {
+    } else if (mode === "fast") {
       this.setSpeed(2);
     } else {
       this.restoreSpeed();
     }
-    // Create action executor
-    const parsed = this.decodeGameAction(action);
+
+    // Decode and create action
+    const parsed = this.decodeQueuedAction(queuedAction);
     if (!parsed) {
-      console.error("Failed to parse action for playback:", action);
+      console.error("Failed to parse queued action for playback:", queuedAction);
       return;
     }
+
     const executable = ActionFactory.create(parsed);
-    // Wrap in a speed-aware action
     this.actionQueue.enqueue(executable);
 
-    // Update pointer, cause only one gets called.
-    // update function to take in only one action at a time
-    this.lastPlayedActionID = action.id;
+    // Update pointer for skip/fast logic
+    this.lastPlayedActionID = queuedAction.sequence;
   }
 
-  private playActionInstantly(action: GameAction) {
-    const parsed = this.decodeGameAction(action);
-    if (!parsed) {
-      console.error("Failed to parse action for instant playback:", action);
-      return;
-    }
-    const executable = ActionFactory.create(parsed);
-
-    const handle = executable.execute();
-    handle.complete(); // jump animation to end immediately
-  }
-
-  private decodeGameAction(action: GameAction): ActionData | null {
-    if (!isActionType(action.type)) return null;
-
-    const type = action.type; // 🔑 NOW this is ActionType
-
-    let payload: unknown;
-    try {
-      payload = JSON.parse(action.payload);
-    } catch {
-      return null;
-    }
-
-    return {
-      id: action.id,
-      timestamp: action.timestamp,
-      type,
-      payload: payload as typeof TURN_ACTION_REGISTRY[typeof type],
-    } as ActionData;
-  }
-
-  private getPlaybackMode(actionTimestamp: number): "normal" | "fast" | "skip" {
-    const delay = Date.now() - actionTimestamp;
-    console.log("action delay:", (delay / 1000).toFixed(2), "seconds");
+  private getPlaybackModeFromTimestamp(timestamp: number): "normal" | "fast" | "skip" {
+    const delay = Date.now() - timestamp;
     if (delay < 2000) return "normal";
     if (delay < 10000) return "fast";
     return "skip";
+  }
+
+  private handleDesyncRecovery() {
+    // Clear the action queue and reset tracking
+    this.actionQueue.clear("kill");
+    this.lastPlayedActionID = -1;
+
+    // Request a full state update by triggering a reconnection
+    // This will cause the server to send the full state again via FULL_SEND
+    console.log("Triggering reconnection for full state recovery");
+
+    // Leave current room to trigger reconnection
+    this.leave("manual");
+
+    // Emit event to show reconnecting status
+    GameEventBus.emit("UPDATE_NETWORK_STATE", { state: "reconnecting" });
   }
 
   private setSpeed(multiplier: number) {
@@ -271,6 +257,40 @@ class Network {
 
   private restoreSpeed() {
     GameEventBus.emit("UPDATE_ANIMATION_SPEED", { speedMultiplier: 1 });
+  }
+
+  // private playActionInstantly(queuedAction: QueuedAction) {
+  //   // Create action data compatible with ActionFactory
+  //   const actionData: ActionData = {
+  //     id: queuedAction.sequence,
+  //     timestamp: queuedAction.serverTimestamp,
+  //     type: queuedAction.type,
+  //     payload: queuedAction.payload
+  //   };
+
+  //   const executable = ActionFactory.create(actionData);
+  //   const handle = executable.execute();
+  //   handle.complete(); // jump animation to end immediately
+  // }
+
+  private decodeQueuedAction(queuedAction: QueuedAction): ActionData | null {
+    if (!isActionType(queuedAction.type)) return null;
+
+    const type = queuedAction.type;
+
+    let payload: unknown;
+    try {
+      payload = JSON.parse(JSON.stringify(queuedAction.payload)); // Deep copy to avoid reference issues
+    } catch {
+      return null;
+    }
+
+    return {
+      id: queuedAction.sequence,
+      timestamp: queuedAction.serverTimestamp,
+      type,
+      payload: payload as typeof TURN_ACTION_REGISTRY[typeof type],
+    } as ActionData;
   }
 
   getRoom() {

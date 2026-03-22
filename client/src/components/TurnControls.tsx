@@ -32,9 +32,7 @@ const TurnControls = () => {
 
   const holdStartRef = useRef<number | null>(null);
 
-  // We determine how many dice to render based on `rollTo`. If it's empty but we're rolling/ragdolling
-  // we default to 2. This makes it robust to arbitrary counts.
-  const diceCount = 2; 
+  const diceCount = 2;
 
   const diceRefs = useRef<(DiceController | null)[]>([]);
 
@@ -75,12 +73,17 @@ const TurnControls = () => {
         if (!dice) return;
         dice.setMode("ragdoll");
       });
+    } else if(diceMode == "IDLE" && rollTo && rollTo.length > 0) {
+      diceRefs.current.forEach((dice, i) => {
+        if (!dice) return;
+        dice.rotateToFace(rollTo[i]);
+      });
     }
 
     return () => {
       if (timer) clearTimeout(timer);
     }
-  }, [diceMode, rollTo, isNOTActivePlayer, setShowDiceRollMessage]);
+  }, [diceMode, rollTo]);
 
   const holdStart = () => {
     if (isNOTActivePlayer) return;

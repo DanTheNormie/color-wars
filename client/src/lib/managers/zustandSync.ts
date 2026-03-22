@@ -49,8 +49,18 @@ class ZustandSyncManager {
           useStore.setState({ state: state.toJSON()});
         }
         state.game.players.forEach((player) => {
+          if(player.id == state.game.activePlayerId){
+            useDiceTrackStore.getState().setActiveToken(player.id)
+          }
           useDiceTrackStore.getState().upsertToken({ id: player.id, tileId: `track-tile-${player.position}`, color: hexStringToHexNumber(player.color) });
+          state.game.territoryOwnership.forEach((territory, territoryId) => {
+            if(territory.ownerId == player.id){
+              useMapStore.getState().setTerritoryColor(territoryId, player.color)
+              useStore.getState().updateTerritoryOwnership(territoryId, player.id)
+            }
+          })
         });
+        useMapStore.getState().setMapID(state.mapID)
       }),
 
       GameEventBus.on("REMOVE_PLAYER", ({ id }) => {

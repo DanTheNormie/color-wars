@@ -61,7 +61,8 @@ export class GameEngine {
     }
 
     this.state.game.activePlayerId = this.state.game.playerOrder.at(0);
-    this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: this.state.game.playerOrder.at(0) });
+    this.state.queueAction('UPDATE_ACTIVE_PLAYER', { playerId: this.state.game.playerOrder.at(0) })
+    // this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: this.state.game.playerOrder.at(0) });
     this.state.game.turnPhase = "awaiting-roll";
   }
 
@@ -69,8 +70,10 @@ export class GameEngine {
     const die1 = Math.floor(Math.random() * 6) + 1;
     const die2 = Math.floor(Math.random() * 6) + 1;
     const roll = die1 + die2;
-
-    this.state.pushAction("ROLL_DICE", client.sessionId, { die1, die2 });
+    this.state.game.diceState.rollTo.clear();
+    this.state.game.diceState.rollTo.push(die1, die2);
+    this.state.queueAction('ROLL_DICE', { die1, die2 })
+    // this.state.pushAction("ROLL_DICE", client.sessionId, { die1, die2 });
 
     const player = this.state.game.players.get(client.sessionId)!;
     const fromTile = player.position;
@@ -79,7 +82,8 @@ export class GameEngine {
     const destTileConfig = this.state.game.diceTrack[toTile];
 
     player.position = toTile;
-    this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
+    this.state.queueAction('MOVE_PLAYER', { fromTile, toTile, tokenId: client.sessionId })
+    // this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
 
     if ((fromTile + roll) >= this.state.game.diceTrack.length) {
       this.bankBackpack(client.sessionId);
@@ -97,10 +101,12 @@ export class GameEngine {
     const player = this.state.game.players.get(playerId)!;
     if((player.backpack.money >= 0 ) && player.financialStatus !== "healthy"){
       player.financialStatus = "healthy"
-      this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "healthy" })
+      this.state.queueAction('UPDATE_FINANCIAL_STATUS', { playerId: player.id, financialStatus: "healthy" })
+      // this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "healthy" })
     }else if((player.backpack.money < 0) && player.financialStatus !== "in-debt"){
       player.financialStatus = "in-debt"
-      this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "in-debt" })
+      this.state.queueAction('UPDATE_FINANCIAL_STATUS', { playerId: player.id, financialStatus: "in-debt" })
+      // this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "in-debt" })
     }
   }
     
@@ -112,7 +118,8 @@ export class GameEngine {
       player.money += debt;
       player.backpack.money = 0;
       this.updateFinancialStatus(client.sessionId)
-      this.state.pushAction("PAY_OFF_DEBT", client.sessionId, { playerId: client.sessionId, amount: debt });
+      this.state.queueAction('PAY_OFF_DEBT', { playerId: client.sessionId, amount: debt })
+      // this.state.pushAction("PAY_OFF_DEBT", client.sessionId, { playerId: client.sessionId, amount: debt });
 
     }
   }
@@ -129,11 +136,12 @@ export class GameEngine {
       player.backpack.money = 0;
       player.backpack.cards.clear();
       
-      this.state.pushAction("BANK_BACKPACK_ITEMS", playerId, { 
-        playerId: playerId, 
-        money: backpackMoney, 
-        cards: backpackCards 
-      });
+      this.state.queueAction('BANK_BACKPACK_ITEMS', { playerId: playerId, money: backpackMoney, cards: backpackCards })
+      // this.state.pushAction("BANK_BACKPACK_ITEMS", playerId, { 
+      //   playerId: playerId, 
+      //   money: backpackMoney, 
+      //   cards: backpackCards 
+      // });
     }
   }
 
@@ -142,25 +150,29 @@ export class GameEngine {
       case 'INCOME': {
         const amount = tileConfig.amount!
         player.backpack.money += amount
-        this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount: amount })
+        this.state.queueAction('INCR_MONEY', { playerId: player.id, amount: amount })
+        // this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'TAX': {
         const amount = tileConfig.amount!
         player.backpack.money -= amount
-        this.state.pushAction('DECR_MONEY', player.id, { playerId: player.id, amount: amount })
+        this.state.queueAction('DECR_MONEY', { playerId: player.id, amount: amount })
+        // this.state.pushAction('DECR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'REWARD': {
         const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
         player.backpack.money += amount
-        this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount: amount })
+        this.state.queueAction('INCR_MONEY', { playerId: player.id, amount: amount })
+        // this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'PENALTY': {
         const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
         player.backpack.money -= amount
-        this.state.pushAction('DECR_MONEY', player.id, { playerId: player.id, amount: amount })
+        this.state.queueAction('DECR_MONEY', { playerId: player.id, amount: amount })
+        // this.state.pushAction('DECR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'SURPRISE': {
@@ -170,7 +182,8 @@ export class GameEngine {
         const packedIds = generatedCardConfigs.map(c => JSON.stringify(c));
         this.state.game.turnPhase = 'resolving-draft'
         this.state.game.generatedCardIDs.push(...packedIds)
-        this.state.pushAction("DRAW_3_REWARD_CARDS", player.id, { playerId: player.id, cardIds: packedIds });
+        this.state.queueAction('DRAW_3_REWARD_CARDS', { playerId: player.id, cardIds: packedIds })
+        // this.state.pushAction("DRAW_3_REWARD_CARDS", player.id, { playerId: player.id, cardIds: packedIds });
         break;
       }
       case 'SAFE':
@@ -198,7 +211,8 @@ export class GameEngine {
 
     const cost = economy.BASE.capEx
 
-    this.state.pushAction('BUY_TERRITORY', player.id, { playerId: player.id, territoryID, amount: cost })
+    this.state.queueAction('BUY_TERRITORY', { playerId: player.id, territoryID, amount: cost })
+    // this.state.pushAction('BUY_TERRITORY', player.id, { playerId: player.id, territoryID, amount: cost })
 
     player.money -= cost;
     this.state.game.territoryOwnership.set(territoryID, new TerritoryState(player.id))
@@ -213,7 +227,8 @@ export class GameEngine {
 
     const cost = economy.BASE.capEx / 2
 
-    this.state.pushAction('SELL_TERRITORY', player.id, { playerId: player.id, territoryID, amount: cost })
+    this.state.queueAction('SELL_TERRITORY', { playerId: player.id, territoryID, amount: cost })
+    // this.state.pushAction('SELL_TERRITORY', player.id, { playerId: player.id, territoryID, amount: cost })
 
     player.money += cost;
     this.state.game.territoryOwnership.delete(territoryID)
@@ -225,16 +240,19 @@ export class GameEngine {
 
     // Attempt to decode the config pushed from DRAW_3_REWARD_CARDS
     const config = JSON.parse(encodedConfig) as RewardConfig;
-    this.state.pushAction('SELECT_CARD', player.id, { selectedCardId: encodedConfig });
+    this.state.queueAction('SELECT_CARD', { selectedCardId: encodedConfig })
+    // this.state.pushAction('SELECT_CARD', player.id, { selectedCardId: encodedConfig });
 
     // apply card effect
     if (config.type === "INSTANT_CASH") {
       const amount = this.getRandomNumberWithStep(config.min, config.max, config.step);
       player.backpack.money += amount;
-      this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount });
+      this.state.queueAction('INCR_MONEY', { playerId: player.id, amount })
+      // this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount });
     } else if (config.type === "CARD") {
       player.backpack.cards.push(config.cardId);
-      this.state.pushAction('ADD_CARD', player.id, { playerId: player.id, cardId: config.cardId });
+      this.state.queueAction('ADD_CARD', { playerId: player.id, cardId: config.cardId })
+      // this.state.pushAction('ADD_CARD', player.id, { playerId: player.id, cardId: config.cardId });
     }
 
     this.state.game.turnPhase = 'awaiting-end-turn';
@@ -250,16 +268,19 @@ export class GameEngine {
     player.backpack.cards.clear();
     
     // 2. Lose all territories
-    this.state.game.territoryOwnership.forEach((territory, territoryId) => {
-      if (territory.ownerId === player.id) {
+    this.state.game.territoryOwnership.forEach((territoryState, territoryId) => {
+      if (territoryState.ownerId === player.id) {
         this.state.game.territoryOwnership.delete(territoryId);
       }
     });
 
     // 3. Update status
-    this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: player.financialStatus });
-    this.state.pushAction("UPDATE_PLAYER_MONEY", player.id, { playerId: player.id, amount: 0 });
-    this.state.pushAction("UPDATE_PLAYER_BACKPACK_MONEY", player.id, { playerId: player.id, amount: 0 });
+    this.state.queueAction('UPDATE_FINANCIAL_STATUS', { playerId: player.id, financialStatus: player.financialStatus })
+    // this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: player.financialStatus });
+    this.state.queueAction('UPDATE_PLAYER_MONEY', { playerId: player.id, amount: 0 })
+    // this.state.pushAction("UPDATE_PLAYER_MONEY", player.id, { playerId: player.id, amount: 0 });
+    this.state.queueAction('UPDATE_PLAYER_BACKPACK_MONEY', { playerId: player.id, amount: 0 })
+    // this.state.pushAction("UPDATE_PLAYER_BACKPACK_MONEY", player.id, { playerId: player.id, amount: 0 });
 
     // 4. Pass turn if it's their turn
     if (this.state.game.activePlayerId === player.id) {
@@ -276,7 +297,8 @@ export class GameEngine {
     if (activePlayers.length === 1) {
       const winner = activePlayers[0];
       this.state.game.turnPhase = "game-over";
-      this.state.pushAction("GAME_OVER", winner.id, { winnerId: winner.id });
+      this.state.queueAction('GAME_OVER', { winnerId: winner.id })
+      // this.state.pushAction("GAME_OVER", winner.id, { winnerId: winner.id });
     }
   }
 
@@ -376,7 +398,8 @@ export class GameEngine {
       }
     }
     
-    this.state.pushAction('SHIFT_TRACK', this.state.game.activePlayerId, { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) });
+    this.state.queueAction('SHIFT_TRACK', { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) })
+    // this.state.pushAction('SHIFT_TRACK', this.state.game.activePlayerId, { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) });
     
     for (const playerId of playersToBank) {
       this.bankBackpack(playerId);
@@ -418,7 +441,8 @@ export class GameEngine {
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }
-    this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: this.state.game.activePlayerId });
+    this.state.queueAction('UPDATE_ACTIVE_PLAYER', { playerId: this.state.game.activePlayerId })
+    //this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: this.state.game.activePlayerId });
   }
 }
 

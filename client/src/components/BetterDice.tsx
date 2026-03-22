@@ -6,6 +6,7 @@ export interface DiceController {
   startPhysicsLoop: (id: string) => void;
   setMode: (mode: DiceMode, payload?: { face: number }) => void;
   animationRef: React.MutableRefObject<number | null>;
+  rotateToFace: (face: number) => void;
 }
 
 const BetterDice = forwardRef<DiceController, {}>((_, ref) => {
@@ -16,6 +17,7 @@ const BetterDice = forwardRef<DiceController, {}>((_, ref) => {
     startPhysicsLoop: dice.startPhysicsLoop,
     setMode: dice.setMode,
     animationRef: dice.animationRef,
+    rotateToFace: dice.rotateToFace,
   }));
 
   const transform = dice.quat.toCSSMatrix();

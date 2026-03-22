@@ -1,6 +1,9 @@
 // src/pixi/layers/TerrainMesh.ts
 import * as PIXI from "pixi.js";
 import type { GameMap, Hex } from "@/types/map-types";
+import { useMapStore } from "@/stores/mapStateStore";
+import { hexStringToHexNumber } from "@/utils/color-utils";
+import { MAP_SECONDARY_COLOR } from "../engine";
 
 export class TerrainMesh extends PIXI.Container {
   private mesh: PIXI.Mesh<PIXI.Geometry, PIXI.Shader> | null = null;
@@ -143,6 +146,18 @@ export class TerrainMesh extends PIXI.Container {
     });
 
     this.addChild(this.mesh);
+
+    // 4. Colorize Mesh
+    let cellColorMap: { q: number; r: number; color: number }[] = [];
+    for (const hex of map.hexes) {
+      cellColorMap.push({ q: hex.q, r: hex.r, color: MAP_SECONDARY_COLOR });
+    }
+    this.setHexColor(cellColorMap);
+
+    useMapStore.getState().colorMap.forEach((color, territoryId) => {
+      this.setTerritoryColor(territoryId, hexStringToHexNumber(color));
+    });
+
   }
 
   setHexColor(cells: Array<{ q: number; r: number; color: number }>) {

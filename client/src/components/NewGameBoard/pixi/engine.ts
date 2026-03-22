@@ -2,15 +2,15 @@ import * as PIXI from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { TerrainMesh } from "./layers/TerrianMesh";
 import type { GameMap } from "@/types/map-types";
-import { hexStringToHexNumber, hslStringToHex } from "@/utils/color-utils";
+import { hexStringToHexNumber } from "@/utils/color-utils";
 import { InteractionManager } from "./systems/InteractionManager";
 import { OutlineLayer } from "./layers/OutlineLayer";
 import { DiceTrackLayer } from "./layers/DiceTrackLayer";
 import { useMapStore } from "@/stores/mapStateStore"; // For subscription
 import { pixiTargetLocator } from "@/animation/target-locator";
 
-export const BACKGROUND_COLOR = 0x09090b;
-export const SECONDARY_COLOR = 0x555555;
+export const MAP_BACKGROUND_COLOR = 0x09090b;
+export const MAP_SECONDARY_COLOR = 0x555555;
 
 /* ============================
    ======== MAP TYPES =========
@@ -92,7 +92,7 @@ export class PIXIGameBoard {
 
       await localApp.init({
         resizeTo: root,
-        backgroundColor: BACKGROUND_COLOR,
+        backgroundColor: MAP_BACKGROUND_COLOR,
         antialias: true,
         powerPreference: "high-performance",
         resolution: Math.min(window.devicePixelRatio, 4),
@@ -356,18 +356,18 @@ export class PIXIGameBoard {
     // build outlines for territories
     this.outlineLayer?.build(map);
 
-    const colorMap = new Map<string, number>();
+    // const colorMap = new Map<string, number>();
 
-    map.territories.forEach((state) => {
-      colorMap.set(state.id, hslStringToHex(state.displayColor));
-    });
+    // map.territories.forEach((state) => {
+    //   colorMap.set(state.id, hslStringToHex(state.displayColor));
+    // });
 
     // 4. Colorize Mesh
-    let cellColorMap: { q: number; r: number; color: number }[] = [];
-    for (const hex of map.hexes) {
-      cellColorMap.push({ q: hex.q, r: hex.r, color: SECONDARY_COLOR });
-    }
-    this.terrain.setHexColor(cellColorMap);
+    // let cellColorMap: { q: number; r: number; color: number }[] = [];
+    // for (const hex of map.hexes) {
+    //   cellColorMap.push({ q: hex.q, r: hex.r, color: MAP_SECONDARY_COLOR });
+    // }
+    // this.terrain.setHexColor(cellColorMap);
 
     // 5. Update Viewport / Camera
     const aestheticPadding = 800;
@@ -462,12 +462,12 @@ export class PIXIGameBoard {
     this.viewport = null;
     this.worldLayer = null;
     this.terrain = null;
-    
-    try{
+
+    try {
       this.app?.destroy(true, true);
-    }catch(error) {
+    } catch (error) {
       console.log(error)
     }
-    
+
   }
 }

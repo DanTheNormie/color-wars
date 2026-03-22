@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { TRACK_COORDINATES, INNER_EDGE_SPEC } from "../../config/dice-track-config";
 import { pixiTargetLocator } from "@/animation/target-locator";
-import { BACKGROUND_COLOR } from "../engine";
+import { MAP_BACKGROUND_COLOR } from "../engine";
 import { TokenLayer } from "./TokenLayer";
 import { type TileConfig, type TileType, DICE_TRACK } from "@color-wars/shared/src/config/diceTrack";
 import { useStore } from "@/stores/sessionStore";
@@ -300,7 +300,7 @@ export class DiceTrackLayer extends PIXI.Container {
     g.clear();
 
     // 1. Draw Opaque Screen
-    g.rect(0, 0, w, h).fill({ color: BACKGROUND_COLOR, alpha: 1.0 });
+    g.rect(0, 0, w, h).fill({ color: MAP_BACKGROUND_COLOR, alpha: 1.0 });
 
     // 2. Cut out the Hole
     // We walk through the INNER_EDGE_SPEC

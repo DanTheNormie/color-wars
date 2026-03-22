@@ -54,6 +54,5 @@ test("GameRoom handles ROLL_DICE successfully (baseline structure)", async () =>
   await new Promise(res => setTimeout(res, 50));
   
   expect(receivedActions.length).toBeGreaterThan(0);
-  expect(receivedActions[0].type).toBe("TEST_ACTION");
-  expect(receivedActions[0].checksum).toBe("dummy-checksum");
+  expect(receivedActions[0].type).toBe("UPDATE_ACTIVE_PLAYER");
 });

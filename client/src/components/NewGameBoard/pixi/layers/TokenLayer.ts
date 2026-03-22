@@ -15,8 +15,9 @@ export class TokenLayer extends PIXI.Container {
   private _debouncedReconcileTokens: (tokens: Record<string, TokenData>) => void;
   private unsub: () => void;
   private unsubActive: () => void;
-  public rearrangeTile = debounce((tileId: string, instant: boolean) => {
-     this._rearrangeTile(tileId, instant);
+  public rearrangeTile = debounce((tileIds: string | string[], instant: boolean) => {
+     const ids = Array.isArray(tileIds) ? tileIds : [tileIds];
+     this._rearrangeTiles(ids, instant);
   }, 200)
   constructor() {
     super();
@@ -47,11 +48,11 @@ export class TokenLayer extends PIXI.Container {
           const activeUnit = this.units.get(newId)!;
           newTileId = activeUnit.currentTileId!;
         }
-        if (prevTileId && newTileId && prevTileId === newTileId) {
-          this.rearrangeTile(prevTileId, true);
-        } else {
-          if (prevTileId) this.rearrangeTile(prevTileId, true);
-          if (newTileId) this.rearrangeTile(newTileId, true);
+        const tilesToUpdate = new Set<string>();
+        if (prevTileId) tilesToUpdate.add(prevTileId);
+        if (newTileId) tilesToUpdate.add(newTileId);
+        if (tilesToUpdate.size > 0) {
+          this.rearrangeTile(Array.from(tilesToUpdate), true);
         }
       },
     );
@@ -101,9 +102,9 @@ export class TokenLayer extends PIXI.Container {
     console.log("affectedTiles", affectedTiles);
 
     // 3. REARRANGE VISUALS
-    affectedTiles.forEach((tileId) => {
-      if(!init) this.rearrangeTile(tileId, true);
-    });
+    if (!init && affectedTiles.size > 0) {
+      this.rearrangeTile(Array.from(affectedTiles), true);
+    }
   };
 
   private createTokenSprite(data: TokenData) {
@@ -142,28 +143,31 @@ export class TokenLayer extends PIXI.Container {
     return this.units;
   }
 
-  private _rearrangeTile(tileId: string, animate: boolean) {
+  private _rearrangeTiles(tileIds: string[], animate: boolean) {
     const state = useDiceTrackStore.getState();
-    const allTokenIds = getTokensOnTile(state, tileId);
     
-    console.log('called for tile: ', tileId, ', tokens: ', allTokenIds)
-    const presentTokens = allTokenIds.filter((tokenId) => {
-      const unit = this.units.get(tokenId);
-      return unit && !unit.isAnimating;
-    });
+    tileIds.forEach((tileId) => {
+      const allTokenIds = getTokensOnTile(state, tileId);
+      
+      console.log('called for tile: ', tileId, ', tokens: ', allTokenIds)
+      const presentTokens = allTokenIds.filter((tokenId) => {
+        const unit = this.units.get(tokenId);
+        return unit && !unit.isAnimating;
+      });
 
-    const tileSprite = pixiTargetLocator.get<PIXI.Sprite>(tileId);
-    if (!tileSprite || presentTokens.length === 0) return;
+      const tileSprite = pixiTargetLocator.get<PIXI.Sprite>(tileId);
+      if (!tileSprite || presentTokens.length === 0) return;
 
-    const layoutConfig = getPolygonalConfiguration(presentTokens.length, this.currentHexSize);
+      const layoutConfig = getPolygonalConfiguration(presentTokens.length, this.currentHexSize);
 
-    presentTokens.forEach((tokenId, index) => {
-      const unit = this.units.get(tokenId);
-      if (!unit) return;
+      presentTokens.forEach((tokenId, index) => {
+        const unit = this.units.get(tokenId);
+        if (!unit) return;
 
-      const config = layoutConfig[index];
+        const config = layoutConfig[index];
 
-      this.applyTransform(unit, tileSprite, config, animate, tokenId === state.activeTokenId);
+        this.applyTransform(unit, tileSprite, config, animate, tokenId === state.activeTokenId);
+      });
     });
   }
 
@@ -197,6 +201,9 @@ export class TokenLayer extends PIXI.Container {
     } else {
       unit.position.set(targetX, targetY);
       unit.scale.set(finalScale);
+      if (pulse) {
+        unit.startPulse();
+      }
     }
   }
 
@@ -204,8 +211,10 @@ export class TokenLayer extends PIXI.Container {
     this.currentHexSize = hexSize;
     // Iterate over known tiles
     const state = useDiceTrackStore.getState();
-    const tiles = new Set(Object.values(state.tokens).map((t) => t.tileId));
-    tiles.forEach((t) => this.rearrangeTile(t, false));
+    const tiles = Array.from(new Set(Object.values(state.tokens).map((t) => t.tileId)));
+    if (tiles.length > 0) {
+      this.rearrangeTile(tiles, false);
+    }
   }
 
   public deleteToken(id: string) {

@@ -130,7 +130,8 @@ export class GameRoom extends Room<RoomState> {
   
       if (isActive) {
         game.activePlayerId = next;
-        this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: next });
+        this.state.queueAction('UPDATE_ACTIVE_PLAYER', { playerId: next })
+        // this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: next });
       }
       if (isLeader){ 
         console.log('isLeader: true', room.leaderId, next)

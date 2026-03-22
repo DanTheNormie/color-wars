@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import type { GameMap, Hex } from "@/types/map-types";
-import { BACKGROUND_COLOR, SECONDARY_COLOR } from "../engine";
+import { MAP_BACKGROUND_COLOR, MAP_SECONDARY_COLOR } from "../engine";
+import { useMapStore } from "@/stores/mapStateStore";
 
 export class OutlineLayer extends PIXI.Container {
   private bordersContainer: PIXI.Container;
@@ -67,7 +68,7 @@ export class OutlineLayer extends PIXI.Container {
     }
 
     territories.forEach((hexList, territoryID) => {
-      const defaultTerritoryColor = SECONDARY_COLOR;
+      const defaultTerritoryColor = MAP_SECONDARY_COLOR;
 
       // --- A. Create Outline Graphics ---
       const gBorder = new PIXI.Graphics();
@@ -103,7 +104,7 @@ export class OutlineLayer extends PIXI.Container {
       gFill.tint = defaultTerritoryColor
       // Border Style: Thick White
       gBorder.stroke({ width: 2, color: 0xffffff, alpha: 1, join: "round", cap: "round" });
-      gBorder.tint=BACKGROUND_COLOR
+      gBorder.tint = MAP_BACKGROUND_COLOR
       // Store references
       this.stateGraphics.set(territoryID, { border: gBorder, fill: gFill });
 
@@ -121,6 +122,10 @@ export class OutlineLayer extends PIXI.Container {
     // Based on prompt: "outline on hover and select". So hide borders by default.
     this.bordersContainer.visible = true;
     this.bordersContainer.children.forEach((c) => (c.visible = true));
+
+    useMapStore.getState().colorMap.forEach((color, territoryId) => {
+      this.setTerritoryColor(territoryId, color);
+    });
   }
 
   /**
@@ -146,7 +151,7 @@ export class OutlineLayer extends PIXI.Container {
     this.activeSelectId = selectId;
   }
 
-  private toggleBorder(territoryID: string, isVisible: boolean, tint: number = BACKGROUND_COLOR) {
+  private toggleBorder(territoryID: string, isVisible: boolean, tint: number = MAP_BACKGROUND_COLOR) {
     const obj = this.stateGraphics.get(territoryID);
     if (!obj) return;
 
@@ -155,14 +160,14 @@ export class OutlineLayer extends PIXI.Container {
       obj.border.tint = tint;
       // Bring to top within its container
       this.bordersContainer.addChild(obj.border);
-    }else {
+    } else {
       obj.border.tint = tint;
     }
   }
 
-  setTerritoryColor(territoryID: string, color:string){
+  setTerritoryColor(territoryID: string, color: string) {
     const obj = this.stateGraphics.get(territoryID)
-    if(!obj) return;
+    if (!obj) return;
 
     obj.fill.tint = color
   }

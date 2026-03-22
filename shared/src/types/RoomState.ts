@@ -1,10 +1,10 @@
 import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
-import type { ActionType, TURN_ACTION_REGISTRY } from "./turnActionRegistry";
+//import type { ActionType, TURN_ACTION_REGISTRY } from "./turnActionRegistry";
 import type { QueuedAction } from "../protocol";
 import { type MapID } from "../maps";
 import type { DevelopmentType } from "./economyTypes";
 import { type TileType, DICE_TRACK } from "../config/diceTrack";
-
+import { checksum } from "../checksum";
 export type RoomPhase = "lobby" | "active" | "finished";
 export type RoomVisibility = "private" | "public";
 export type TradeStatus = "pending" | "accepted" | "rejected";
@@ -214,18 +214,19 @@ export class RoomState extends Schema {
     this.turnCheckpoint = this.game.clone();
   }
 
-  pushAction<T extends ActionType>(type: T, playerId: string, payload: typeof TURN_ACTION_REGISTRY[T]) {
-    const action = new GameAction(type as string, playerId, JSON.stringify(payload), Date.now(), this._nextActionId++);
-    this.turnActionHistory.push(action);
-  }
+  // pushAction<T extends ActionType>(type: T, playerId: string, payload: typeof TURN_ACTION_REGISTRY[T]) {
+  //   const action = new GameAction(type as string, playerId, JSON.stringify(payload), Date.now(), this._nextActionId++);
+  //   this.turnActionHistory.push(action);
+  // }
 
-  queueAction<T = unknown>(type: string, payload: T, checksum: string) {
+  queueAction<T = unknown>(type: string, payload: T) {
+    const cs = checksum(this)
     const action: QueuedAction = {
       type: type as string,
       payload,
       serverTimestamp: 0,
-      sequence: 0,
-      checksum,
+      sequence: this._nextActionId++,
+      checksum: cs,
     };
     this._pendingActions.push(action);
   }
