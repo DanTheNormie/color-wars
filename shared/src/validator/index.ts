@@ -74,6 +74,13 @@ const ACTION_RULES: {
     rules.requireAdjacentOwnership,
     rules.requireValidUpgradeChoice,
     rules.requireEnoughMoneyToUpgrade
+  ],
+  DOWNGRADE_TERRITORY: [
+    rules.requirePlayerExists,
+    rules.requirePlayersTurn,
+    rules.requireTerritoryExists,
+    rules.requireTerritoryOwnerShip,
+    rules.requireIsUpgraded
   ]
 };
 

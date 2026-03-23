@@ -101,8 +101,18 @@ export const requireValidUpgradeChoice = (s: PlainStateOf<RoomState>, ctx: WithU
   if (!territoryState) throw new Error("Territory is not owned");
   
   const currentBuilding = (territoryState as any).buildingType || "BASE";
-  if (currentBuilding === ctx.buildingType) {
-    throw new Error(`Territory is already upgraded to ${ctx.buildingType}`);
+  if (currentBuilding !== "BASE") {
+    throw new Error(`Territory must be downgraded to BASE before switching building types. Currently: ${currentBuilding}`);
+  }
+}
+
+export const requireIsUpgraded = (s: PlainStateOf<RoomState>, ctx: WithTerritoryID) => {
+  const territoryState = s.game.territoryOwnership[ctx.territoryID];
+  if (!territoryState) throw new Error("Territory is not owned");
+  
+  const currentBuilding = (territoryState as any).buildingType || "BASE";
+  if (currentBuilding === "BASE") {
+    throw new Error("Territory is already at BASE level; cannot downgrade.");
   }
 }
 

@@ -261,6 +261,23 @@ export class GameEngine {
     this.state.queueAction('UPGRADE_TERRITORY', { playerId: player.id, territoryID, buildingType, amount: cost });
   }
 
+  downgradeTerritory(client: Client, territoryID: string) {
+    const player = this.state.game.players.get(client.sessionId)!;
+    const territoryState = this.state.game.territoryOwnership.get(territoryID)!;
+    const currentBuilding = territoryState.buildingType;
+    
+    const territory = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!;
+    const size = territory.hexes.length;
+    const economy = MAPS[this.state.mapID].getTerritoryEconomy(size);
+    
+    const refund = Math.floor(((economy as any)[currentBuilding].capEx) * 0.5);
+
+    player.money += refund;
+    territoryState.buildingType = "BASE";
+
+    this.state.queueAction('DOWNGRADE_TERRITORY', { playerId: player.id, territoryID, amount: refund });
+  }
+
   selectCard(client: Client, encodedConfig: string) {
     const player = this.state.game.players.get(client.sessionId)!;
     this.state.game.generatedCardIDs.clear();

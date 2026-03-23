@@ -17,6 +17,7 @@ export interface ClientMessages {
   PAY_OFF_DEBT: {};
    DECLARE_BANKRUPTCY: {};
   UPGRADE_TERRITORY: { territoryID: string; buildingType: DevelopmentType; };
+  DOWNGRADE_TERRITORY: { territoryID: string; };
 }
 
 export interface QueuedAction<TPayload = unknown> {

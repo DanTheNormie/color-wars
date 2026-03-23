@@ -245,6 +245,10 @@ export class GameRoom extends Room<RoomState> {
     this.onAction('UPGRADE_TERRITORY', (client, {territoryID, buildingType}) => {
       this.gameEngine.upgradeTerritory(client, territoryID, buildingType)
     })
+
+    this.onAction('DOWNGRADE_TERRITORY', (client, {territoryID}) => {
+      this.gameEngine.downgradeTerritory(client, territoryID)
+    })
   }
 
   onAuth(client: Client<any, any>, options: any, context: AuthContext) {
