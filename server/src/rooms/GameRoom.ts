@@ -241,6 +241,10 @@ export class GameRoom extends Room<RoomState> {
     this.onAction('DECLARE_BANKRUPTCY', (client)=>{
       this.gameEngine.declareBankruptcy(client)
     })
+
+    this.onAction('UPGRADE_TERRITORY', (client, {territoryID, buildingType}) => {
+      this.gameEngine.upgradeTerritory(client, territoryID, buildingType)
+    })
   }
 
   onAuth(client: Client<any, any>, options: any, context: AuthContext) {

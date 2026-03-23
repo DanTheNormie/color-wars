@@ -1,4 +1,5 @@
 import { type MapID } from "./maps";
+import { type DevelopmentType } from "./types/economyTypes";
 
 export interface ClientMessages {
   BUY_TERRITORY: { territoryID: string; };
@@ -14,7 +15,8 @@ export interface ClientMessages {
   CHANGE_MAP: {mapID: MapID}
   SELECT_CARD: {cardID: string}
   PAY_OFF_DEBT: {};
-  DECLARE_BANKRUPTCY: {};
+   DECLARE_BANKRUPTCY: {};
+  UPGRADE_TERRITORY: { territoryID: string; buildingType: DevelopmentType; };
 }
 
 export interface QueuedAction<TPayload = unknown> {

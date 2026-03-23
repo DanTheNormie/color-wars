@@ -7,8 +7,9 @@ import { StatusEffect } from "@color-wars/shared/src/types/RoomState";
 import { StatusEffectID } from "@color-wars/shared/src/types/effectId";
 import { RewardService } from "./rewardService";
 import { RewardConfig } from "@color-wars/shared/src/types/rewardConfig";
-import { MAPS } from "@color-wars/shared/src/maps";
+import { MAPS, income, maintenanceCost } from "@color-wars/shared/src/maps";
 import { type TileType, DICE_TRACK, TileConfig } from "@color-wars/shared/src/config/diceTrack"
+import { type DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
 
 
 export class GameEngine {
@@ -129,19 +130,31 @@ export class GameEngine {
     const backpackMoney = player.backpack.money;
     const backpackCards = [...player.backpack.cards];
     
-    if (backpackMoney > 0 || backpackCards.length > 0) {
-      player.money += backpackMoney;
+    // Calculate territory income/maintenance
+    let territoryNet = 0;
+    this.state.game.territoryOwnership.forEach((tState, tId) => {
+      if (tState.ownerId === playerId) {
+        const territory = MAPS[this.state.mapID].map.territories.find(t => t.id === tId);
+        if (territory) {
+          const size = territory.hexes.length;
+          const economy = MAPS[this.state.mapID].economy;
+          
+          const inc = income(size, tState.buildingType as DevelopmentType, economy);
+          const maint = maintenanceCost(size, tState.buildingType as DevelopmentType, economy);
+          territoryNet += (inc - maint);
+        }
+      }
+    });
+
+    if (backpackMoney > 0 || backpackCards.length > 0 || territoryNet !== 0) {
+      const netAmount = backpackMoney + territoryNet;
+      player.money += netAmount;
       player.cards.push(...backpackCards);
       
       player.backpack.money = 0;
       player.backpack.cards.clear();
       
-      this.state.queueAction('BANK_BACKPACK_ITEMS', { playerId: playerId, money: backpackMoney, cards: backpackCards })
-      // this.state.pushAction("BANK_BACKPACK_ITEMS", playerId, { 
-      //   playerId: playerId, 
-      //   money: backpackMoney, 
-      //   cards: backpackCards 
-      // });
+      this.state.queueAction('BANK_BACKPACK_ITEMS', { playerId: playerId, money: netAmount, cards: backpackCards })
     }
   }
 
@@ -232,6 +245,20 @@ export class GameEngine {
 
     player.money += cost;
     this.state.game.territoryOwnership.delete(territoryID)
+  }
+
+  upgradeTerritory(client: Client, territoryID: string, buildingType: DevelopmentType) {
+    const player = this.state.game.players.get(client.sessionId)!;
+    const territory = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!;
+    const size = territory.hexes.length;
+    const economy = MAPS[this.state.mapID].getTerritoryEconomy(size);
+    const cost = (economy as any)[buildingType].capEx;
+
+    player.money -= cost;
+    const territoryState = this.state.game.territoryOwnership.get(territoryID)!;
+    territoryState.buildingType = buildingType;
+
+    this.state.queueAction('UPGRADE_TERRITORY', { playerId: player.id, territoryID, buildingType, amount: cost });
   }
 
   selectCard(client: Client, encodedConfig: string) {

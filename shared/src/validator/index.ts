@@ -65,6 +65,15 @@ const ACTION_RULES: {
   ],
   DECLARE_BANKRUPTCY: [
     rules.requirePlayerExists,
+  ],
+  UPGRADE_TERRITORY: [
+    rules.requirePlayerExists,
+    rules.requirePlayersTurn,
+    rules.requireTerritoryExists,
+    rules.requireTerritoryOwnerShip,
+    rules.requireAdjacentOwnership,
+    rules.requireValidUpgradeChoice,
+    rules.requireEnoughMoneyToUpgrade
   ]
 };
 

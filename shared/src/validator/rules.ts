@@ -14,6 +14,9 @@ interface WithTerritoryID extends WithPlayer {
 interface WithCardID extends WithPlayer {
   cardID: string
 }
+interface WithUpgrade extends WithTerritoryID {
+  buildingType: string;
+}
 
 export const requireTerritoryExists = (s: PlainStateOf<RoomState>, ctx: WithTerritoryID) => {
   const mapID = s.mapID
@@ -64,6 +67,43 @@ export const requireDrawnCards = (s: PlainStateOf<RoomState>, ctx: WithCardID) =
 
 export const requireValidSelectedCard = (s: PlainStateOf<RoomState>, ctx: WithCardID) => {
   if(!s.game.generatedCardIDs.some((c) => ctx.cardID == c)) throw new Error (`Selected cardID: ${ctx.cardID} was not found in the generated cards list`)
+}
+
+export const requireAdjacentOwnership = (s: PlainStateOf<RoomState>, ctx: WithTerritoryID) => {
+  const mapID = s.mapID;
+  const adjacencies = (MAPS[mapID].map as any).adjacencies;
+  if (!adjacencies) return; // If no adjacencies defined, skip rule (or throw if required)
+  
+  const neighbors = adjacencies[ctx.territoryID] || [];
+  for (const neighborId of neighbors) {
+    const ownership = s.game.territoryOwnership[neighborId];
+    if (!ownership || ownership.ownerId !== ctx.senderId) {
+      throw new Error(`You must own all adjacent territories to upgrade. Missing: ${neighborId}`);
+    }
+  }
+}
+
+export const requireEnoughMoneyToUpgrade = (s: PlainStateOf<RoomState>, ctx: WithUpgrade) => {
+  const mapID = s.mapID;
+  const territory = MAPS[mapID].map.territories.find((t) => t.id === ctx.territoryID)!;
+  const size = territory.hexes.length;
+  const economy = MAPS[mapID].getTerritoryEconomy(size);
+  const cost = (economy as any)[ctx.buildingType]?.capEx || 0;
+  
+  const player = s.game.players[ctx.senderId];
+  if (player.money < cost) {
+    throw new Error(`Insufficient funds to upgrade to ${ctx.buildingType}. Need ${cost}, have ${player.money}`);
+  }
+}
+
+export const requireValidUpgradeChoice = (s: PlainStateOf<RoomState>, ctx: WithUpgrade) => {
+  const territoryState = s.game.territoryOwnership[ctx.territoryID];
+  if (!territoryState) throw new Error("Territory is not owned");
+  
+  const currentBuilding = (territoryState as any).buildingType || "BASE";
+  if (currentBuilding === ctx.buildingType) {
+    throw new Error(`Territory is already upgraded to ${ctx.buildingType}`);
+  }
 }
 
 // 2. The Rules
