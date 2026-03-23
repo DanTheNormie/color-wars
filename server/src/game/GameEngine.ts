@@ -423,7 +423,7 @@ export class GameEngine {
     }
 
     // Check if the game is over (only one player left)
-    this.checkGameOver();
+    //this.checkGameOver();
     if (this.state.game.turnPhase === "game-over") {
       return;
     }

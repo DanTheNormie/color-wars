@@ -2,20 +2,18 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
-import babel from "vite-plugin-babel";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
-    babel({
-      babelConfig: {
+    react({
+      babel: {
         plugins: [
           "babel-plugin-react-compiler",
           ["@babel/plugin-proposal-decorators", { version: "2023-11" }],
         ],
       },
-    }),
+    } as any),
     tailwindcss(),
   ],
   resolve: {
@@ -27,4 +25,17 @@ export default defineConfig({
     },
   },
   server: { host: true, strictPort: true },
+  build: {
+    rolldownOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("react")) return "react";
+            if (id.includes("pixi.js")) return "pixi";
+          }
+        },
+        codeSplitting: true,
+      },
+    },
+  },
 });

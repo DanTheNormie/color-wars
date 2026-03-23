@@ -5,8 +5,9 @@ import styles from "@components/Dice.module.css";
 export interface DiceController {
   startPhysicsLoop: (id: string) => void;
   setMode: (mode: DiceMode, payload?: { face: number }) => void;
-  animationRef: React.MutableRefObject<number | null>;
   rotateToFace: (face: number) => void;
+  isRunning: () => boolean;
+  setOnSettle: (fn: () => void) => void;
 }
 
 const BetterDice = forwardRef<DiceController, {}>((_, ref) => {
@@ -16,8 +17,9 @@ const BetterDice = forwardRef<DiceController, {}>((_, ref) => {
   useImperativeHandle(ref, () => ({
     startPhysicsLoop: dice.startPhysicsLoop,
     setMode: dice.setMode,
-    animationRef: dice.animationRef,
     rotateToFace: dice.rotateToFace,
+    isRunning: dice.isRunning,
+    setOnSettle: dice.setOnSettle,
   }));
 
   const transform = dice.quat.toCSSMatrix();

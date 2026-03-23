@@ -49,19 +49,15 @@ const TurnControls = () => {
   }
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
     if (diceMode == "ROLLINGTOFACE") {
       diceRefs.current.forEach((dice, i) => {
         if (!dice) return;
-        if (dice.animationRef.current == null) dice.startPhysicsLoop(nanoid());
+        if (!dice.isRunning()) dice.startPhysicsLoop(nanoid());
         // Default to a fallback face if rollTo array is shorter than expected
         const face = rollTo[i] ?? 1;
         dice.setMode("spin-to-target", { face });
+        dice.setOnSettle(() => setShowDiceRollMessage(true));
       });
-
-      timer = setTimeout(() => {
-        setShowDiceRollMessage(true)
-      }, 2200)
     } else if (diceMode == "ACCELERATING" && isNOTActivePlayer) {
       diceRefs.current.forEach((dice) => {
         if (!dice) return;
@@ -78,10 +74,6 @@ const TurnControls = () => {
         if (!dice) return;
         dice.rotateToFace(rollTo[i]);
       });
-    }
-
-    return () => {
-      if (timer) clearTimeout(timer);
     }
   }, [diceMode, rollTo]);
 

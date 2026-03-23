@@ -41,6 +41,10 @@ export class Quaternion {
     return this;
   }
 
+  normalized(): Quaternion {
+    return this.clone().normalize();
+  }
+
   setFromAxisAngle(axis: Vector3, angle: number): this {
     const halfAngle = angle / 2;
     const s = Math.sin(halfAngle);
@@ -200,6 +204,14 @@ export class Vector3 {
     return this;
   }
 
+  cross(v: Vector3): Vector3 {
+    return new Vector3(
+      this.y * v.z - this.z * v.y,
+      this.z * v.x - this.x * v.z,
+      this.x * v.y - this.y * v.x
+    );
+  }
+
   applyQuaternion(q: Quaternion): this {
     const x = this.x,
       y = this.y,
@@ -227,13 +239,6 @@ export const swingTwistDecomposition = (quaternion: Quaternion, axis: Vector3) =
   const p = new Vector3(quaternion.x, quaternion.y, quaternion.z);
   const dot = p.dot(d);
 
-  if (Math.abs(dot) < 1e-6 && Math.abs(quaternion.w) < 1e-6) {
-    return {
-      swing: quaternion.clone(),
-      twist: new Quaternion(0, 0, 0, 1),
-    };
-  }
-
   const twist = new Quaternion(d.x * dot, d.y * dot, d.z * dot, quaternion.w).normalize();
   const swing = quaternion.clone().multiply(twist.conjugate());
 
@@ -245,7 +250,9 @@ export const getRotationBetweenVectors = (from: Vector3, to: Vector3): Quaternio
   const dotProduct = from.dot(to);
 
   if (dotProduct < -0.999999) {
-    const rotationAxis = new Vector3(1, 0, 0);
+    // Fix antipodal axis: choose perpendicular vector based on smallest component
+    const perp = Math.abs(from.x) < 0.9 ? new Vector3(1, 0, 0) : new Vector3(0, 1, 0);
+    const rotationAxis = perp.cross(from).normalize();
     quaternion.setFromAxisAngle(rotationAxis, Math.PI);
   } else {
     const cross = new Vector3(
