@@ -142,7 +142,7 @@ export class PIXIVFXLayer {
       overlayApp,
       this.vfxLayer!,
       count,
-      coinSize * 10,
+      coinSize * 2,
       () =>
         new PIXI.Graphics()
           .circle(0, 0, coinSize / 2)
@@ -209,7 +209,7 @@ export class PIXIVFXLayer {
       this.app!,
       this.vfxLayer!,
       1,
-      50,
+      20,
       () => new PIXI.Graphics().circle(0, 0, 8).fill(0x31d652),
       0x31d652
     );
