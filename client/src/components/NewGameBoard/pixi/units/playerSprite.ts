@@ -8,19 +8,14 @@ export class PlayerSprite extends PIXI.Container {
   public isAnimating: boolean = false; // Prevents resize from snapping mid-animation
   private pulseTl?: gsap.core.Timeline;
   private graphics: PIXI.Graphics;
-  private shadow: PIXI.Graphics;
+  public baseScale: number = 1;
 
   constructor(id: string, color: number) {
     super();
     this.id = id;
 
-    this.shadow = new PIXI.Graphics();
-    this.shadow.ellipse(0, 0, 15, 0).fill({ color: 0x0, alpha: 0.3 });
-    this.shadow.position.set(0, 15);
-    this.addChild(this.shadow);
-
     this.graphics = new PIXI.Graphics();
-    this.graphics.circle(0, 0, 10).fill({ color }).stroke({ width: 2, color: 0xffffff });
+    this.graphics.circle(0, 0, 10).fill({ color }).stroke({ width: 1, color: 0x000000 });
 
     this.graphics.eventMode = "static";
     this.graphics.cursor = "pointer";
@@ -54,6 +49,16 @@ export class PlayerSprite extends PIXI.Container {
   public stopPulse(){
     this.pulseTl?.kill()
     this.pulseTl = undefined
+    
+    // Smoothly return to base scale
+    gsap.to(this, {
+      pixi: {
+        scale: this.baseScale,
+      },
+      duration: 0.2,
+      ease: "power1.inOut",
+    });
+
     gsap.to(this.graphics, {
       pixi: {
         scale: 1,

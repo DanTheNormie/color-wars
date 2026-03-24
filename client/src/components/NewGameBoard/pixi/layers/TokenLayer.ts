@@ -180,6 +180,8 @@ export class TokenLayer extends PIXI.Container {
     // Calculate scale relative to base size.
     // If config.scale is 1.0 (Active), it renders full size.
     const finalScale = this.currentHexSize * this.BASE_TOKEN_RATIO * config.scale;
+    unit.baseScale = finalScale;
+    
     const tl = gsap.timeline();
 
     if (animate) {
@@ -192,9 +194,10 @@ export class TokenLayer extends PIXI.Container {
         duration: 0.5,
         ease: "back.out(1.2)",
         onComplete: () => {
-          //TODO: change this, breaks when resizing
           if (pulse) {
             unit.startPulse();
+          } else {
+            unit.stopPulse();
           }
         },
       });
@@ -203,6 +206,8 @@ export class TokenLayer extends PIXI.Container {
       unit.scale.set(finalScale);
       if (pulse) {
         unit.startPulse();
+      } else {
+        unit.stopPulse();
       }
     }
   }
@@ -275,6 +280,7 @@ export function getPolygonalConfiguration(total: number, hexSize: number): Layou
 
   // Scale logic: Shrink as count increases
   let scale = 0.8;
+  if (total >= 3) scale = 0.7;
   if (total >= 4) scale = 0.5;
   if (total >= 7) scale = 0.4;
 
