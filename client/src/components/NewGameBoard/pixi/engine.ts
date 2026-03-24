@@ -55,7 +55,19 @@ export class PIXIGameBoard {
 
   private async loadAssets() {
     await PIXI.Assets.load(
-      ["/tile-icons/flag.png", "/tile-icons/gift.png", "/tile-icons/angel_wings.png", "/tile-icons/skull.png", "/tile-icons/money.png", "/tile-icons/warning.png", "/tile-icons/money_bag.png"],
+      [
+        "/tile-icons/flag.png",
+        "/tile-icons/gift.png",
+        "/tile-icons/angel_wings.png",
+        "/tile-icons/skull.png",
+        "/tile-icons/money.png",
+        "/tile-icons/warning.png",
+        "/tile-icons/money_bag.png",
+        "/building-icons/city.png",
+        "/building-icons/factory.png",
+        "/building-icons/missile.png",
+        "/building-icons/monument.png",
+      ],
       (progress) => {
         console.log(`loading... ${progress * 100}`);
       },
@@ -98,6 +110,7 @@ export class PIXIGameBoard {
         resolution: Math.min(window.devicePixelRatio, 4),
         autoDensity: true,
       });
+      //globalThis.__PIXI_APP__ = localApp;
       await this.loadAssets();
 
       if (this.destroyed || myToken !== this.initToken) {

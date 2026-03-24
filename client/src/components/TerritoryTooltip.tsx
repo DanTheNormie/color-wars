@@ -15,6 +15,7 @@ import { useTooltipStore } from "@/stores/tooltipStore";
 import { useMapStore } from "@/stores/mapStateStore";
 import { useStore } from "@/stores/sessionStore";
 import { getAdjacent, getAdjacentOwnedByPlayer } from "@/utils/map-utils";
+import type { DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
 /* ─── Number formatter ─── */
 const fmt = new Intl.NumberFormat("en", {
   notation: "compact",
@@ -57,6 +58,8 @@ export default function TerritoryTooltip() {
   /* ── Session data (re-reads reactively after buy/sell) ── */
   const buyTerritory = useStore((s) => s.buyTerritory);
   const sellTerritory = useStore((s) => s.sellTerritory);
+  const upgradeTerritory = useStore((s) => s.sendUpgradeTerritoryIntent);
+  const downgradeTerritory = useStore((s) => s.sendDowngradeTerritoryIntent);
   const territoryOwnership = useStore((s) => s.state.game?.territoryOwnership);
   const players = useStore((s) => s.state.game?.players);
   const currentPlayerId = useStore((s) => s.currentPlayer?.id);
@@ -115,7 +118,7 @@ export default function TerritoryTooltip() {
   const ownerId = ownership?.ownerId ?? null;
   const ownerPlayer = ownerId ? players?.[ownerId] : null;
   const isOwnedByCurrentPlayer = ownerId != null && ownerId === currentPlayerId;
-  
+
   // Ownership building logic
   const buildingType = ownership ? (ownership as any).buildingType ?? "BASE" : "BASE";
   const sellLabel = SELL_LABELS[buildingType] || "Territory";
@@ -141,16 +144,24 @@ export default function TerritoryTooltip() {
     }
   }, [tid, sellTerritory, closeTooltip]);
 
+  const handleUpgrade = useCallback((type: DevelopmentType) => {
+    if (tid) upgradeTerritory(tid, type);
+  }, [tid, upgradeTerritory]);
+
+  const handleDowngrade = useCallback(() => {
+    if (tid) downgradeTerritory(tid);
+  }, [tid, downgradeTerritory]);
+
   /* ── Don't render if closed ── */
   if (!isOpen || !territory) return null;
 
   const baseCost = economy ? fmt.format(economy.BASE.capEx) : "—";
-  
+
   // Try to determine sell value roughly as half capEx. If not applicable, blank.
   const capExObj = economy ? economy[buildingType as keyof typeof economy] : null;
-  const sellValue = (capExObj && buildingType !== "CAPITAL_MONUMENT") 
-      ? fmt.format((capExObj as any).capEx / 2) 
-      : "";
+  const sellValue = (capExObj && buildingType !== "CAPITAL_MONUMENT")
+    ? fmt.format((capExObj as any).capEx / 2)
+    : "";
 
   return (
     <FloatingPortal>
@@ -177,7 +188,7 @@ export default function TerritoryTooltip() {
               {territory.name}
             </span>
             {isOwnedByCurrentPlayer && (
-              <div 
+              <div
                 className="bg-[#c22d2d] text-white text-[9px] font-semibold px-[5px] py-[2px] rounded uppercase cursor-pointer hover:bg-[#dc2626] transition-colors"
                 onClick={handleSell}
               >
@@ -205,7 +216,7 @@ export default function TerritoryTooltip() {
           <div className="flex flex-col gap-[8px] mb-4 mt-1">
             {UPGRADES.map((upgrade) => {
               let valStr = "???";
-              let color = "#8e8e93"; 
+              let color = "#8e8e93";
               if (upgrade.id !== "CAPITAL_MONUMENT" && economy) {
                 const layer = economy[upgrade.key as keyof typeof economy] as any;
                 if (layer) {
@@ -213,8 +224,8 @@ export default function TerritoryTooltip() {
                   valStr = (val >= 0 ? "+" : "") + fmt.format(val);
                   color = val >= 0 ? "#4ade80" : "#f87171";
                   if (val === 0) {
-                      color = "#f5f5f7";
-                      valStr = "0";
+                    color = "#f5f5f7";
+                    valStr = "0";
                   }
                 }
               }
@@ -247,47 +258,47 @@ export default function TerritoryTooltip() {
             (adjacentOwnedByPlayer.length < adjacentTerritories.length) ? (
               (adjacentOwnedByPlayer.length === 0) ? (
                 <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
-                  {adjacentTerritories.length === 1 
-                    ? "you need to own the adjacent territory to upgrade" 
+                  {adjacentTerritories.length === 1
+                    ? "you need to own the adjacent territory to upgrade"
                     : `you need to own all ${adjacentTerritories.length} adjacent territories to upgrade`}
                 </div>
               ) : (
                 <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
-                  {adjacentTerritories.length - adjacentOwnedByPlayer.length === 1 
-                    ? "purchase the last adjacent territory to upgrade" 
+                  {adjacentTerritories.length - adjacentOwnedByPlayer.length === 1
+                    ? "purchase the last adjacent territory to upgrade"
                     : `purchase remaining ${adjacentTerritories.length - adjacentOwnedByPlayer.length} adjacent territories to upgrade`}
                 </div>
               )
             ) : (
               buildingType === "BASE" ? (
-              <div className="flex gap-2 justify-between">
-                <button 
-                  className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
-                  onClick={() => {/* TODO: Wire to upgrade action */}}
+                <div className="flex gap-2 justify-between">
+                  <button
+                    className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
+                    onClick={() => handleUpgrade("CITY")}
+                  >
+                    Build City
+                  </button>
+                  <button
+                    className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
+                    onClick={() => handleUpgrade("FACTORY")}
+                  >
+                    Build Factory
+                  </button>
+                  <button
+                    className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
+                    onClick={() => handleUpgrade("MISSILE_SILO")}
+                  >
+                    Build Missile Silo
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-white cursor-pointer transition-all duration-150 hover:bg-[#ca8a04] active:scale-[0.97] bg-[#eab308]"
+                  onClick={handleDowngrade}
                 >
-                  Build City
+                  Downgrade to BASE (50% refund)
                 </button>
-                <button 
-                  className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
-                  onClick={() => {/* TODO: Wire to upgrade action */}}
-                >
-                  Build Factory
-                </button>
-                <button 
-                  className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
-                  onClick={() => {/* TODO: Wire to upgrade action */}}
-                >
-                  Build Missile Silo
-                </button>
-              </div>
-            ) : (
-              <button 
-                className="w-[60%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-black cursor-pointer transition-all duration-150 hover:bg-[#facc15] active:scale-[0.97] bg-[#eab308]"
-                onClick={() => {/* TODO: Wire to upgrade action */}}
-              >
-                Build Capital Monument
-              </button>
-            )
+              )
             )
           ) : null}
         </div>

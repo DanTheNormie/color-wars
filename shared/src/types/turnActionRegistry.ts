@@ -1,5 +1,6 @@
 import { type TileConfig } from "../config/diceTrack";
 import { type TileState, type FinancialStatus } from "./RoomState";
+import { DevelopmentType } from "./economyTypes";
 
 export const TURN_ACTION_REGISTRY = {
   MOVE_PLAYER: {} as { fromTile: number, toTile: number, tokenId: string },
@@ -19,6 +20,8 @@ export const TURN_ACTION_REGISTRY = {
   UPDATE_PLAYER_MONEY: {} as { playerId: string, amount: number },
   UPDATE_PLAYER_BACKPACK_MONEY: {} as { playerId: string, amount: number },
   GAME_OVER: {} as { winnerId: string },
+  UPGRADE_TERRITORY: {} as { territoryId: string, buildingType: DevelopmentType },
+  DOWNGRADE_TERRITORY: {} as { territoryId: string },
 
 } as const;
 

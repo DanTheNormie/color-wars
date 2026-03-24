@@ -195,7 +195,7 @@ export class AddCard extends BaseAction<"ADD_CARD"> {
 export class DrawCardsAction extends BaseAction<"DRAW_3_REWARD_CARDS"> {
   execute(): ActionHandle {
     this.logAction(this.payload.playerId);
-    
+
     // Wrap the store interaction and waiting logic in a Promise
     const drawAnimationTask = new Promise<void>((resolve) => {
       // 1. Trigger the UI to mount and start animating
@@ -318,7 +318,7 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
                 targetIdx = Math.max(0, idx - count);
               } else {
                 const newPosition = idx + count;
-                if(newPosition > numTiles - 1){
+                if (newPosition > numTiles - 1) {
                   targetIdx = 0;
                 } else {
                   targetIdx = newPosition;
@@ -333,8 +333,8 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
           }
         });
       })(),
-      () => {},
-      () => {}
+      () => { },
+      () => { }
     );
   }
 }
@@ -344,7 +344,7 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
     const { playerId, money, cards } = this.payload;
 
     if (money === 0 && cards.length === 0) {
-      return new ActionHandle(Promise.resolve(), () => {}, () => {});
+      return new ActionHandle(Promise.resolve(), () => { }, () => { });
     }
 
     // 1. Update backpack state to empty (optimistic frontend update)
@@ -359,7 +359,7 @@ export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
     const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
 
     if (!vfxLayer || !gameBoard) {
-       throw new Error ('Missing pixi engine')
+      throw new Error('Missing pixi engine')
     }
 
     const vfxApp = vfxLayer.getApp()!;
@@ -401,10 +401,10 @@ export class UpdateFinancialStatusAction extends BaseAction<"UPDATE_FINANCIAL_ST
     const { playerId, financialStatus } = this.payload;
     const store = useStore.getState();
     store.updatePlayerFinancialStatus(playerId, financialStatus);
-    
+
     if (financialStatus === 'bankrupt') {
       useDiceTrackStore.getState().removeToken(playerId);
-      
+
       // Clear all territories owned by this player
       const territoryOwnership = store.state.game.territoryOwnership;
       if (territoryOwnership) {
@@ -416,7 +416,7 @@ export class UpdateFinancialStatusAction extends BaseAction<"UPDATE_FINANCIAL_ST
         });
       }
     }
-    
+
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }
@@ -452,6 +452,23 @@ export class GameOverAction extends BaseAction<"GAME_OVER"> {
     const { winnerId } = this.payload;
     useStore.getState().setWinnerId(winnerId);
     this.logAction(winnerId);
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
+  }
+}
+
+export class UpgradeTerritoryAction extends BaseAction<"UPGRADE_TERRITORY"> {
+  execute(): ActionHandle {
+    const { territoryId, buildingType } = this.payload;
+    useStore.getState().sendUpgradeTerritoryIntent(territoryId, buildingType);
+
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
+  }
+}
+
+export class DowngradeTerritoryAction extends BaseAction<"DOWNGRADE_TERRITORY"> {
+  execute(): ActionHandle {
+    const { territoryId } = this.payload;
+    useStore.getState().sendDowngradeTerritoryIntent(territoryId);
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }

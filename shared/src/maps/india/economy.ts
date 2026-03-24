@@ -25,5 +25,10 @@ export const INDIA_ECONOMY: EconomyConfig = {
       maintenanceMultiplier: 2.5,
       incomeMultiplier: 0,
     },
+    [DEVELOPMENT_TYPES.CAPITAL]: {
+      buildMultiplier: 10,
+      maintenanceMultiplier: 1,
+      incomeMultiplier: 0,
+    },
   },
 };

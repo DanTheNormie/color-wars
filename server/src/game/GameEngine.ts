@@ -51,7 +51,7 @@ export class GameEngine {
   startGame() {
     for (const playerID of this.state.game.playerOrder) {
       const player = this.state.game.players.get(playerID)!;
-      player.money = 10000;
+      player.money = 20000;
       player.position = 0;
       player.hasRolled = false;
     }

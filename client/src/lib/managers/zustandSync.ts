@@ -57,6 +57,9 @@ class ZustandSyncManager {
             if(territory.ownerId == player.id){
               useMapStore.getState().setTerritoryColor(territoryId, player.color)
               useStore.getState().updateTerritoryOwnership(territoryId, player.id)
+              if(territory.buildingType != 'BASE'){
+                useStore.getState().upgradeTerritory(territoryId, territory.buildingType)
+              }
             }
           })
         });

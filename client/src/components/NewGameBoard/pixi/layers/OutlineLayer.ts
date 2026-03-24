@@ -5,9 +5,12 @@ import { MAP_BACKGROUND_COLOR, MAP_SECONDARY_COLOR } from "../engine";
 import { useMapStore } from "@/stores/mapStateStore";
 import { getAdjacent } from "@/utils/map-utils";
 import { hexNumberToHexString } from "@/utils/color-utils";
+import { useStore } from "@/stores/sessionStore";
+import type { DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
 export class OutlineLayer extends PIXI.Container {
   private bordersContainer: PIXI.Container;
   private fillsContainer: PIXI.Container;
+  private iconsContainer: PIXI.Container;
 
   // Storage for lookups
   private stateGraphics: Map<string, { border: PIXI.Graphics; fill: PIXI.Graphics }> = new Map();
@@ -16,21 +19,52 @@ export class OutlineLayer extends PIXI.Container {
   private activeHoverId: string | null = null;
   private activeSelectId: string | null = null;
   private pulseTweens: Map<string, gsap.core.Tween> = new Map();
+  private territoryCenters: Map<string, { x: number; y: number, size: number }> = new Map();
+  private buildingIcons: Map<string, PIXI.Sprite> = new Map();
+  private unsubscribeStore: (() => void) | null = null;
+  private buildingIconSize: number = 30;
 
   constructor() {
     super();
     // Order matters: Fills at bottom, Borders on top
     this.fillsContainer = new PIXI.Container();
     this.bordersContainer = new PIXI.Container();
+    this.iconsContainer = new PIXI.Container();
 
     this.addChild(this.fillsContainer);
     this.addChild(this.bordersContainer);
+    this.addChild(this.iconsContainer);
+
+    this.setupStoreSubscription();
   }
+
+  private setupStoreSubscription() {
+    this.unsubscribeStore = (useStore).subscribe(
+      (state) => state.state?.game?.territoryOwnership,
+      (ownership) => {
+        if (ownership) {
+          this.updateAllIcons(ownership);
+        }
+      }
+    );
+  }
+
+  public destroy(options?: PIXI.DestroyOptions) {
+    if (this.unsubscribeStore) {
+      this.unsubscribeStore();
+    }
+    super.destroy(options);
+  }
+
+
 
   public build(map: GameMap) {
     this.fillsContainer.removeChildren();
     this.bordersContainer.removeChildren();
+    this.iconsContainer.removeChildren();
     this.stateGraphics.clear();
+    this.territoryCenters.clear();
+    this.buildingIcons.clear();
     this.stopAllPulses();
 
     const { hexSize } = map.grid;
@@ -101,6 +135,28 @@ export class OutlineLayer extends PIXI.Container {
         });
       });
 
+      const { hex, distance } = this.findDeepestHex(hexList);
+      const cx = width * (hex.q + hex.r / 2);
+      const cy = hexSize * 1.5 * hex.r;
+
+      this.territoryCenters.set(territoryID, { x: cx, y: cy, size: Math.max(distance * width, 5) });
+      const ownership = useStore.getState().state?.game?.territoryOwnership[territoryID]
+      const buildingType = ownership?.buildingType || 'BASE'
+      this.updateTerritoryIcon(territoryID, buildingType)
+      // const iconPath = this.getIconPath('CITY');
+      // if (!iconPath) return;
+
+      // const sprite = PIXI.Sprite.from(iconPath);
+      // sprite.anchor.set(0.5);
+      // sprite.x = cx;
+      // sprite.y = cy;
+      // sprite.width = this.buildingIconSize; // Adjust size as needed
+      // sprite.height = this.buildingIconSize;
+
+      // this.iconsContainer.addChild(sprite);
+
+      //this.iconsContainer.addChild(new PIXI.Graphics().circle(cx, cy, distance*width).stroke({ color: 0xffffff, alpha: 1.0 }))
+
       // Finalize Styles
 
       // Fill Style: Solid color, no stroke
@@ -130,7 +186,66 @@ export class OutlineLayer extends PIXI.Container {
     useMapStore.getState().colorMap.forEach((color, territoryId) => {
       this.setTerritoryColor(territoryId, color);
     });
+}
+
+private findDeepestHex(hexes: Hex[]) {
+
+  const dirs = [
+    [1, 0], [1, -1], [0, -1],
+    [-1, 0], [-1, 1], [0, 1],
+  ];
+
+  function isBoundary(hex: Hex, set: Set<string>) {
+    return dirs.some(([dq, dr]) =>
+      !set.has(`${hex.q + dq},${hex.r + dr}`)
+    );
   }
+  const key = (q: number, r: number) => `${q},${r}`;
+  const set = new Set(hexes.map(h => key(h.q, h.r)));
+
+  const dist = new Map<string, number>();
+  const queue: Hex[] = [];
+
+  // initialize boundary
+  for (const h of hexes) {
+    if (isBoundary(h, set)) {
+      dist.set(key(h.q, h.r), 0);
+      queue.push(h);
+    }
+  }
+
+  // BFS inward
+  while (queue.length) {
+    const h = queue.shift()!;
+    const d = dist.get(key(h.q, h.r))!;
+
+    for (const [dq, dr] of dirs) {
+      const nq = h.q + dq;
+      const nr = h.r + dr;
+      const nk = key(nq, nr);
+
+      if (!set.has(nk)) continue;
+      if (dist.has(nk)) continue;
+
+      dist.set(nk, d + 1);
+      queue.push({ q: nq, r: nr, s: 0, territoryID: null });
+    }
+  }
+
+  // find max
+  let best = hexes[0];
+  let bestDist = -1;
+
+  for (const h of hexes) {
+    const d = dist.get(key(h.q, h.r))!;
+    if (d > bestDist) {
+      bestDist = d;
+      best = h;
+    }
+  }
+
+  return { hex: best, distance: bestDist };
+}
 
   /**
    * LOD Switcher
@@ -156,8 +271,8 @@ export class OutlineLayer extends PIXI.Container {
     // Set new
     if (hoverId) this.toggleBorder(hoverId, true, 0xffd700); // Gold hover
     if (selectId) {
-      this.toggleFill(selectId, true, 0xffffff); // White select
-
+      //this.toggleFill(selectId, true, 0xffffff); // White select
+      this.toggleBorder(selectId, true, 0xffffff); // White select
       // Pulse neighbors
       const currentMap = useMapStore.getState().current_map;
       const neighbors = getAdjacent(selectId, currentMap);
@@ -178,9 +293,9 @@ export class OutlineLayer extends PIXI.Container {
     if (this.pulseTweens.has(territoryID)) {
       this.pulseTweens.get(territoryID)?.kill();
     }
-
+    obj.border.zIndex = 1;
     // Pulse the FILL tint between default and gold
-    const tween = gsap.to(obj.fill, {
+    const tween = gsap.to(obj.border, {
       pixi: { tint: 0xffd700 }, // Gold
       duration: 1.0,
       repeat: -1,
@@ -199,6 +314,7 @@ export class OutlineLayer extends PIXI.Container {
       if (obj) {
         // Restore fill alpha and color
         obj.fill.alpha = 1.0;
+        obj.border.zIndex = 0;
         const color = useMapStore.getState().colorMap.get(id);
         if (color) this.setTerritoryColor(id, color);
         else this.setTerritoryColor(id, hexNumberToHexString(MAP_SECONDARY_COLOR));
@@ -219,7 +335,9 @@ export class OutlineLayer extends PIXI.Container {
       obj.border.tint = tint;
       // Bring to top within its container
       this.bordersContainer.addChild(obj.border);
+      obj.border.zIndex = 2;
     } else {
+      obj.border.zIndex = 0;
       obj.border.tint = tint;
     }
   }
@@ -247,6 +365,54 @@ export class OutlineLayer extends PIXI.Container {
     if (!obj) return;
 
     obj.fill.tint = color
+  }
+
+  private updateAllIcons(ownership: Record<string, { buildingType: DevelopmentType }>) {
+    Object.entries(ownership).forEach(([territoryId, data]) => {
+      this.updateTerritoryIcon(territoryId, data.buildingType);
+    });
+  }
+
+  private updateTerritoryIcon(territoryId: string, buildingType: DevelopmentType) {
+    const center = this.territoryCenters.get(territoryId);
+    if (!center) {
+      return
+    };
+    // Remove existing icon
+    const existing = this.buildingIcons.get(territoryId);
+    if (existing) {
+      this.iconsContainer.removeChild(existing);
+      this.buildingIcons.delete(territoryId);
+    }
+
+    if (buildingType === "BASE" || !buildingType) {
+      return;
+    }
+
+    const iconPath = this.getIconPath(buildingType);
+    if (!iconPath) return;
+
+    const sprite = PIXI.Sprite.from(iconPath);
+    sprite.anchor.set(0.5);
+    sprite.x = center.x;
+    sprite.y = center.y;
+    sprite.width = center.size; // Adjust size as needed
+    sprite.height = center.size ;
+    sprite.tint = 0x000000;
+    
+    this.iconsContainer.addChild(sprite);
+    this.buildingIcons.set(territoryId, sprite);
+  }
+
+  private getIconPath(type: DevelopmentType): string | null {
+    switch (type) {
+      case "CITY": return "/building-icons/city.png";
+      case "FACTORY": return "/building-icons/factory.png";
+      case "MISSILE_SILO": return "/building-icons/missile.png";
+      case "CAPITAL": return "/building-icons/monument.png";
+      // Add other types if they exist in shared/config or economyTypes
+      default: return null;
+    }
   }
 }
 

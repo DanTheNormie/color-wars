@@ -17,6 +17,7 @@ export const DEVELOPMENT_TYPES = {
   CITY: "CITY",
   FACTORY: "FACTORY",
   MISSILE_SILO: "MISSILE_SILO",
+  CAPITAL: "CAPITAL",
 } as const;
 
 export type DevelopmentType = typeof DEVELOPMENT_TYPES[keyof typeof DEVELOPMENT_TYPES];
