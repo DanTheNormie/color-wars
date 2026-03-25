@@ -142,6 +142,22 @@ export const useStore = create(
                   throw error;
                 }
               },
+              joinRoom: async (roomId: string) => {
+                console.log("[sessionStore] joinRoom started");
+                const { room: localRoom } = get();
+                try {
+                  const payloadName = localRoom.playerName?.trim() ?? DEFAULT_PLAYER_NAME;
+                  const room = await network.joinRoom(roomId, { playerName: payloadName });
+                  set((z) => {
+                    z.room.roomId = room.roomId;
+                    z.room.reconnectionToken = room.reconnectionToken;
+                  });
+                  return room.roomId;
+                } catch (error) {
+                  console.log(error);
+                  throw error;
+                }
+              },
               setRoomLeader: (playerId: string) => {
                 set((z) => {
                   z.state.room.leaderId = playerId
@@ -402,6 +418,11 @@ export const useStore = create(
                   console.warn("Unable to shift track", error);
                 }
               },
+              setRehydrated: (rehydrated: boolean) => {
+                set((z) => {
+                  z.rehydrated = rehydrated;
+                })
+              }
             }),
           ),
         ),
@@ -411,7 +432,7 @@ export const useStore = create(
             room: state.room,
           }),
           onRehydrateStorage: (state) => {
-            state.rehydrated = true;
+            state?.setRehydrated(true)
           }
         },
       ),

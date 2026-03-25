@@ -2,6 +2,7 @@ import { useStore } from "@/stores/sessionStore";
 /* import { useMapStore } from "@/stores/mapStateStore"; */
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 // import { pixiTargetLocator } from "@/animation/target-locator";
 // import { Sprite } from "pixi.js";
 // import { useRef } from "react";
@@ -12,6 +13,13 @@ const LobbyActions = () => {
   const isLeader = useStore((z) => z.state.room.leaderId === z.currentPlayer.id);
   const startGame = useStore((z) => z.startGame);
   const leaveGame = useStore((z) => z.leaveGame);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyInvite = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   // const ele = useRef<HTMLButtonElement>(null);
   /* const setTerritoryColor = useMapStore((z) => z.setTerritoryColor);
 
@@ -48,6 +56,9 @@ const LobbyActions = () => {
   return (
     <div className="flex flex-col gap-1">
       {isLeader && <Button onClick={startGame}>Start Game</Button>}
+      <Button variant="outline" onClick={handleCopyInvite}>
+        {copied ? "Copied!" : "Copy Invite Link"}
+      </Button>
       <Button variant="destructive" onClick={handleLeaveGame}>
         Leave Game
       </Button>

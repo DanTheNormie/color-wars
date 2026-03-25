@@ -29,6 +29,20 @@ class Network {
     return this.registerRoom(room);
   }
 
+  async joinRoom(roomId: string, options: PlayerJoinPayload) {
+    if (this.room) return this.room;
+    if (this.state == "reconnecting" || this.state == "connecting") throw new Error("already connecting");
+    this.setState("connecting");
+    try {
+      const room = await this.client.joinById<RoomState>(roomId, options);
+      return this.registerRoom(room);
+    } catch (error) {
+      this.setState("disconnected");
+      console.error(error);
+      throw new Error("failed to connect");
+    }
+  }
+
   async reconnect(reconnectionToken: string) {
     if (this.room) return this.room;
     if (this.state == "reconnecting" || this.state == "connecting") throw new Error("already connecting");
