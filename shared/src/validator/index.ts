@@ -81,6 +81,8 @@ const ACTION_RULES: {
     rules.requireTerritoryExists,
     rules.requireTerritoryOwnerShip,
     rules.requireIsUpgraded
+  ],
+  SHIFT_TRACK: [
   ]
 };
 

@@ -416,6 +416,13 @@ export const useStore = create(
                   z.winnerId = winnerId;
                 });
               },
+              shiftDiceTrack: (direction: "forward" | "backward") => {
+                try {
+                  network.send("SHIFT_TRACK", { direction });
+                } catch (error) {
+                  console.warn("Unable to shift track", error);
+                }
+              },
             }),
           ),
         ),

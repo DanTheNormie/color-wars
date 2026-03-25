@@ -249,6 +249,11 @@ export class GameRoom extends Room<RoomState> {
     this.onAction('DOWNGRADE_TERRITORY', (client, {territoryID}) => {
       this.gameEngine.downgradeTerritory(client, territoryID)
     })
+
+    this.onAction('SHIFT_TRACK', (client, {direction}) => {
+      logger.info('received shift track');
+      this.gameEngine.shiftTrack(direction)
+    })
   }
 
   onAuth(client: Client<any, any>, options: any, context: AuthContext) {

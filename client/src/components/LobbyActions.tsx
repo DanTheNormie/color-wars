@@ -23,24 +23,24 @@ const LobbyActions = () => {
     setMapID('TEST')
   } */
 
-    /* const click2 = ()=>{
-      const sprite = pixiTargetLocator.get<Sprite>('track-tile-0')!
-      const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
-      const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
-      if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
-      const vfxApp = vfxLayer.getApp()!;
-      const boardApp = gameBoard.getApp()!;
-      if (!vfxApp) throw new Error("Pixi Application not found in engine");
-      vfxLayer.animateSpritesheetConfettiOverlay(sprite, ele.current!, boardApp, vfxApp, 10)
-    } */
+  /* const click2 = ()=>{
+    const sprite = pixiTargetLocator.get<Sprite>('track-tile-0')!
+    const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+    const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
+    if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
+    const vfxApp = vfxLayer.getApp()!;
+    const boardApp = gameBoard.getApp()!;
+    if (!vfxApp) throw new Error("Pixi Application not found in engine");
+    vfxLayer.animateSpritesheetConfettiOverlay(sprite, ele.current!, boardApp, vfxApp, 10)
+  } */
 
-    // const click2 = ()=>{
-    //   const endElement = document.querySelector('[id^="player-money-"]')! as HTMLElement
-    //   const startElement = document.querySelector('[id^="player-backpack-money-"]')! as HTMLElement
-    //   const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
-    //   if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
-    //   vfxLayer.playEnergyTransferAnimation(startElement, endElement)
-    // }
+  // const click2 = ()=>{
+  //   const endElement = document.querySelector('[id^="player-money-"]')! as HTMLElement
+  //   const startElement = document.querySelector('[id^="player-backpack-money-"]')! as HTMLElement
+  //   const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
+  //   if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
+  //   vfxLayer.playEnergyTransferAnimation(startElement, endElement)
+  // }
 
 
   const handleLeaveGame = async () => {
@@ -57,6 +57,14 @@ const LobbyActions = () => {
       <Button variant="destructive" onClick={handleLeaveGame}>
         Leave Game
       </Button>
+      {/* <div className="flex gap-2 justify-center">
+        <Button onClick={() => useStore.getState().shiftDiceTrack("forward")}>
+          Shift Forward
+        </Button>
+        <Button onClick={() => useStore.getState().shiftDiceTrack("backward")}>
+          Shift Backward
+        </Button>
+      </div> */}
       {/* <Button onClick={handleOnClick1}>Load India Map </Button>
       <Button ref={ele} variant='outline' onClick={click2}>coin effect</Button>
       <Button onClick={handleOnClick2}>Load test Map </Button>
