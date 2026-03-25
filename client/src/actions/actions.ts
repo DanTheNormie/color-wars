@@ -3,7 +3,7 @@ import { BaseAction } from "./core";
 import { ActionHandle } from "@/animation/driver/AnimationHandle";
 import { pixiTargetLocator } from "@/animation/target-locator";
 import { PlayerSprite } from "@/components/NewGameBoard/pixi/units/playerSprite";
-import { Sprite } from "pixi.js";
+import * as PIXI from "pixi.js";
 import { TRACK_COORDINATES } from "@/components/NewGameBoard/config/dice-track-config";
 import { useDiceTrackStore } from "@/stores/diceTrackStore";
 import { useStore } from "@/stores/sessionStore";
@@ -23,7 +23,7 @@ export class HexHop extends BaseAction<"MOVE_PLAYER"> {
     const unit = pixiTargetLocator.get<PlayerSprite>(tokenId);
     if (!unit) throw Error("unit is not valid");
 
-    const pathSprites: Sprite[] = [];
+    const pathSprites: PIXI.Container[] = [];
     const totalTiles = TRACK_COORDINATES.length;
 
     // 1. Calculate the number of clockwise steps needed
@@ -38,7 +38,7 @@ export class HexHop extends BaseAction<"MOVE_PLAYER"> {
       const currentIndex = (fromTile + i) % totalTiles;
 
       const id = `track-tile-${currentIndex}`;
-      const tile = pixiTargetLocator.get<Sprite>(id);
+      const tile = pixiTargetLocator.get<PIXI.Container>(id);
 
       if (tile) {
         pathSprites.push(tile);
@@ -105,7 +105,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
 
     const tileID = unit.currentTileId;
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for IncrMoney animation");
-    const tile = pixiTargetLocator.get<Sprite>(tileID)!;
+    const tile = pixiTargetLocator.get<PIXI.Container>(tileID)!;
 
     const ele = document.getElementById(`player-backpack-money-${playerId}`);
     if (!ele) throw new Error("Target DOM element for money transfer not found");
@@ -140,7 +140,7 @@ export class DecrMoney extends BaseAction<"DECR_MONEY"> {
     if (!unit) throw new Error("PlayerSprite unit not found for DecrMoney animation");
     const tileID = unit.currentTileId;
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for DecrMoney animation");
-    const tile = pixiTargetLocator.get<Sprite>(tileID);
+    const tile = pixiTargetLocator.get<PIXI.Container>(tileID);
     const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
     if (!engine) throw new Error("PixiEngine not found in target locator");
 
@@ -167,7 +167,7 @@ export class AddCard extends BaseAction<"ADD_CARD"> {
 
     const tileID = unit.currentTileId;
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for AddCard animation");
-    const tile = pixiTargetLocator.get<Sprite>(tileID)!;
+    const tile = pixiTargetLocator.get<PIXI.Container>(tileID)!;
 
     const ele = document.getElementById(`player-backpack-cards-${playerId}`);
     if (!ele) throw new Error("Target DOM element for card counter not found");

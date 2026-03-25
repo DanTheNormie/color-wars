@@ -8,7 +8,7 @@ import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
 /**
  * Animation Recipe: token hop
  */
-export function animateUnitHop(unit: PlayerSprite, pathTiles: PIXI.Sprite[]) {
+export function animateUnitHop(unit: PlayerSprite, pathTiles: PIXI.Container[]) {
   const tl = gsap.timeline();
 
   // We start from the unit's current position (or the first tile in the path if we want to be strict)
@@ -48,7 +48,7 @@ export function animateUnitHop(unit: PlayerSprite, pathTiles: PIXI.Sprite[]) {
   return tl;
 }
 
-export function ToXY(target: PIXI.Sprite, endPos: { x: number; y: number }) {
+export function ToXY(target: PIXI.Container, endPos: { x: number; y: number }) {
   return gsap.to(target, {
     x: endPos.x,
     y: endPos.y,
@@ -59,7 +59,7 @@ export function ToXY(target: PIXI.Sprite, endPos: { x: number; y: number }) {
   });
 }
 
-export function animateCoinConfettiToDom(sprite: PIXI.Sprite, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
+export function animateCoinConfettiToDom(sprite: PIXI.Container, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
   const confettiEls: HTMLElement[] = [];
   const meta: { burstOffset: { x: number; y: number } }[] = [];
   const coinSize = sprite.width / 4;
@@ -144,7 +144,7 @@ function getCanvasContext (){
   return ctx
 }
 
-export function animateCoinConfettiToCanvas(sprite: PIXI.Sprite, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
+export function animateCoinConfettiToCanvas(sprite: PIXI.Container, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
   const ctx = getCanvasContext() 
 
   const coins: {
@@ -312,7 +312,7 @@ export function testAnimation(x1: number, y1: number, x2: number, y2: number) {
     .repeat(20)
 }
 
-export function animateCoinConfetti(sprite: PIXI.Sprite, app: PIXI.Application, count = 12) {
+export function animateCoinConfetti(sprite: PIXI.Container, app: PIXI.Application, count = 12) {
   const confettiEls: HTMLElement[] = [];
   const meta: { burstOffset: { x: number; y: number } }[] = [];
   const coinSize = sprite.width / 4;

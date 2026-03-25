@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 import { pixiTargetLocator } from "@/animation/target-locator";
-import { Sprite } from "pixi.js";
 import gsap from "@/lib/gsap";
 
 function clipInput(k: number, arr: number[]) {
@@ -105,7 +104,7 @@ export class PIXIVFXLayer {
     return this.initPromise;
   }
 
-  animateCoinConfettiOverlay(boardSprite: PIXI.Sprite | HTMLElement, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
+  animateCoinConfettiOverlay(boardSprite: PIXI.Container | HTMLElement, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
     // ─────────────────────────────
     // 1️⃣ START POSITION (Board → Screen → Overlay)
     // ─────────────────────────────
@@ -152,7 +151,7 @@ export class PIXIVFXLayer {
     );
   }
 
-  animateSpritesheetConfettiOverlay(boardSprite: PIXI.Sprite, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
+  animateSpritesheetConfettiOverlay(boardSprite: PIXI.Container, targetEl: HTMLElement, boardApp: PIXI.Application, overlayApp: PIXI.Application, count = 5): gsap.core.Timeline {
     // ─────────────────────────────
     // 1️⃣ START POSITION
     // ─────────────────────────────
@@ -190,8 +189,8 @@ export class PIXIVFXLayer {
     // ─────────────────────────────
     const overlayRect = this.app!.canvas.getBoundingClientRect();
 
-    const startRect = pixiTargetLocator.get<Sprite>("track-tile-0")!.getGlobalPosition();
-    const endRect = pixiTargetLocator.get<Sprite>("track-tile-17")!.getGlobalPosition();
+    const startRect = pixiTargetLocator.get<PIXI.Container>("track-tile-0")!.getGlobalPosition();
+    const endRect = pixiTargetLocator.get<PIXI.Container>("track-tile-17")!.getGlobalPosition();
     const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
     const boardRect = gameBoard.getApp()!.canvas.getBoundingClientRect();
 

@@ -27,12 +27,17 @@ type TileTextureConfig = {
   };
 };
 
+const HEX_RADIUS = 64;
+const HEX_GAP = 0.05;
+const HEX_FINAL_RADIUS = HEX_RADIUS * (1 - HEX_GAP);
+
+
 export const TILE_TEXTURE_CONFIG: Record<TileType, TileTextureConfig> = {
   START: {
     baseHex: {},
     icon: {
       path: "/tile-icons/flag.png",
-      scale: 0.4,
+      scale: 0.7,
       offset: { x: 0, y: 0 },
     },
   },
@@ -123,7 +128,7 @@ export const TILE_TEXTURE_CONFIG: Record<TileType, TileTextureConfig> = {
 export class DiceTrackLayer extends PIXI.Container {
   private background: PIXI.Graphics;
   private trackContainer: PIXI.Container;
-  private sprites: PIXI.Sprite[] = [];
+  private sprites: PIXI.Container[] = [];
   public tokenLayer: TokenLayer | null = null;
   private hexTextures: Partial<Record<string, PIXI.Texture>> = {};
 
@@ -157,28 +162,18 @@ export class DiceTrackLayer extends PIXI.Container {
     const diceTrack = useStore.getState().state.game.diceTrack;
     if (diceTrack && diceTrack.length > 0) {
       diceTrack.forEach((t, i) => {
-        let cacheKey = this.getTileTextureCacheKey(t as TileConfig);
-        if (!this.hexTextures[cacheKey]) {
-          this.hexTextures[cacheKey] = this.getHexTexture(t as TileConfig, app);
-        }
-        const sprite = new PIXI.Sprite(this.hexTextures[cacheKey]);
-        sprite.anchor.set(0.5);
         const targetID = `track-tile-${i}`;
-        pixiTargetLocator.register(targetID, sprite);
-        sprite.label = targetID;
-        this.sprites.push(sprite);
-        this.trackContainer.addChild(sprite);
+        const container = this.createTileContainer(t as TileConfig, app, targetID);
+        this.sprites.push(container);
+        this.trackContainer.addChild(container);
       });
     } else {
       console.warn("No dice track found, using default")
       TRACK_COORDINATES.forEach((_, i) => {
-        const sprite = new PIXI.Sprite(this.hexTextures[this.getTileTextureCacheKey(DICE_TRACK[i])]);
-        sprite.anchor.set(0.5);
         const targetID = `track-tile-${i}`;
-        if (!sprite.destroyed) pixiTargetLocator.register(targetID, sprite); // register for animation
-        sprite.label = targetID; // Debug label
-        this.sprites.push(sprite);
-        this.trackContainer.addChild(sprite);
+        const container = this.createTileContainer(DICE_TRACK[i], app, targetID);
+        this.sprites.push(container);
+        this.trackContainer.addChild(container);
       });
     }
 
@@ -193,7 +188,7 @@ export class DiceTrackLayer extends PIXI.Container {
     return this.trackContainer;
   }
 
-  public getTrackSprites(): PIXI.Sprite[] {
+  public getTrackSprites(): PIXI.Container[] {
     return this.sprites;
   }
 
@@ -201,23 +196,19 @@ export class DiceTrackLayer extends PIXI.Container {
     return this.tokenLayer;
   }
 
-  public prepareNewTileSprite(newTile: TileConfig, app: PIXI.Application): PIXI.Sprite {
-    let cacheKey = this.getTileTextureCacheKey(newTile);
-    if (!this.hexTextures[cacheKey]) {
-      this.hexTextures[cacheKey] = this.getHexTexture(newTile, app);
-    }
-
-    const newSprite = new PIXI.Sprite(this.hexTextures[cacheKey]);
-    newSprite.anchor.set(0.5);
-    newSprite.scale.copyFrom(this.sprites[0].scale);
-    newSprite.position.set(this.sprites[0].x, this.sprites[0].y);
-    newSprite.alpha = 0;
-    newSprite.zIndex = 0;
-    this.trackContainer.addChildAt(newSprite, 0);
-    return newSprite;
+  public prepareNewTileSprite(newTile: TileConfig, app: PIXI.Application): PIXI.Container {
+    const targetID = `temp-tile-${Date.now()}`;
+    const newContainer = this.createTileContainer(newTile, app, targetID);
+    
+    newContainer.scale.copyFrom(this.sprites[0].scale);
+    newContainer.position.set(this.sprites[0].x, this.sprites[0].y);
+    newContainer.alpha = 0;
+    newContainer.zIndex = 0;
+    this.trackContainer.addChildAt(newContainer, 0);
+    return newContainer;
   }
 
-  public commitTrackShift(count: number, direction: 'forward' | 'backward', newSprites: PIXI.Sprite[]) {
+  public commitTrackShift(count: number, direction: 'forward' | 'backward', newSprites: PIXI.Container[]) {
     if (direction === 'forward') {
       const vanishing = this.sprites.splice(1, count);
       vanishing.forEach(v => v.destroy());
@@ -377,10 +368,7 @@ export class DiceTrackLayer extends PIXI.Container {
 
 
   private getHexTexture(tileConfig: TileConfig, app: PIXI.Application) {
-    const RADIUS = 64;
-    const GAP = 0.05;
-    //const STROKEWIDTH = 4;
-    const FINAL_RADIUS = RADIUS * (1 - GAP);
+    const FINAL_RADIUS = HEX_FINAL_RADIUS;
     const textureCfg = TILE_TEXTURE_CONFIG[tileConfig.type]
 
     const container = new PIXI.Container();
@@ -441,5 +429,29 @@ export class DiceTrackLayer extends PIXI.Container {
       hexTextures[key] = this.getHexTexture(t, app)
     })
     return hexTextures;
+  }
+
+  private createTileContainer(tileConfig: TileConfig, app: PIXI.Application, targetID: string): PIXI.Container {
+    let cacheKey = this.getTileTextureCacheKey(tileConfig);
+    if (!this.hexTextures[cacheKey]) {
+      this.hexTextures[cacheKey] = this.getHexTexture(tileConfig, app);
+    }
+
+    const container = new PIXI.Container();
+    const sprite = new PIXI.Sprite(this.hexTextures[cacheKey]);
+    sprite.anchor.set(0.5);
+    container.addChild(sprite);
+
+    // Add hex mask
+    const mask = new PIXI.Graphics();
+    mask.roundPoly(0, 0, HEX_FINAL_RADIUS, 6, 10, Math.PI / 6);
+    mask.fill(0xffffff);
+    container.addChild(mask);
+    container.mask = mask;
+
+    container.label = targetID;
+    pixiTargetLocator.register(targetID, container);
+
+    return container;
   }
 }
