@@ -34,13 +34,7 @@ const LobbyActions = () => {
     vfxLayer.animateSpritesheetConfettiOverlay(sprite, ele.current!, boardApp, vfxApp, 10)
   } */
 
-  // const click2 = ()=>{
-  //   const endElement = document.querySelector('[id^="player-money-"]')! as HTMLElement
-  //   const startElement = document.querySelector('[id^="player-backpack-money-"]')! as HTMLElement
-  //   const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
-  //   if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
-  //   vfxLayer.playEnergyTransferAnimation(startElement, endElement)
-  // }
+
 
 
   const handleLeaveGame = async () => {

@@ -56,13 +56,6 @@ const ACTION_RULES: {
     rules.requireLeader
   ],
 
-  PAY_OFF_DEBT: [
-    rules.requirePlayerExists,
-    rules.requirePlayersTurn,
-    rules.requireHasRolledDice,
-    rules.requirePlayerInDebt,
-    rules.requireEnoughMoneyToPayOffDebt
-  ],
   DECLARE_BANKRUPTCY: [
     rules.requirePlayerExists,
   ],

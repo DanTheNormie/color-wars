@@ -22,7 +22,6 @@ export class OutlineLayer extends PIXI.Container {
   private territoryCenters: Map<string, { x: number; y: number, size: number }> = new Map();
   private buildingIcons: Map<string, PIXI.Sprite> = new Map();
   private unsubscribeStore: (() => void) | null = null;
-  private buildingIconSize: number = 30;
 
   constructor() {
     super();

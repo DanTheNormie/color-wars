@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import type { PlainStateOf, PlayerState } from "@color-wars/shared/src/types/RoomState";
 import { useStore } from "@/stores/sessionStore";
 import { PLAYER } from "@color-wars/shared/src/config/game";
-import { PlayerMoney, PlayerBackpackMoney, PlayerCards, PlayerBackpackCards, PlayerTerritories } from "./Counter";
+import { PlayerMoney, PlayerCards, PlayerTerritories } from "./Counter";
 import { Separator } from "./ui/separator";
 import { Avatar } from "./ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
@@ -126,7 +126,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
       style={{
         backgroundColor: `color-mix(in srgb, var(--secondary) 20%, ${player.color} 10%)`
       }}
-      className={`player border-r border-y border-[#ffffff10] flex w-full items-center justify-around rounded-r-md transition-opacity ${!player.connected ? "opacity-40" : ""} ${player.financialStatus === 'bankrupt' ? "opacity-50 grayscale pointer-events-none" : ""}`}
+      className={`player border-r border-y border-[#ffffff10] flex w-full items-center justify-around rounded-r-md transition-opacity ${!player.connected ? "opacity-40" : ""} ${player.status === 'bankrupt' ? "opacity-50 grayscale pointer-events-none" : ""}`}
     >
       {/* LEFT — Player Info */}
       <div className="flex h-full w-full gap-2 items-center ">
@@ -173,14 +173,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
       {!isLobbyPhase && (
         <div className="mx-2 sm:ml-4 md:mr-6 flex flex-col justify-around h-full">
           <div className="flex items-center gap-1 justify-start whitespace-nowrap">
-            <span className={textSizeClass}> 🎒Backpack </span>
-            <span className={textSizeClass}> &middot; </span>
-            <span className={textSizeClass}> {player.financialStatus} </span>
-          </div>
-
-          <div className="flex w-full gap-3">
-            <PlayerBackpackMoney playerId={player.id} />
-            <PlayerBackpackCards playerId={player.id} />
+            <span className={textSizeClass}> {player.status} </span>
           </div>
         </div>
       )}

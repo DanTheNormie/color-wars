@@ -78,24 +78,15 @@ const LogMessageItem = ({ entry }: { entry: GameLogEntry }) => {
       }
       return <div className={`${logMessageStyle} text-sm`}> {message}</div>
     }
-    case "BANK_BACKPACK_ITEMS": {
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> banked items from backpack.</div>;
-    }
-    case "UPDATE_FINANCIAL_STATUS": {
-      const financialStatus = payload.financialStatus;
-      if (financialStatus === "bankrupt") {
+    case "UPDATE_PLAYER_STATUS": {
+      const status = payload.status;
+      if (status === "bankrupt") {
         return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> has declared bankruptcy.</div>;
       }
-      else if (financialStatus === "in-debt") {
+      else if (status === "in-debt") {
         return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is in debt.</div>;
       }
-      else if (financialStatus === "solvent") {
-        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is solvent.</div>;
-      }
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is no longer in debt.</div>;
-    }
-    case "PAY_OFF_DEBT": {
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> paid off their debt.</div>;
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is now solvent.</div>;
     }
     default:
       return <div className={logMessageStyle}>{`<!-- log for action type: "${entry.type}" not implemented -->`}</div>;

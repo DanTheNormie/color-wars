@@ -86,9 +86,7 @@ export class GameEngine {
     this.state.queueAction('MOVE_PLAYER', { fromTile, toTile, tokenId: client.sessionId })
     // this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
 
-    if ((fromTile + roll) >= this.state.game.diceTrack.length) {
-      this.bankBackpack(client.sessionId);
-    }
+
 
     this.handleTileEffect(destTileConfig, player)
 
@@ -100,61 +98,12 @@ export class GameEngine {
 
   updateFinancialStatus(playerId: string) {
     const player = this.state.game.players.get(playerId)!;
-    if((player.backpack.money >= 0 ) && player.financialStatus !== "healthy"){
-      player.financialStatus = "healthy"
-      this.state.queueAction('UPDATE_FINANCIAL_STATUS', { playerId: player.id, financialStatus: "healthy" })
-      // this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "healthy" })
-    }else if((player.backpack.money < 0) && player.financialStatus !== "in-debt"){
-      player.financialStatus = "in-debt"
-      this.state.queueAction('UPDATE_FINANCIAL_STATUS', { playerId: player.id, financialStatus: "in-debt" })
-      // this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: "in-debt" })
-    }
-  }
-    
-
-  payOffDebt(client: Client) {
-    const player = this.state.game.players.get(client.sessionId)!;
-    const debt = player.backpack.money;
-    if (debt < 0) {
-      player.money += debt;
-      player.backpack.money = 0;
-      this.updateFinancialStatus(client.sessionId)
-      this.state.queueAction('PAY_OFF_DEBT', { playerId: client.sessionId, amount: debt })
-      // this.state.pushAction("PAY_OFF_DEBT", client.sessionId, { playerId: client.sessionId, amount: debt });
-
-    }
-  }
-
-  bankBackpack(playerId: string) {
-    const player = this.state.game.players.get(playerId)!;
-    const backpackMoney = player.backpack.money;
-    const backpackCards = [...player.backpack.cards];
-    
-    // Calculate territory income/maintenance
-    let territoryNet = 0;
-    this.state.game.territoryOwnership.forEach((tState, tId) => {
-      if (tState.ownerId === playerId) {
-        const territory = MAPS[this.state.mapID].map.territories.find(t => t.id === tId);
-        if (territory) {
-          const size = territory.hexes.length;
-          const economy = MAPS[this.state.mapID].economy;
-          
-          const inc = income(size, tState.buildingType as DevelopmentType, economy);
-          const maint = maintenanceCost(size, tState.buildingType as DevelopmentType, economy);
-          territoryNet += (inc - maint);
-        }
-      }
-    });
-
-    if (backpackMoney > 0 || backpackCards.length > 0 || territoryNet !== 0) {
-      const netAmount = backpackMoney + territoryNet;
-      player.money += netAmount;
-      player.cards.push(...backpackCards);
-      
-      player.backpack.money = 0;
-      player.backpack.cards.clear();
-      
-      this.state.queueAction('BANK_BACKPACK_ITEMS', { playerId: playerId, money: netAmount, cards: backpackCards })
+    if((player.money >= 0 ) && player.status !== "healthy"){
+      player.status = "healthy"
+      this.state.queueAction('UPDATE_PLAYER_STATUS', { playerId: player.id, status: "healthy" })
+    }else if((player.money < 0) && player.status !== "in-debt"){
+      player.status = "in-debt"
+      this.state.queueAction('UPDATE_PLAYER_STATUS', { playerId: player.id, status: "in-debt" })
     }
   }
 
@@ -162,28 +111,28 @@ export class GameEngine {
     switch (tileConfig.type) {
       case 'INCOME': {
         const amount = tileConfig.amount!
-        player.backpack.money += amount
+        player.money += amount
         this.state.queueAction('INCR_MONEY', { playerId: player.id, amount: amount })
         // this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'TAX': {
         const amount = tileConfig.amount!
-        player.backpack.money -= amount
+        player.money -= amount
         this.state.queueAction('DECR_MONEY', { playerId: player.id, amount: amount })
         // this.state.pushAction('DECR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'REWARD': {
         const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-        player.backpack.money += amount
+        player.money += amount
         this.state.queueAction('INCR_MONEY', { playerId: player.id, amount: amount })
         // this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
       }
       case 'PENALTY': {
         const amount = this.getRandomNumberWithStep(1000, 10000, 1000)
-        player.backpack.money -= amount
+        player.money -= amount
         this.state.queueAction('DECR_MONEY', { playerId: player.id, amount: amount })
         // this.state.pushAction('DECR_MONEY', player.id, { playerId: player.id, amount: amount })
         break;
@@ -290,11 +239,11 @@ export class GameEngine {
     // apply card effect
     if (config.type === "INSTANT_CASH") {
       const amount = this.getRandomNumberWithStep(config.min, config.max, config.step);
-      player.backpack.money += amount;
+      player.money += amount;
       this.state.queueAction('INCR_MONEY', { playerId: player.id, amount })
       // this.state.pushAction('INCR_MONEY', player.id, { playerId: player.id, amount });
     } else if (config.type === "CARD") {
-      player.backpack.cards.push(config.cardId);
+      player.cards.push(config.cardId);
       this.state.queueAction('ADD_CARD', { playerId: player.id, cardId: config.cardId })
       // this.state.pushAction('ADD_CARD', player.id, { playerId: player.id, cardId: config.cardId });
     }
@@ -304,12 +253,11 @@ export class GameEngine {
 
   declareBankruptcy(client: Client) {
     const player = this.state.game.players.get(client.sessionId)!;
-    player.financialStatus = "bankrupt"
+    player.status = "bankrupt"
     
     // 1. Lose all money
     player.money = 0;
-    player.backpack.money = 0;
-    player.backpack.cards.clear();
+    player.cards.clear();
     
     // 2. Lose all territories
     this.state.game.territoryOwnership.forEach((territoryState, territoryId) => {
@@ -319,12 +267,8 @@ export class GameEngine {
     });
 
     // 3. Update status
-    this.state.queueAction('UPDATE_FINANCIAL_STATUS', { playerId: player.id, financialStatus: player.financialStatus })
-    // this.state.pushAction("UPDATE_FINANCIAL_STATUS", player.id, { playerId: player.id, financialStatus: player.financialStatus });
+    this.state.queueAction('UPDATE_PLAYER_STATUS', { playerId: player.id, status: player.status })
     this.state.queueAction('UPDATE_PLAYER_MONEY', { playerId: player.id, amount: 0 })
-    // this.state.pushAction("UPDATE_PLAYER_MONEY", player.id, { playerId: player.id, amount: 0 });
-    this.state.queueAction('UPDATE_PLAYER_BACKPACK_MONEY', { playerId: player.id, amount: 0 })
-    // this.state.pushAction("UPDATE_PLAYER_BACKPACK_MONEY", player.id, { playerId: player.id, amount: 0 });
 
     // 4. Pass turn if it's their turn
     if (this.state.game.activePlayerId === player.id) {
@@ -335,7 +279,7 @@ export class GameEngine {
   }
 
   checkGameOver() {
-    const activePlayers = Array.from(this.state.game.players.values()).filter(p => p.financialStatus !== "bankrupt");
+    const activePlayers = Array.from(this.state.game.players.values()).filter(p => p.status !== "bankrupt");
     
     // If only one player is left, they win
     if (activePlayers.length === 1) {
@@ -423,8 +367,6 @@ export class GameEngine {
     }
     newTiles.reverse();
 
-    const playersToBank: string[] = [];
-
     // Update player positions
     for (const [, player] of this.state.game.players) {
       if (player.position >= 1) {
@@ -434,7 +376,6 @@ export class GameEngine {
           const newPosition = player.position + count;
           if(newPosition > this.state.game.diceTrack.length - 1){
             player.position = 0;
-            playersToBank.push(player.id);
           } else {
             player.position = newPosition;
           }
@@ -443,11 +384,6 @@ export class GameEngine {
     }
     
     this.state.queueAction('SHIFT_TRACK', { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) })
-    // this.state.pushAction('SHIFT_TRACK', this.state.game.activePlayerId, { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) });
-    
-    for (const playerId of playersToBank) {
-      this.bankBackpack(playerId);
-    }
 
     this.state.game.turnPhase = 'resolving-shift';
   }
@@ -459,7 +395,7 @@ export class GameEngine {
     // Skip bankrupt players
     let attempts = 0;
     while (
-      this.state.game.players.get(this.state.game.playerOrder[nextIdx])?.financialStatus === "bankrupt" &&
+      this.state.game.players.get(this.state.game.playerOrder[nextIdx])?.status === "bankrupt" &&
       attempts < this.state.game.playerOrder.length
     ) {
       nextIdx = (nextIdx + 1) % this.state.game.playerOrder.length;
@@ -477,7 +413,7 @@ export class GameEngine {
     if (nextIdx === 0) {
       this.state.game.currentRound += 1;
       for (const [, player] of this.state.game.players) {
-        if (player.financialStatus !== "bankrupt") {
+        if (player.status !== "bankrupt") {
           player.hasRolled = false;
         }
       }

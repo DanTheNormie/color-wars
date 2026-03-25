@@ -46,16 +46,7 @@ export function PlayerMoney({ playerId }: { playerId: string }) {
   );
 }
 
-export function PlayerBackpackMoney({ playerId }: { playerId: string }) {
-  const score = useStore((s) => s.state.game.players[playerId]?.backpack.money || 0);
 
-  return (
-    <div className={statTextContainerClassName}>
-      <div className={textSizeClass}>🪙</div>
-      <CounterSimple className={textSizeClass} value={score} animateDiff id={`player-backpack-money-${playerId}`} />
-    </div>
-  );
-}
 
 export function PlayerCards({ playerId }: { playerId: string }) {
   const score = useStore((s) => s.state.game.players[playerId]?.cards.length || 0);
@@ -68,16 +59,7 @@ export function PlayerCards({ playerId }: { playerId: string }) {
   );
 }
 
-export function PlayerBackpackCards({ playerId }: { playerId: string }) {
-  const playerBackpackCards = useStore((s) => s.state.game.players[playerId]?.backpack.cards.length || 0);
 
-  return (
-    <div className={statTextContainerClassName}>
-      <div className={textSizeClass}>🃏</div>
-      <CounterSimple className={textSizeClass} value={playerBackpackCards} animateDiff id={`player-backpack-cards-${playerId}`} />
-    </div>
-  );
-}
 
 export function PlayerTerritories({ playerId }: { playerId: string }) {
   const playerT = useStore((s) => {

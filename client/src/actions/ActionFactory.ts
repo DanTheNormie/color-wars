@@ -13,11 +13,8 @@ import {
   SellTerritoryAction,
   ShiftTrackAction, 
   UpdateActivePlayer, 
-  BankBackpackItemsAction,
-  UpdateFinancialStatusAction,
-  PayOffDebtAction,
+  UpdatePlayerStatusAction,
   UpdatePlayerMoneyAction,
-  UpdatePlayerBackpackMoneyAction,
   GameOverAction,
   UpgradeTerritoryAction,
   DowngradeTerritoryAction
@@ -59,20 +56,11 @@ export class ActionFactory {
       case 'UPDATE_ACTIVE_PLAYER':
         return new UpdateActivePlayer(data);
 
-      case 'BANK_BACKPACK_ITEMS':
-        return new BankBackpackItemsAction(data);
-
-      case 'UPDATE_FINANCIAL_STATUS':
-        return new UpdateFinancialStatusAction(data);
-
-      case "PAY_OFF_DEBT":
-        return new PayOffDebtAction(data);
+      case 'UPDATE_PLAYER_STATUS':
+        return new UpdatePlayerStatusAction(data);
 
       case "UPDATE_PLAYER_MONEY":
         return new UpdatePlayerMoneyAction(data);
-
-      case "UPDATE_PLAYER_BACKPACK_MONEY":
-        return new UpdatePlayerBackpackMoneyAction(data);
         
       case "GAME_OVER":
         return new GameOverAction(data);

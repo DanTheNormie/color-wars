@@ -14,7 +14,7 @@ import type { PIXIVFXLayer } from "@/components/vfxOverlayLayer/pixi/vfxEngine";
 import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackLayer";
 import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
 import { buildTrackShiftAnimation } from "../animation/registry/anim";
-import gsap from "@/lib/gsap";
+
 //import { network } from "@/lib/managers/network";
 
 export class HexHop extends BaseAction<"MOVE_PLAYER"> {
@@ -107,7 +107,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for IncrMoney animation");
     const tile = pixiTargetLocator.get<PIXI.Container>(tileID)!;
 
-    const ele = document.getElementById(`player-backpack-money-${playerId}`);
+    const ele = document.getElementById(`player-money-${playerId}`);
     if (!ele) throw new Error("Target DOM element for money transfer not found");
 
 
@@ -126,7 +126,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim2, async () => {
-      useStore.getState().updatePlayerBackpackMoney(playerId, useStore.getState().state.game.players[playerId].backpack.money + amount);
+      useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
       console.log("IncrMoney animation complete");
     });
   }
@@ -152,8 +152,8 @@ export class DecrMoney extends BaseAction<"DECR_MONEY"> {
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim, async () => {
-      useStore.getState().updatePlayerBackpackMoney(playerId, useStore.getState().state.game.players[playerId].backpack.money - amount);
-      console.log("IncrMoney animation complete");
+      useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
+      console.log("DecrMoney animation complete");
     });
   }
 }
@@ -169,7 +169,7 @@ export class AddCard extends BaseAction<"ADD_CARD"> {
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for AddCard animation");
     const tile = pixiTargetLocator.get<PIXI.Container>(tileID)!;
 
-    const ele = document.getElementById(`player-backpack-cards-${playerId}`);
+    const ele = document.getElementById(`player-cards-${playerId}`);
     if (!ele) throw new Error("Target DOM element for card counter not found");
 
     const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
@@ -185,8 +185,8 @@ export class AddCard extends BaseAction<"ADD_CARD"> {
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim, async () => {
-      useStore.getState().addBackpackCard(playerId, cardId);
-      console.log("AddCard animation complete – card added to backpack:", cardId);
+      useStore.getState().addPlayerCard(playerId, cardId);
+      console.log("AddCard animation complete – card added to player:", cardId);
     });
   }
 }
@@ -339,70 +339,13 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
   }
 }
 
-export class BankBackpackItemsAction extends BaseAction<"BANK_BACKPACK_ITEMS"> {
+export class UpdatePlayerStatusAction extends BaseAction<"UPDATE_PLAYER_STATUS"> {
   execute(): ActionHandle {
-    const { playerId, money, cards } = this.payload;
-
-    if (money === 0 && cards.length === 0) {
-      return new ActionHandle(Promise.resolve(), () => { }, () => { });
-    }
-
-    // 1. Update backpack state to empty (optimistic frontend update)
-
-
-    const backpackMoneyEle = document.getElementById(`player-backpack-money-${playerId}`);
-    const safeMoneyEle = document.getElementById(`player-money-${playerId}`);
-    const backpackCardsEle = document.getElementById(`player-backpack-cards-${playerId}`);
-    const safeCardsEle = document.getElementById(`player-cards-${playerId}`);
-
-    const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
-    const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
-
-    if (!vfxLayer || !gameBoard) {
-      throw new Error('Missing pixi engine')
-    }
-
-    const vfxApp = vfxLayer.getApp()!;
-    const boardApp = gameBoard.getApp()!;
-    const master = gsap.timeline({ paused: true });
-    const promise = new Promise<void>((resolve) => {
-
-      if (money > 0 && backpackMoneyEle && safeMoneyEle) {
-        useStore.getState().updatePlayerBackpackMoney(playerId, 0);
-        const tl = vfxLayer.animateCoinConfettiOverlay(backpackMoneyEle, safeMoneyEle, boardApp, vfxApp, 1);
-        tl.eventCallback("onComplete", () => {
-          useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + money);
-        });
-        master.add(tl);
-      }
-
-      if (cards.length > 0 && backpackCardsEle && safeCardsEle) {
-        useStore.getState().clearPlayerBackpackCards(playerId);
-        const tl = vfxLayer.animateCoinConfettiOverlay(backpackCardsEle, safeCardsEle, boardApp, vfxApp, 1);
-        tl.eventCallback("onComplete", () => {
-          useStore.getState().addPlayerCards(playerId, cards);
-        });
-        master.add(tl);
-      }
-
-      master.eventCallback("onComplete", () => {
-        resolve();
-      });
-      master.play();
-    });
-
-    this.logAction(playerId);
-    return new ActionHandle(promise, () => { }, () => { });
-  }
-}
-
-export class UpdateFinancialStatusAction extends BaseAction<"UPDATE_FINANCIAL_STATUS"> {
-  execute(): ActionHandle {
-    const { playerId, financialStatus } = this.payload;
+    const { playerId, status } = this.payload;
     const store = useStore.getState();
-    store.updatePlayerFinancialStatus(playerId, financialStatus);
+    store.updatePlayerStatus(playerId, status);
 
-    if (financialStatus === 'bankrupt') {
+    if (status === 'bankrupt') {
       useDiceTrackStore.getState().removeToken(playerId);
 
       // Clear all territories owned by this player
@@ -421,28 +364,10 @@ export class UpdateFinancialStatusAction extends BaseAction<"UPDATE_FINANCIAL_ST
   }
 }
 
-export class PayOffDebtAction extends BaseAction<"PAY_OFF_DEBT"> {
-  execute(): ActionHandle {
-    const { playerId, amount } = this.payload;
-    useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
-    useStore.getState().updatePlayerBackpackMoney(playerId, 0);
-    this.logAction(playerId);
-    return new ActionHandle(Promise.resolve(), () => { }, () => { });
-  }
-}
-
 export class UpdatePlayerMoneyAction extends BaseAction<"UPDATE_PLAYER_MONEY"> {
   execute(): ActionHandle {
     const { playerId, amount } = this.payload;
     useStore.getState().updatePlayerMoney(playerId, amount);
-    return new ActionHandle(Promise.resolve(), () => { }, () => { });
-  }
-}
-
-export class UpdatePlayerBackpackMoneyAction extends BaseAction<"UPDATE_PLAYER_BACKPACK_MONEY"> {
-  execute(): ActionHandle {
-    const { playerId, amount } = this.payload;
-    useStore.getState().updatePlayerBackpackMoney(playerId, amount);
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }

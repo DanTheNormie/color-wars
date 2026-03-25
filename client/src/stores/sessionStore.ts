@@ -11,7 +11,7 @@ import type {
   RoomPhase,
   TurnPhase,
   TileState,
-  FinancialStatus
+  PlayerStatus
 } from "@color-wars/shared/src/types/RoomState";
 import type { DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
 import type { TerritoryId } from "@/types/map";
@@ -67,17 +67,10 @@ export const useStore = create(
                   z.state.game.diceTrack = diceTrack
                 })
               },
-              updatePlayerFinancialStatus: (playerId: string, financialStatus: FinancialStatus) => {
+              updatePlayerStatus: (playerId: string, status: PlayerStatus) => {
                 set((z) => {
-                  z.state.game.players[playerId].financialStatus = financialStatus
+                  z.state.game.players[playerId].status = status
                 })
-              },
-              payOffDebt: () => {
-                try {
-                  network.send('PAY_OFF_DEBT', {})
-                } catch (err) {
-                  console.log(err)
-                }
               },
               declareBackruptcy: () => {
                 try {
@@ -226,26 +219,12 @@ export const useStore = create(
                   z.state.game.players[playerId].money = amount
                 })
               },
-              updatePlayerBackpackMoney: (playerId: string, amount: number) => {
-                set((z) => {
-                  z.state.game.players[playerId].backpack.money = amount
-                })
-              },
-              addBackpackCard: (playerId: string, cardId: string) => {
+              addPlayerCard: (playerId: string, cardId: string) => {
                 set((z) => {
                   const player = z.state?.game?.players?.[playerId];
                   if (player) {
-                    player.backpack ??= { cards: [], money: 0 };
-                    player.backpack.cards ??= [];
-                    player.backpack.cards.push(cardId);
-                  }
-                });
-              },
-              clearPlayerBackpackCards: (playerId: string) => {
-                set((z) => {
-                  const player = z.state?.game?.players?.[playerId];
-                  if (player && player.backpack) {
-                    player.backpack.cards = [];
+                    player.cards ??= [];
+                    player.cards.push(cardId);
                   }
                 });
               },

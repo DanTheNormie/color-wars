@@ -14,7 +14,6 @@ export interface ClientMessages {
   END_TURN: {};
   CHANGE_MAP: {mapID: MapID}
   SELECT_CARD: {cardID: string}
-  PAY_OFF_DEBT: {};
    DECLARE_BANKRUPTCY: {};
   UPGRADE_TERRITORY: { territoryID: string; buildingType: DevelopmentType; };
   DOWNGRADE_TERRITORY: { territoryID: string; };
