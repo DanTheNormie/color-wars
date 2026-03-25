@@ -418,11 +418,6 @@ export const useStore = create(
                   console.warn("Unable to shift track", error);
                 }
               },
-              setRehydrated: (rehydrated: boolean) => {
-                set((z) => {
-                  z.rehydrated = rehydrated;
-                })
-              }
             }),
           ),
         ),
@@ -432,7 +427,7 @@ export const useStore = create(
             room: state.room,
           }),
           onRehydrateStorage: (state) => {
-            state?.setRehydrated(true)
+            state.rehydrated = true
           }
         },
       ),
