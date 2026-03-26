@@ -1,4 +1,4 @@
-import { AuthContext, Client, Delayed, Room, logger } from "colyseus";
+import { AuthContext, Client, Delayed, Room, logger, CloseCode } from "colyseus";
 
 import { GameEngine } from "../game/GameEngine.js";
 import { DEFAULT } from "@color-wars/shared";
@@ -13,7 +13,7 @@ import {
   PlayerJoinPayload,
 } from "@color-wars/shared";
 
-export class GameRoom extends Room<RoomState> {
+export class GameRoom extends Room<{state: RoomState}> {
   private gameEngine!: GameEngine;
   private pinger: Delayed | null = null;
   private actionSequence = 0;
@@ -106,7 +106,8 @@ export class GameRoom extends Room<RoomState> {
     await this.updateMetadata();
   }
 
-  async onLeave(client: Client, consented?: boolean) {
+
+  async onLeave(client: Client, code: CloseCode) {
     const { game, room } = this.state;
     const { players, playerOrder } = game;
     logger.debug('player disconnected: ', client.sessionId)
@@ -146,7 +147,7 @@ export class GameRoom extends Room<RoomState> {
     const idx = playerOrder.indexOf(client.sessionId);
   
     try {
-      if (consented) {
+      if (code === CloseCode.CONSENTED) {
         if (idx !== -1) removePlayer(idx);
         return;
       }
@@ -253,7 +254,7 @@ export class GameRoom extends Room<RoomState> {
     })
   }
 
-  onAuth(client: Client<any, any>, options: any, context: AuthContext) {
+  onAuth(client: Client, options: any, context: AuthContext) {
     const hasGameStarted = this.state.room.phase === "active";
     if (hasGameStarted) {
       throw new Error("Game has already started");

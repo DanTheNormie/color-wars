@@ -9,7 +9,7 @@ export function createMatchmakingRouter() {
     try {
       const { playerName, preferences } = req.body ?? {};
       const reservation = await RoomManager.quickMatch({ playerName }, preferences ?? undefined);
-      res.json(formatReservationResponse(reservation));
+      res.json(reservation);
     } catch (error) {
       res.status(500).json({ error: "Unable to find a room" });
     }
@@ -23,7 +23,7 @@ export function createMatchmakingRouter() {
         maxPlayers,
         minPlayers,
       });
-      res.json({ joinCode, reservation: formatReservationResponse(reservation) });
+      res.json({ joinCode, reservation });
     } catch (error) {
       logger.error("private_room_create_failed", { message: (error as Error).message });
       res.status(500).json({ error: "Unable to create private room" });
@@ -40,7 +40,7 @@ export function createMatchmakingRouter() {
 
     try {
       const reservation = await RoomManager.joinPrivateRoom(joinCode, { playerName });
-      res.json(formatReservationResponse(reservation));
+      res.json(reservation);
     } catch (error) {
       logger.warn("private_room_join_failed", { message: (error as Error).message, joinCode });
       res.status(404).json({ error: "Room not found" });
@@ -82,7 +82,7 @@ export function createMatchmakingRouter() {
         if (result.reservation) {
           res.json({
             isSpectator: false,
-            reservation: formatReservationResponse(result.reservation),
+            reservation: result.reservation,
           });
         } else {
           res.status(500).json({ error: "Reservation not found" });
@@ -107,26 +107,3 @@ export function createMatchmakingRouter() {
   return router;
 }
 
-function formatReservationResponse(
-  reservation: Awaited<ReturnType<typeof RoomManager.quickMatch>>,
-) {
-  return {
-    sessionId: reservation.sessionId,
-    reservationId: (reservation as any).reservationId,
-    protocol: (reservation as any).protocol,
-    reconnectionToken: (reservation as any).reconnectionToken,
-    devMode: reservation.devMode,
-    room: {
-      roomId: reservation.room.roomId,
-      processId: reservation.room.processId,
-      name: reservation.room.name,
-      clients: reservation.room.clients,
-      maxClients: reservation.room.maxClients,
-      locked: reservation.room.locked,
-      private: reservation.room.private,
-      publicAddress: reservation.room.publicAddress,
-      unlisted: reservation.room.unlisted,
-      metadata: reservation.room.metadata,
-    },
-  };
-}

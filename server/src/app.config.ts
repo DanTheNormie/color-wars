@@ -1,4 +1,4 @@
-import config = require("@colyseus/tools");
+import {defineRoom, defineServer} from "colyseus";
 import { monitor } from "@colyseus/monitor";
 import express from "express";
 import path from "path";
@@ -44,28 +44,37 @@ const registerClientBuild = (app: express.Express) => {
   logger.info("serving_client_build", { buildDir });
 };
 
-export const colyseusConfig = config.default({
-  initializeGameServer: (gameServer) => {
-    gameServer.define(DEFAULT_ROOM_TYPE, GameRoom).enableRealtimeListing().sortBy({ clients: -1 });
-  },
+// export const colyseusConfig = config({
+//   initializeGameServer: (gameServer) => {
+//     gameServer.define(DEFAULT_ROOM_TYPE, GameRoom).enableRealtimeListing().sortBy({ clients: -1 });
+//   },
 
-  initializeExpress: (app) => {
-    app.use(express.json());
+//   initializeExpress: (app) => {
+//     app.use(express.json());
 
-    app.use("/matchmaking", createMatchmakingRouter());
+//     app.use("/matchmaking", createMatchmakingRouter());
 
-    app.use("/monitor", monitor());
+//     app.use("/monitor", monitor());
 
-    app.get("/health", (_req, res) => {
-      res.json({ status: "ok" });
-    });
+//     app.get("/health", (_req, res) => {
+//       res.json({ status: "ok" });
+//     });
 
-    if (env.nodeEnv === "production") {
-      registerClientBuild(app);
-    }
-  },
+//     if (env.nodeEnv === "production") {
+//       registerClientBuild(app);
+//     }
+//   },
 
-  beforeListen: () => {
-    logger.info("color-wars server listening", { port: env.port });
-  },
-});
+//   beforeListen: () => {
+//     logger.info("color-wars server listening", { port: env.port });
+//   },
+// });
+
+export const colyseusConfig = defineServer({
+  rooms: {
+    [DEFAULT_ROOM_TYPE]: defineRoom(GameRoom),
+  }
+})
+  
+
+
