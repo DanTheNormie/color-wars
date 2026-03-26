@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo, memo } from "react";
 import gsap from "@/lib/gsap";
 import { useCardStore } from "@/stores/cardSelectionStore";
 
@@ -42,19 +42,19 @@ declare module "react" {
 
 import type { RewardConfig } from "@color-wars/shared";
 
-const Card = ({ id }: { id: string }) => {
-  const config = JSON.parse(id) as RewardConfig;
-  const { title, subtitle, colorTheme } = config.ui;
+const themeClasses: Record<string, string> = {
+  "Emerald Green": "from-emerald-600 via-emerald-500 to-teal-700",
+  "Gold / Yellow": "from-amber-400 via-yellow-300 to-orange-500",
+  "Crimson Red": "from-rose-700 via-red-600 to-red-900",
+  "Royal Blue": "from-blue-700 via-blue-500 to-indigo-900",
+  "Industrial Gray": "from-slate-600 via-gray-500 to-zinc-700",
+  "Industrial / Warning": "from-orange-600 via-yellow-600 to-gray-800",
+  "Gold": "from-yellow-600 via-amber-400 to-yellow-800 animate-pulse",
+};
 
-  const themeClasses: Record<string, string> = {
-    "Emerald Green": "from-emerald-600 via-emerald-500 to-teal-700",
-    "Gold / Yellow": "from-amber-400 via-yellow-300 to-orange-500",
-    "Crimson Red": "from-rose-700 via-red-600 to-red-900",
-    "Royal Blue": "from-blue-700 via-blue-500 to-indigo-900",
-    "Industrial Gray": "from-slate-600 via-gray-500 to-zinc-700",
-    "Industrial / Warning": "from-orange-600 via-yellow-600 to-gray-800",
-    "Gold": "from-yellow-600 via-amber-400 to-yellow-800 animate-pulse",
-  };
+const Card = memo(({ id }: { id: string }) => {
+  const config = useMemo(() => JSON.parse(id) as RewardConfig, [id]);
+  const { title, subtitle, colorTheme } = config.ui;
 
   const gradient = themeClasses[colorTheme] || "from-gray-600 to-gray-800";
 
@@ -101,31 +101,27 @@ const Card = ({ id }: { id: string }) => {
       </hover-tilt>
     </div>
   );
-};
+});
 
-const Thumb = ({ id, idx }: { id: string, idx:number }) => {
-  const selectedCardId = useCardStore((s) => s.selectedCardId);
-  const setSelectedCardId = useCardStore((s) => s.setSelectedCardId);
-  const handleOnClick = () => {
-    setSelectedCardId(id);
-  };
+const Thumb = memo(({ id, idx, isSelected, onClick }: { id: string, idx: number, isSelected: boolean, onClick: (id: string) => void }) => {
   return (
     <div
-      onClick={handleOnClick}
-      className={`flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-md bg-zinc-700 text-[10px] text-white select-none p-1 text-center transition-all ${selectedCardId == id ? "border-2 border-white scale-110 shadow-lg z-10" : "opacity-60 hover:opacity-100"}`}
+      onClick={() => onClick(id)}
+      className={`flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-md bg-zinc-700 text-[10px] text-white select-none p-1 text-center transition-all ${isSelected ? "border-2 border-white scale-110 shadow-lg z-10" : "opacity-60 hover:opacity-100"}`}
     >
       {/* <div className="font-bold truncate w-full">{config.ui.title}</div> */}
       <div className="text-lg font-bold">{String.fromCharCode(65 + idx)}</div>
     </div>
   );
-};
+});
 
 // --- Main Overlay ---
-export const CardSelectionOverlay = () => {
+export const CardSelectionOverlay = memo(() => {
   // Using selector to prevent unnecessary re-renders if other parts of store change
   const cardIds = useCardStore((s) => s.cardIds);
   const phase = useCardStore((s) => s.phase);
   const selectedCardId = useCardStore((s) => s.selectedCardId);
+  const setSelectedCardId = useCardStore((s) => s.setSelectedCardId);
   const selectCard = useStore((s) => s.selectCard)
   const swiperRef = useRef<SwiperClass | null>(null);
   const setPhase = useCardStore((s) => s.setPhase);
@@ -157,9 +153,10 @@ export const CardSelectionOverlay = () => {
 
   // 1. Reveal Animation
   useEffect(() => {
+    let tl: gsap.core.Tween | undefined;
     if (phase === "drawing" && containerRef.current) {
       const wrappers = Array.from(containerRef.current.querySelectorAll(".card-wrapper")).reverse();
-      gsap.fromTo(
+      tl = gsap.fromTo(
         wrappers,
         { y: -800, opacity: 0, rotateZ: 15 },
         {
@@ -175,10 +172,14 @@ export const CardSelectionOverlay = () => {
         },
       );
     }
+    return () => {
+      if (tl) tl.kill();
+    };
   }, [phase, setPhase]);
 
   // 2. Exit Animation
   useEffect(() => {
+    let tl: gsap.core.Timeline | undefined;
     console.log(phase === "resolving", containerRef.current, selectedCardId);
     if (phase === "resolving" && containerRef.current && selectedCardId) {
       console.log("Starting exit animation for selected card:", selectedCardId);
@@ -186,7 +187,7 @@ export const CardSelectionOverlay = () => {
       const selectedWrapper = wrappers.find((el) => el.id === `${selectedCardId}`);
       const others = wrappers.filter((el) => el !== selectedWrapper);
 
-      const tl = gsap.timeline({
+      tl = gsap.timeline({
         onComplete: () => reset(), // This sets phase to 'idle', unlocking the Action Queue
       });
 
@@ -211,6 +212,9 @@ export const CardSelectionOverlay = () => {
         });
       }
     }
+    return () => {
+      if (tl) tl.kill();
+    };
   }, [phase, selectedCardId, reset]);
 
   if (phase === "idle") return null;
@@ -267,7 +271,7 @@ export const CardSelectionOverlay = () => {
       <Swiper allowTouchMove={false} slidesPerView={3} watchSlidesProgress spaceBetween={12} className="mt-4 w-72">
         {cardIds.map((id, idx) => (
           <SwiperSlide key={`thumb-${id}`}>
-            <Thumb id={id} idx={idx} />
+            <Thumb id={id} idx={idx} isSelected={selectedCardId === id} onClick={setSelectedCardId} />
           </SwiperSlide>
         ))}
       </Swiper>
@@ -277,4 +281,4 @@ export const CardSelectionOverlay = () => {
       </div>
     </div>
   );
-};
+});

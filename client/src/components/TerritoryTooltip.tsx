@@ -169,7 +169,7 @@ export default function TerritoryTooltip() {
         ref={setFloatingRef}
         style={floatingStyles}
         {...getFloatingProps()}
-        className="z-9999 bg-[#1c1c1e] border border-[#3a3a3c] rounded-xl p-4 w-[280px] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] text-[#f5f5f7] pointer-events-auto"
+        className="z-9999 bg-[#1c1c1e] border border-[#3a3a3c] rounded-xl p-4 w-[240px] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] text-[#f5f5f7] pointer-events-auto"
       >
         <FloatingArrow
           ref={setArrowEl}
@@ -304,8 +304,7 @@ export default function TerritoryTooltip() {
         </div>
 
         {/* ── Footer Icons & Prices ── */}
-        <div className="flex justify-between items-center pt-3 mt-1 
-border-none gap-2 px-1">
+        <div className="flex justify-between items-center pt-3 mt-1 border-none gap-2 px-1">
           {[
             { id: "CITY", icon: "/building-icons/city.svg" },
             { id: "FACTORY", icon: "/building-icons/factory.svg" },
