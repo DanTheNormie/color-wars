@@ -1,4 +1,4 @@
-import { DEVELOPMENT_TYPES, type EconomyConfig } from "../../types/economyTypes";
+import { DEVELOPMENT_TYPES, type EconomyConfig } from "../../types/economyTypes.js";
 
 export const TEST_ECONOMY: EconomyConfig = {
   basePricePerSize: 50,

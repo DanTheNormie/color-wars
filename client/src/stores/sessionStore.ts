@@ -11,12 +11,12 @@ import type {
   RoomPhase,
   TurnPhase,
   TileState,
-  PlayerStatus
-} from "@color-wars/shared/src/types/RoomState";
-import type { DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
+  PlayerStatus,
+  DevelopmentType,
+  MapID
+} from "@color-wars/shared";
 import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
-import type { MapID } from "@color-wars/shared/src/maps";
 import { GameEventBus } from "@/lib/managers/GameEventBus";
 
 const DEFAULT_PLAYER_NAME = "Commander";

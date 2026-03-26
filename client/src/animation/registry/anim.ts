@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import gsap from "@/lib/gsap";
 import { PlayerSprite } from "@/components/NewGameBoard/pixi/units/playerSprite";
-import type { TileConfig } from "@color-wars/shared/src/config/diceTrack";
+import type { TileConfig } from "@color-wars/shared";
 import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackLayer";
 import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
 

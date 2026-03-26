@@ -1,9 +1,9 @@
-import type { EconomyConfig } from "../types/economyTypes";
-import { type DevelopmentType, DEVELOPMENT_TYPES } from "../types/economyTypes";
-import INDIA from "./india/india.json";
-import TEST from "./test/test.json";
-import { INDIA_ECONOMY } from "./india/economy";
-import { TEST_ECONOMY } from "./test/economy";
+import type { EconomyConfig } from "../types/economyTypes.js";
+import { type DevelopmentType, DEVELOPMENT_TYPES } from "../types/economyTypes.js";
+import INDIA from "./india/india.json" with { type: "json" };
+import TEST from "./test/test.json" with { type: "json" };
+import { INDIA_ECONOMY } from "./india/economy.js";
+import { TEST_ECONOMY } from "./test/economy.js";
 
 export const MAPS = {
   INDIA: {

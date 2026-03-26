@@ -15,7 +15,7 @@ import { useTooltipStore } from "@/stores/tooltipStore";
 import { useMapStore } from "@/stores/mapStateStore";
 import { useStore } from "@/stores/sessionStore";
 import { getAdjacent, getAdjacentOwnedByPlayer } from "@/utils/map-utils";
-import type { DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
+import type { DevelopmentType } from "@color-wars/shared";
 /* ─── Number formatter ─── */
 const fmt = new Intl.NumberFormat("en", {
   notation: "compact",

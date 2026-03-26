@@ -1,15 +1,15 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { PlayerState, RoomState, TerritoryState, TileState } from "@color-wars/shared/src/types/RoomState";
-import { PLAYER } from "@color-wars/shared/src/config/game";
+import { PlayerState, RoomState, TerritoryState, TileState } from "@color-wars/shared";
+import { PLAYER } from "@color-wars/shared";
 import { Client, Room } from "colyseus";
-import { StatusEffect } from "@color-wars/shared/src/types/RoomState";
-import { StatusEffectID } from "@color-wars/shared/src/types/effectId";
-import { RewardService } from "./rewardService";
-import { RewardConfig } from "@color-wars/shared/src/types/rewardConfig";
-import { MAPS, income, maintenanceCost } from "@color-wars/shared/src/maps";
-import { type TileType, DICE_TRACK, TileConfig } from "@color-wars/shared/src/config/diceTrack"
-import { type DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
+import { StatusEffect } from "@color-wars/shared";
+import { StatusEffectID } from "@color-wars/shared";
+import { RewardService } from "./rewardService.js";
+import { RewardConfig } from "@color-wars/shared";
+import { MAPS } from "@color-wars/shared";
+import { type TileType, DICE_TRACK, TileConfig } from "@color-wars/shared";
+import { type DevelopmentType } from "@color-wars/shared";
 
 
 export class GameEngine {

@@ -1,5 +1,5 @@
-import { type MapID } from "./maps";
-import { type DevelopmentType } from "./types/economyTypes";
+import { type MapID } from "./maps/index.js";
+import { type DevelopmentType } from "./types/economyTypes.js";
 
 export interface ClientMessages {
   BUY_TERRITORY: { territoryID: string; };

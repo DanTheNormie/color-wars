@@ -64,7 +64,7 @@ export function PlayerCards({ playerId }: { playerId: string }) {
 export function PlayerTerritories({ playerId }: { playerId: string }) {
   const playerT = useStore((s) => {
     const territoryOwnershipMap = s.state.game.territoryOwnership
-    const playerTerritories = Object.values(territoryOwnershipMap).filter((t)=>t.ownerId == playerId)
+    const playerTerritories = Object.values(territoryOwnershipMap).filter((t:any)=>t.ownerId == playerId)
     return playerTerritories.length
   });
 

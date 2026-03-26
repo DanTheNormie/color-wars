@@ -3,7 +3,7 @@ import { TRACK_COORDINATES, INNER_EDGE_SPEC } from "../../config/dice-track-conf
 import { pixiTargetLocator } from "@/animation/target-locator";
 import { MAP_BACKGROUND_COLOR } from "../engine";
 import { TokenLayer } from "./TokenLayer";
-import { type TileConfig, type TileType, DICE_TRACK } from "@color-wars/shared/src/config/diceTrack";
+import { type TileConfig, type TileType, DICE_TRACK } from "@color-wars/shared";
 import { useStore } from "@/stores/sessionStore";
 
 type TileTextureConfig = {
@@ -161,7 +161,7 @@ export class DiceTrackLayer extends PIXI.Container {
     // Create Sprites
     const diceTrack = useStore.getState().state.game.diceTrack;
     if (diceTrack && diceTrack.length > 0) {
-      diceTrack.forEach((t, i) => {
+      diceTrack.forEach((t: any, i: number) => {
         const targetID = `track-tile-${i}`;
         const container = this.createTileContainer(t as TileConfig, app, targetID);
         this.sprites.push(container);
@@ -424,7 +424,7 @@ export class DiceTrackLayer extends PIXI.Container {
 
   private generateRoundedHexTextures(app: PIXI.Application) {
     const hexTextures: Partial<Record<string, PIXI.Texture>> = {};
-    DICE_TRACK.forEach((t) => {
+    DICE_TRACK.forEach((t: any) => {
       const key = this.getTileTextureCacheKey(t)
       hexTextures[key] = this.getHexTexture(t, app)
     })

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { RoomManager } from "../matchmaking/RoomManager";
-import { logger } from "../utils/logger";
+import { RoomManager } from "../matchmaking/RoomManager.js";
+import { logger } from "../utils/logger.js";
 
 export function createMatchmakingRouter() {
   const router = Router();

@@ -1,6 +1,6 @@
-import { type TileConfig } from "../config/diceTrack";
-import { type TileState, type PlayerStatus } from "./RoomState";
-import { type DevelopmentType } from "./economyTypes";
+import { type TileConfig } from "../config/diceTrack.js";
+import { type TileState, type PlayerStatus } from "./RoomState.js";
+import { type DevelopmentType } from "./economyTypes.js";
 
 export const TURN_ACTION_REGISTRY = {
   MOVE_PLAYER: {} as { fromTile: number, toTile: number, tokenId: string },

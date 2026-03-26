@@ -3,7 +3,7 @@ import type { GameMap } from "@/types/map-types";
 import { subscribeWithSelector } from "zustand/middleware";
 import { devtools, combine } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { MAPS, type MapID } from "@color-wars/shared/src/maps";
+import { MAPS, type MapID } from "@color-wars/shared";
  
 interface territoryEconomy {
     BASE:{

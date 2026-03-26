@@ -40,7 +40,7 @@ declare module "react" {
   }
 }
 
-import type { RewardConfig } from "@color-wars/shared/src/types/rewardConfig";
+import type { RewardConfig } from "@color-wars/shared";
 
 const Card = ({ id }: { id: string }) => {
   const config = JSON.parse(id) as RewardConfig;

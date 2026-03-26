@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools, combine } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import type { ActionType } from "@color-wars/shared/src/types/turnActionRegistry";
+import type { ActionType } from "@color-wars/shared";
 
 export interface GameLogEntry {
   id: number;

@@ -1,6 +1,6 @@
-import { type Tier, TIER_WEIGHTS } from "@color-wars/shared/src/types/tier";
+import { type Tier, TIER_WEIGHTS } from "@color-wars/shared";
 
-import { RewardConfig } from "@color-wars/shared/src/types/rewardConfig";
+import { RewardConfig } from "@color-wars/shared";
 
 interface DrawOptions {
   count?: number;

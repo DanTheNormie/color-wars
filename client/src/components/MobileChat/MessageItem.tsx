@@ -1,5 +1,5 @@
 import { useStore } from "@/stores/sessionStore";
-import type { Message } from "@color-wars/shared/src/types/RoomState";
+import type { Message } from "@color-wars/shared";
 import { cn, getTextColor } from "@/lib/utils";
 import { CircleUserRound } from "lucide-react";
 

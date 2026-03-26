@@ -1,17 +1,17 @@
-import config from "@colyseus/tools";
+import config = require("@colyseus/tools");
 import { monitor } from "@colyseus/monitor";
-import cors from "cors";
 import express from "express";
 import path from "path";
 import { existsSync } from "fs";
-import { GameRoom } from "./rooms/GameRoom";
-import { createMatchmakingRouter } from "./routes/matchmakingRoutes";
-import { logger } from "./utils/logger";
-import { DEFAULT_ROOM_TYPE } from "@color-wars/shared/src/config/room";
-import { env } from "./config/env";
+import { GameRoom } from "./rooms/GameRoom.js";
+import { createMatchmakingRouter } from "./routes/matchmakingRoutes.js";
+import { logger } from "./utils/logger.js";
+import { DEFAULT_ROOM_TYPE } from "@color-wars/shared";
+import { env } from "./config/env.js";
 
 const registerClientBuild = (app: express.Express) => {
   const buildDir = env.clientBuildPath;
+  console.log("buildDir",buildDir);
   const indexFile = path.join(buildDir, "index.html");
 
   if (!existsSync(buildDir) || !existsSync(indexFile)) {
@@ -44,7 +44,7 @@ const registerClientBuild = (app: express.Express) => {
   logger.info("serving_client_build", { buildDir });
 };
 
-export default config({
+export const colyseusConfig = config.default({
   initializeGameServer: (gameServer) => {
     gameServer.define(DEFAULT_ROOM_TYPE, GameRoom).enableRealtimeListing().sortBy({ clients: -1 });
   },

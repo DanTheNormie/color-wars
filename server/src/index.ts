@@ -1,5 +1,5 @@
 import { listen } from "@colyseus/tools";
-import { env } from "./config/env";
-import app from "./app.config";
+import { env } from "./config/env.js";
+import { colyseusConfig } from "./app.config.js";
 
-listen(app, env.port);
+listen(colyseusConfig, env.port);

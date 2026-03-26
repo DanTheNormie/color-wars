@@ -1,4 +1,4 @@
-import type { PlayerState, TileState, TurnPhase, RoomState} from "@color-wars/shared/src/types/RoomState";
+import type { PlayerState, TileState, TurnPhase, RoomState} from "@color-wars/shared";
 import xxh from "xxhashjs"
 
 export interface checksumState {

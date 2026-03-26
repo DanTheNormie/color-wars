@@ -1,10 +1,9 @@
 import { AuthContext, Client, Delayed, Room, logger } from "colyseus";
 
-import { RoomManager } from "../matchmaking/RoomManager";
-import { GameEngine } from "../game/GameEngine";
-import { DEFAULT } from "@color-wars/shared/src/config/room";
-import { validateOrThrow } from "@color-wars/shared/src/validator";
-import { RoomState, PlayerState, DiceState } from "@color-wars/shared/src/types/RoomState";
+import { GameEngine } from "../game/GameEngine.js";
+import { DEFAULT } from "@color-wars/shared";
+import { validateOrThrow } from "@color-wars/shared";
+import { RoomState, PlayerState, DiceState } from "@color-wars/shared";
 import {
   ClientActionType,
   ServerActionType,
@@ -12,7 +11,7 @@ import {
   ClientMessages,
   ServerMessages,
   PlayerJoinPayload,
-} from "@color-wars/shared/src/protocol";
+} from "@color-wars/shared";
 
 export class GameRoom extends Room<RoomState> {
   private gameEngine!: GameEngine;

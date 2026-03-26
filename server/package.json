@@ -8,6 +8,7 @@
     "start": "tsx src/index.ts",
     "dev": "nodemon",
     "build": "tsc",
+    "build_and_run": "tsc && node dist/index.js",
     "test": "vitest run"
   },
   "dependencies": {

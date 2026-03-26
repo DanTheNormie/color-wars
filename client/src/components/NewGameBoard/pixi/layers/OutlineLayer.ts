@@ -6,7 +6,7 @@ import { useMapStore } from "@/stores/mapStateStore";
 import { getAdjacent } from "@/utils/map-utils";
 import { hexNumberToHexString } from "@/utils/color-utils";
 import { useStore } from "@/stores/sessionStore";
-import type { DevelopmentType } from "@color-wars/shared/src/types/economyTypes";
+import type { DevelopmentType } from "@color-wars/shared";
 export class OutlineLayer extends PIXI.Container {
   private bordersContainer: PIXI.Container;
   private fillsContainer: PIXI.Container;

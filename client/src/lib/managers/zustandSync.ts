@@ -9,6 +9,7 @@ import { useMapStore } from "@/stores/mapStateStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useGameLogStore } from "@/stores/gameLogStore";
 import { pixiTargetLocator } from "@/animation/target-locator";
+import type { TerritoryState } from "../../../../shared/dist/types/RoomState";
 
 class ZustandSyncManager {
   private unsubs: (() => void)[] = [];
@@ -53,7 +54,7 @@ class ZustandSyncManager {
             useDiceTrackStore.getState().setActiveToken(player.id)
           }
           useDiceTrackStore.getState().upsertToken({ id: player.id, tileId: `track-tile-${player.position}`, color: hexStringToHexNumber(player.color) });
-          state.game.territoryOwnership.forEach((territory, territoryId) => {
+          state.game.territoryOwnership.forEach((territory:TerritoryState, territoryId:string) => {
             if(territory.ownerId == player.id){
               useMapStore.getState().setTerritoryColor(territoryId, player.color)
               useStore.getState().updateTerritoryOwnership(territoryId, player.id)

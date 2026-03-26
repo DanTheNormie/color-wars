@@ -1,6 +1,6 @@
-import { ActionContext, ClientActionType } from "../protocol";
-import type { PlainStateOf, RoomState } from "../types/RoomState";
-import * as rules from "./rules";
+import { ActionContext, ClientActionType } from "../protocol.js";
+import type { PlainStateOf, RoomState } from "../types/RoomState.js";
+import * as rules from "./rules.js";
 
 type Rule<K extends ClientActionType> = (
   state: PlainStateOf<RoomState>,

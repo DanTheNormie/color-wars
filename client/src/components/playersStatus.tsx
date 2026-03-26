@@ -7,7 +7,7 @@ const PlayersStatus = () => {
   return (
     <div className="flex w-full justify-center py-1 px-2">
       <ul className=" flex w-full flex-col gap-2 overflow-hidden rounded-sm p-[2%]">
-        {Object.values(players).map((player) => (
+        {Object.values(players).map((player: any) => (
           <Player key={player.id} player={player} />
         ))}
       </ul>

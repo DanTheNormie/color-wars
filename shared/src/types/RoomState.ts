@@ -1,10 +1,10 @@
 import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
 //import type { ActionType, TURN_ACTION_REGISTRY } from "./turnActionRegistry";
-import type { QueuedAction } from "../protocol";
-import { type MapID } from "../maps";
-import type { DevelopmentType } from "./economyTypes";
-import { type TileType, DICE_TRACK } from "../config/diceTrack";
-import { checksum } from "../checksum";
+import type { QueuedAction } from "../protocol.js";
+import { type MapID } from "../maps/index.js";
+import type { DevelopmentType } from "./economyTypes.js";
+import { type TileType, DICE_TRACK } from "../config/diceTrack.js";
+import { checksum } from "../checksum/index.js";
 export type RoomPhase = "lobby" | "active" | "finished";
 export type RoomVisibility = "private" | "public";
 export type TradeStatus = "pending" | "accepted" | "rejected";

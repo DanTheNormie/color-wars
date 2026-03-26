@@ -1,4 +1,4 @@
-import type { CardID } from "./effectId";
+import type { CardID } from "./effectId.js";
 
 export type InstantCashConfig = {
   type: "INSTANT_CASH";

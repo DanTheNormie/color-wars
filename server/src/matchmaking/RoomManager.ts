@@ -1,8 +1,8 @@
 import { matchMaker } from "colyseus";
 import { nanoid } from "nanoid";
-import type { GameRoom } from "../rooms/GameRoom";
+import type { GameRoom } from "../rooms/GameRoom.js";
 //import { DEFAULT_MAX_PLAYERS, DEFAULT_MIN_PLAYERS, ROOM_TYPE } from "../constants";
-import { logger } from "../utils/logger";
+import { logger } from "../utils/logger.js";
 
 const DEFAULT_MAX_PLAYERS = 4;
 const DEFAULT_MIN_PLAYERS = 4;

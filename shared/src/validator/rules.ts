@@ -1,6 +1,6 @@
-import type { Message, PlainStateOf, RoomState } from "../types/RoomState";
+import type { Message, PlainStateOf, RoomState } from "../types/RoomState.js";
 
-import { MAPS } from "../maps";
+import { MAPS } from "../maps/index.js";
 
 // 1. Define the Shapes (The requirements)
 // Every action context in your app seems to have a playerId

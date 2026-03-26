@@ -1,8 +1,8 @@
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { useState, useRef } from "react";
-import type { PlainStateOf, PlayerState } from "@color-wars/shared/src/types/RoomState";
+import type { PlainStateOf, PlayerState } from "@color-wars/shared";
 import { useStore } from "@/stores/sessionStore";
-import { PLAYER } from "@color-wars/shared/src/config/game";
+import { PLAYER } from "@color-wars/shared";
 import { PlayerMoney, PlayerCards, PlayerTerritories } from "./Counter";
 import { Separator } from "./ui/separator";
 import { Avatar } from "./ui/avatar";
@@ -63,9 +63,9 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
   // }, []);
 
   const takenColors = Object.values(players)
-    .map((p) => p.color)
+    .map((p: any) => p.color)
     .filter(Boolean);
-  const availableColors = PLAYER.COLORS.filter((color) => !takenColors.includes(color));
+  const availableColors = PLAYER.COLORS.filter((color: string) => !takenColors.includes(color));
   console.log(player);
   const isYou = player.id === sessionId;
   const isLeader = player.id === leaderId;
@@ -92,7 +92,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
             trigger={<div className={`w-2 self-stretch border ${isYou ? "cursor-pointer" : ""}`} style={{ backgroundColor: player.color }} />}
           >
             <div className="grid h-full grid-cols-5 gap-2 p-2">
-              {availableColors.map((color) => (
+              {availableColors.map((color: string) => (
                 <button key={color} className="h-full w-6 rounded-full border transition hover:scale-110" style={{ backgroundColor: color }} />
               ))}
             </div>
@@ -138,7 +138,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
           trigger={<div className={`w-2 self-stretch border ${isYou ? "cursor-pointer" : ""}`} style={{ backgroundColor: player.color }} />}
         >
           <div className="grid h-full grid-cols-5 p-2">
-            {availableColors.map((color) => (
+            {availableColors.map((color: string) => (
               <button key={color} className="h-full w-6 rounded-full border transition hover:scale-110" style={{ backgroundColor: color }} />
             ))}
           </div>

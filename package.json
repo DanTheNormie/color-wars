@@ -4,8 +4,8 @@
   "private": true,
   "workspaces": [
     "client",
-    "server",
-    "shared"
+    "shared",
+    "server"
   ],
   "type": "module",
   "scripts": {

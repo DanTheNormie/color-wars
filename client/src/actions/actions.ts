@@ -352,7 +352,7 @@ export class UpdatePlayerStatusAction extends BaseAction<"UPDATE_PLAYER_STATUS">
       const territoryOwnership = store.state.game.territoryOwnership;
       if (territoryOwnership) {
         Object.entries(territoryOwnership).forEach(([territoryId, territory]) => {
-          if (territory.ownerId === playerId) {
+          if ((territory as any).ownerId === playerId) {
             store.updateTerritoryOwnership(territoryId, null);
             useMapStore.getState().removeTerritoryColor(territoryId);
           }

@@ -1,7 +1,7 @@
 import { GameEventBus } from "@/lib/managers/GameEventBus";
 import type { ActionHandle } from "@animation/driver/AnimationHandle";
 import { useGameLogStore } from "@/stores/gameLogStore";
-import type { ActionType, ActionData } from "@color-wars/shared/src/types/turnActionRegistry";
+import type { ActionType, ActionData } from "@color-wars/shared";
 
 export interface IExecutable {
   execute(): ActionHandle;

@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { devtools, combine } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { useStore } from "./sessionStore";
-import type { Message } from "@color-wars/shared/src/types/RoomState";
+import type { Message } from "@color-wars/shared";
 
 interface ChatStore {
   messages: Message[];

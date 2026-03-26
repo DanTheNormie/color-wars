@@ -1,5 +1,5 @@
 // src/actions/ActionFactory.ts
-import type { ActionData } from "@color-wars/shared/src/types/turnActionRegistry";
+import type { ActionData } from "@color-wars/shared";
 import type { IExecutable } from "./core";
 import {
   HexHop,

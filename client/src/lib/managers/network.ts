@@ -1,13 +1,13 @@
 // network.ts
 import { Client, Room, getStateCallbacks } from "colyseus.js";
 import { wsEndpoint } from "../serverConfig";
-import { RoomState } from "@color-wars/shared/src/types/RoomState";
-import type { ClientMessages, ServerMessages, ClientActionType, ServerActionType, PlayerJoinPayload, QueuedAction } from "@color-wars/shared/src/protocol";
-import { DEFAULT_ROOM_TYPE } from "@color-wars/shared/src/config/room";
+import { RoomState } from "@color-wars/shared";
+import type { ClientMessages, ServerMessages, ClientActionType, ServerActionType, PlayerJoinPayload, QueuedAction, RoomPhase, PlayerState, TurnPhase } from "@color-wars/shared";
+import { DEFAULT_ROOM_TYPE } from "@color-wars/shared";
 import { GameEventBus } from "./GameEventBus";
 import { ActionQueue } from "@/actions/core";
 import { ActionFactory } from "@/actions/ActionFactory";
-import { type ActionData, isActionType, TURN_ACTION_REGISTRY } from "@color-wars/shared/src/types/turnActionRegistry";
+import { type ActionData, isActionType, TURN_ACTION_REGISTRY } from "@color-wars/shared";
 
 // network.types.ts
 export type NetworkState = "disconnected" | "connecting" | "connected" | "reconnecting" | "degraded" | "desynced" | "closing" | "zombie";
@@ -104,33 +104,33 @@ class Network {
       const $ = getStateCallbacks(this.room);
 
       this.stateChangeCallbacks.push(
-        $(this.room.state.game).players.onAdd((player, playerId) => {
+        $(this.room.state.game).players.onAdd((player: any, playerId: string) => {
           GameEventBus.emit("UPDATE_PLAYER", { id: playerId, player });
           this.stateChangeCallbacks.push(
-            $(player).listen("hasRolled", (hasRolledDice) => {
+            $(player).listen("hasRolled", (hasRolledDice: boolean) => {
               GameEventBus.emit("UPDATE_PLAYER_ROLLED_DICE", { id: playerId, hasRolledDice });
             }),
           );
         }),
-        $(this.room.state.game).players.onRemove((_, playerId) => {
+        $(this.room.state.game).players.onRemove((_:any, playerId: string) => {
           GameEventBus.emit("REMOVE_PLAYER", { id: playerId });
         }),
         // $(this.room.state).playersPings.onChange((ping, playerId) => {
         //   // GameEventBus.emit("UPDATE_PLAYER_PING", { id: playerId, ping });
         // }),
-        $(this.room.state.room).listen("phase", (newPhase) => {
+        $(this.room.state.room).listen("phase", (newPhase: RoomPhase) => {
           GameEventBus.emit("UPDATE_ROOM_PHASE", { phase: newPhase });
-          this.room!.state.game.players.forEach((player) => {
+          this.room!.state.game.players.forEach((player: PlayerState) => {
             GameEventBus.emit("UPDATE_PLAYER", { id: player.id, player });
           });
         }),
         // $(this.room.state).turnActionHistory.onAdd((action) => {
         //   this.handleActionHistory(action);
         // }),
-        $(this.room.state.room).listen("leaderId", (newValue) => {
+        $(this.room.state.room).listen("leaderId", (newValue: string) => {
           GameEventBus.emit("UPDATE_ROOM_LEADER", { id: newValue });
         }),
-        $(this.room.state.game).listen('turnPhase', (newValue) => {
+        $(this.room.state.game).listen('turnPhase', (newValue: TurnPhase) => {
           GameEventBus.emit('UPDATE_TURN_PHASE', {turnPhase: newValue})
         }),
         $(this.room.state).listen('mapID', (newValue) => {

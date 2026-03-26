@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { CircleUserRound } from "lucide-react";
 import { useStore } from "@/stores/sessionStore"; // Adjust path to your session store
-import type { Message } from "@color-wars/shared/src/types/RoomState";
+import type { Message } from "@color-wars/shared";
 import { getTextColor } from "@/lib/utils";
 
 const TickerItem = ({ message }: { message: Message }) => {

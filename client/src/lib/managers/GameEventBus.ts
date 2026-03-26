@@ -1,10 +1,10 @@
 /* ---------------------------------------------
  * 1. DEFINITIONS
  * --------------------------------------------- */
-import type { RoomState, PlayerState, DiceStateMode, RoomPhase, TurnPhase } from "@color-wars/shared/src/types/RoomState";
+import type { RoomState, PlayerState, DiceStateMode, RoomPhase, TurnPhase } from "@color-wars/shared";
 import type { NetworkState } from "./network";
-import type { Message, TileState } from "@color-wars/shared/src/types/RoomState";
-import type { MapID } from "@color-wars/shared/src/maps";
+import type { Message, TileState } from "@color-wars/shared";
+import type { MapID } from "@color-wars/shared";
 
 export interface LOCAL_EVENT {
   FULL_SEND: RoomState;
