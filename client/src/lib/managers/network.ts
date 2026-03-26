@@ -1,8 +1,8 @@
 // network.ts
-import { Client, Room, getStateCallbacks } from "colyseus.js";
+import { Client, type Room, getStateCallbacks } from "@colyseus/sdk";
 import { wsEndpoint } from "../serverConfig";
 import { RoomState } from "@color-wars/shared";
-import type { ClientMessages, ServerMessages, ClientActionType, ServerActionType, PlayerJoinPayload, QueuedAction, RoomPhase, PlayerState, TurnPhase } from "@color-wars/shared";
+import type { ClientMessages, ServerMessages, ClientActionType, ServerActionType, PlayerJoinPayload, QueuedAction, RoomPhase, PlayerState, TurnPhase, MapID } from "@color-wars/shared";
 import { DEFAULT_ROOM_TYPE } from "@color-wars/shared";
 import { GameEventBus } from "./GameEventBus";
 import { ActionQueue } from "@/actions/core";
@@ -25,7 +25,7 @@ class Network {
     if (this.room) return this.room;
     if (this.state == "reconnecting" || this.state == "connecting") throw new Error("already connecting");
     this.setState("connecting");
-    const room = await this.client.joinOrCreate<RoomState>(DEFAULT_ROOM_TYPE, options);
+    const room = await this.client.create<RoomState>(DEFAULT_ROOM_TYPE, options);
     return this.registerRoom(room);
   }
 
@@ -133,7 +133,7 @@ class Network {
         $(this.room.state.game).listen('turnPhase', (newValue: TurnPhase) => {
           GameEventBus.emit('UPDATE_TURN_PHASE', {turnPhase: newValue})
         }),
-        $(this.room.state).listen('mapID', (newValue) => {
+        $(this.room.state).listen('mapID', (newValue: MapID) => {
           GameEventBus.emit("CHANGE_MAP_ID", {mapID: newValue})
         })
       );
