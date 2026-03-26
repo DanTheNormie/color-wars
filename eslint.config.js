@@ -62,7 +62,7 @@ export default tseslint.config(
       ],
       'react/jsx-key': 'warn',
       // Downgrade potentially blocking react rules to warning
-      'react-hooks/rules-of-hooks': 'warn',
+      'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react-compiler/react-compiler': 'warn',
     },

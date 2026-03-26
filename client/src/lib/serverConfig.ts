@@ -16,6 +16,5 @@ const httpEndpoint = (() => {
 })();
 
 const wsEndpoint = httpEndpoint.replace(/^http/, "ws");
-console.log(wsEndpoint);
-console.log(import.meta.env.VITE_SERVER_URL);
+
 export { httpEndpoint, wsEndpoint };

@@ -9,8 +9,8 @@ export default defineConfig({
     react({
       babel: {
         plugins: [
+          ["@babel/plugin-proposal-decorators", { legacy: true }],
           "babel-plugin-react-compiler",
-          ["@babel/plugin-proposal-decorators", { version: "2023-11" }],
         ],
       },
     } as any),
@@ -34,7 +34,6 @@ export default defineConfig({
             if (id.includes("pixi.js")) return "pixi";
           }
         },
-        codeSplitting: true,
       },
     },
   },

@@ -17,11 +17,8 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "noUncheckedSideEffectImports": true
   },
   "include": ["vite.config.ts"]
 }
