@@ -46,9 +46,9 @@ const LobbyPage = () => {
             className="bg-background h-12 border-zinc-800 pl-10 text-lg text-zinc-100 focus-visible:border-cyan-500 focus-visible:ring-0"
           />
 
-          <Button className="h-12 w-full" onClick={handleQuickMatch}>
+          <Button variant="pop" color="violet" className="h-12 w-full" onClick={handleQuickMatch}>
             PLAY NOW
-            <Zap className="h-4 w-4 fill-black transition-transform group-hover/btn:rotate-12 group-hover/btn:fill-white" />
+            <Zap className="h-4 w-4 fill-white transition-transform group-hover/btn:rotate-12 group-hover/btn:fill-black" />
           </Button>
           <CardSelectionOverlay/>
           {/* <PixiCanvas /> */}

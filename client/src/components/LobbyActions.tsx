@@ -55,11 +55,11 @@ const LobbyActions = () => {
   }; */
   return (
     <div className="flex flex-col gap-1">
-      {isLeader && <Button onClick={startGame}>Start Game</Button>}
-      <Button variant="outline" onClick={handleCopyInvite}>
+      {isLeader && <Button variant="pop" color="green" onClick={startGame}>Start Game</Button>}
+      <Button variant="pop" color="amber" onClick={handleCopyInvite}>
         {copied ? "Copied!" : "Copy Invite Link"}
       </Button>
-      <Button variant="destructive" onClick={handleLeaveGame}>
+      <Button variant="pop" color="rose" onClick={handleLeaveGame}>
         Leave Game
       </Button>
       {/* <div className="flex gap-2 justify-center">
