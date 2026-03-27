@@ -1,6 +1,5 @@
 import React from "react";
 import { useStore } from "@/stores/sessionStore";
-import { Avatar, AvatarImage } from "./ui/avatar";
 import { AvatarColorMap } from "./Player";
 import { Button } from "./ui/button";
 import { Trophy, Home } from "lucide-react";

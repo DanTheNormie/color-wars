@@ -1,4 +1,4 @@
-import { Client } from "colyseus.js";
+import { Client } from "@colyseus/sdk";
 import { wsEndpoint } from "./serverConfig";
 
 // One client per tab - cached to prevent multiple client instances
