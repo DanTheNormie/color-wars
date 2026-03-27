@@ -3,7 +3,6 @@ import { useGameLogStore } from "@/stores/gameLogStore";
 import { useStore } from "@/stores/sessionStore";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
-import {Avatar, AvatarImage} from "@/components/ui/avatar";
 import { AvatarColorMap } from "../Player";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import type { GameLogEntry } from "@/stores/gameLogStore";
@@ -26,9 +25,7 @@ const PlayerInline = ({ playerId }: { playerId: string }) => {
 
   return (
     <div className="flex w-fit items-center gap-2">
-      <Avatar className="h-[24px] w-[24px]">
-        <AvatarImage src={AvatarColorMap[player.color]}></AvatarImage>
-      </Avatar>
+      <img className="h-[18px] w-[18px]" src={AvatarColorMap[player.color]} alt="" />
       <span className="font-bold" style={{ color: color }}>
         {name}
       </span>
@@ -61,7 +58,7 @@ const LogMessageItem = ({ entry }: { entry: GameLogEntry }) => {
       case "ADD_CARD":
         return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received a card.</div>;
       case "MOVE_PLAYER":{
-        const diceTrack = useStore((z) => z.state.game.diceTrack);
+        const diceTrack = useStore.getState().state.game.diceTrack;
         if (!diceTrack || diceTrack.length === 0) return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on a tile.</div>;
         const tile = diceTrack[payload.toTile % diceTrack.length];
         const tileName = tile.type.toLowerCase()

@@ -23,7 +23,7 @@ export function debounce<T extends (...args: any[]) => void>(
  * Returns "#262626" or "#dddddd" depending on which
  * has better contrast on the given hex background.
  */
-export function getTextColor(bgHex: string): "#262626" | "#dddddd" {
+export function getTextColor(bgHex: string): "#000" | "#dddddd" {
   const hex = bgHex.replace("#", "");
 
   const r = parseInt(hex.slice(0, 2), 16) / 255;
@@ -40,6 +40,6 @@ export function getTextColor(bgHex: string): "#262626" | "#dddddd" {
     0.0722 * toLinear(b);
 
   // WCAG recommendation
-  return luminance > 0.179 ? "#262626" : "#dddddd";
+  return luminance > 0.179 ? "#000" : "#dddddd";
 }
 

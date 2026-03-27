@@ -59,9 +59,7 @@ const GameOverOverlay: React.FC = () => {
               className="absolute inset-0 rounded-full blur-2xl opacity-50"
               style={{ backgroundColor: winner.color }}
             />
-            <Avatar className="h-40 w-40 border-4 border-white/10 shadow-2xl relative z-10">
-               <AvatarImage src={AvatarColorMap[winner.color]} className="object-cover" />
-            </Avatar>
+            <img className="h-40 w-40 border-4 border-white/10 shadow-2xl relative z-10" src={AvatarColorMap[winner.color]} alt="" />
           </div>
           
           <div className="flex flex-col gap-1">

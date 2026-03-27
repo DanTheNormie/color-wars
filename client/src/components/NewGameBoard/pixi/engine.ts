@@ -67,6 +67,10 @@ export class PIXIGameBoard {
         "/building-icons/factory.png",
         "/building-icons/missile.png",
         "/building-icons/monument.png",
+        "/avatars/red.svg",
+        "/avatars/blue.svg",
+        "/avatars/green.svg",
+        "/avatars/purple.svg",
       ],
       (progress) => {
         console.log(`loading... ${progress * 100}`);

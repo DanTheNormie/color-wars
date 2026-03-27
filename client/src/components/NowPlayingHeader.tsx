@@ -17,7 +17,7 @@ export default function NowPlayingHeader() {
     <div className="sticky top-0 z-50 flex w-full justify-center">
       <div 
         className="flex items-center gap-2 px-4 py-1.5 rounded-b-xl shadow-md transition-colors duration-300"
-        style={{ backgroundColor: `${bgColor}99`, color: textColor }}
+        style={{ backgroundColor: `${bgColor}`, color: textColor }}
       >
         <span className="text-sm font-bold tracking-wide">
           {activePlayer.name} is currently playing

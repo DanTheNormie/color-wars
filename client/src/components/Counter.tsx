@@ -33,14 +33,15 @@ export function CounterSimple({ value, animateDiff, id, className }: { value: nu
 }
 
 const statTextContainerClassName = "flex items-center";
-const textSizeClass = `flex items-center text-[0.4rem] xs:text-[0.4rem] sm:text-[0.6rem] lg:text-[0.8rem] sm:mr-0.5 md:mr-1`;
+const textSizeClass = `fflex items-center text-[0.5rem] xs:text-[0.5rem] sm:text-[0.7rem] lg:text-[1rem]`;
+const textSizeClass2 = `flex items-center text-[0.rem] xs:text-[0.4rem] sm:text-[0.6rem] lg:text-[0.8rem] sm:mr-0.5 md:mr-1`;
 
 export function PlayerMoney({ playerId }: { playerId: string }) {
   const score = useStore((s) => s.state.game.players[playerId]?.money || 0);
 
   return (
     <div className={statTextContainerClassName}>
-      <div className={textSizeClass}>🏦</div>
+      <div className={`${textSizeClass} mr-1`}>{`$`}</div>
       <CounterSimple className={textSizeClass} value={score} animateDiff id={`player-money-${playerId}`} />
     </div>
   );
