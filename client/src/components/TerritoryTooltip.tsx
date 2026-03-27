@@ -63,6 +63,8 @@ export default function TerritoryTooltip() {
   const territoryOwnership = useStore((s) => s.state.game?.territoryOwnership);
   const players = useStore((s) => s.state.game?.players);
   const currentPlayerId = useStore((s) => s.currentPlayer?.id);
+  const phase = useStore((s) => s.state.room.phase);
+
 
   const adjacentTerritories = getAdjacent(territoryId, currentMap);
   const adjacentOwnedByPlayer = getAdjacentOwnedByPlayer(currentPlayerId, territoryId, currentMap, territoryOwnership);
@@ -163,6 +165,7 @@ export default function TerritoryTooltip() {
     ? fmt.format((capExObj as any).capEx / 2)
     : "";
 
+  if(phase !== 'active') {return null}
   return (
     <FloatingPortal>
       <div

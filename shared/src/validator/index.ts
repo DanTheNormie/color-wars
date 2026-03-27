@@ -18,6 +18,7 @@ const ACTION_RULES: {
     rules.requireValidSelectedCard
   ],
   BUY_TERRITORY: [
+    rules.requireActivePhase,
     rules.requirePlayerExists,
     rules.requirePlayersTurn,
     rules.requireTerritoryExists,

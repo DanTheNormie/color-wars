@@ -8,7 +8,8 @@ import { GameEventBus } from "./GameEventBus";
 import { ActionQueue } from "@/actions/core";
 import { ActionFactory } from "@/actions/ActionFactory";
 import { type ActionData, isActionType, TURN_ACTION_REGISTRY } from "@color-wars/shared";
-
+import { validateOrThrow } from "@color-wars/shared";
+import { type ActionContext } from "@color-wars/shared";
 // network.types.ts
 export type NetworkState = "disconnected" | "connecting" | "connected" | "reconnecting" | "degraded" | "desynced" | "closing" | "zombie";
 
@@ -157,6 +158,16 @@ class Network {
     if (!this.room) {
       throw new Error("Network not connected: send() unavailable");
     }
+    const senderId = this.room.sessionId;
+    const ctx = { senderId, ...payload } as ActionContext<K>;
+    const state = this.room.state.toJSON();
+    try{
+      validateOrThrow(type, state, ctx);
+    }catch(err: any){
+      GameEventBus.emit("TOAST", {content: err.message, type: "error"})
+      return;
+    }
+    
     this.room.send(type, payload);
   }
 

@@ -147,6 +147,12 @@ export const requireLobbyPhase = (s: PlainStateOf<RoomState>) => {
   }
 }
 
+export const requireActivePhase = (s: PlainStateOf<RoomState>) => {
+  if(s.room.phase !== 'active'){
+    throw new Error('Room is not in Active Phase')
+  }
+}
+
 export const requireHasRolledDice = (s: PlainStateOf<RoomState>, c: WithPlayer) => {
   const player = s.game.players[c.senderId];
   if (!player || !player.hasRolled) {

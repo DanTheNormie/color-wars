@@ -13,6 +13,7 @@ import { VFXLayer } from "@/components/vfxOverlayLayer/vfxLayer";
 import TerritoryTooltip from "@/components/TerritoryTooltip";
 import NowPlayingHeader from "@/components/NowPlayingHeader";
 import GameActions from "@/components/gameActions";
+import UserAssets from "@/components/UserAssets";
 import GameOverOverlay from "@/components/GameOverOverlay";
 import { httpEndpoint } from "@/lib/serverConfig";
 import { Input } from "@/components/ui/input";
@@ -162,19 +163,22 @@ const RoomPage = () => {
   return (
     <div className="flex w-full flex-col items-center justify-center">
       <div id='game-container' className="w-full max-w-180 pb-[100vh] relative">
+        
         <NowPlayingHeader />
         <PixiCanvas />
         <PlayersStatus />
         <GameActions />
-        <VFXLayer />
-        <TerritoryTooltip />
-
+        <UserAssets />
+        
+        
         <ActionArea>
           {roomPhase === "active" && <TurnControls />}
           {roomPhase === "lobby" && <LobbyActions />}
         </ActionArea>
         <CardSelectionOverlay />
         <GameOverOverlay />
+        <VFXLayer />
+        <TerritoryTooltip />
       </div>
     </div>
   );
