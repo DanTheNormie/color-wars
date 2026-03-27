@@ -385,29 +385,48 @@ export class PIXIVFXLayer {
       });
     }
 
+    const TOTAL_DURATION = 2;
+
+    // Phase durations as fractions of total
+    const fadeInDuration  = 0.2;
+    const moveDuration    = 0.4;
+    const fadeOutDuration = TOTAL_DURATION - fadeInDuration - moveDuration; // 1.4s remaining
+
+    // Total time for a staggered phase = duration + stagger * (count - 1)
+    // Solve for stagger given a fixed phase time budget:
+    //   budget = duration + stagger * (count - 1)
+    //   stagger = (budget - duration) / (count - 1)
+    const MOVE_BUDGET      = moveDuration + 0.2;   // allow a little stagger overlap
+    const FADE_OUT_BUDGET  = fadeOutDuration;
+
+    const moveStagger     = count > 1 ? (MOVE_BUDGET - moveDuration) / (count - 1) : 0;
+    const fadeOutStagger  = count > 1 ? (FADE_OUT_BUDGET - (FADE_OUT_BUDGET * 0.5)) / (count - 1) : 0;
+    const fadeOutDur      = FADE_OUT_BUDGET * 0.5;
+
     const timeline = gsap.timeline()
       .from(sprites, {
         alpha: 0,
-        duration: 0.2,
+        duration: fadeInDuration,
         x: startX,
         y: startY,
-      }).to(sprites, {
+      })
+      .to(sprites, {
         x: (i: number) => meta[i].x,
         y: (i: number) => meta[i].y,
-        stagger: 0.002,
-        duration: 0.4,
+        stagger: moveStagger,
+        duration: moveDuration,
         ease: "power2.out",
-      }).to(sprites, {
+      })
+      .to(sprites, {
         x: endX,
         y: endY,
-        opacity: 0,
-        duration: sprites.length / 12,
+        duration: fadeOutDur,
         ease: "power2.in",
-        stagger: 0.05,
+        stagger: fadeOutStagger,
         onComplete: () => {
           sprites.forEach((s) => s.destroy());
         },
-      })
+      });
 
 
     return timeline;

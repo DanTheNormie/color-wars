@@ -110,8 +110,6 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
     const ele = document.getElementById(`player-money-${playerId}`);
     if (!ele) throw new Error("Target DOM element for money transfer not found");
 
-
-
     const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;
     const gameBoard = pixiTargetLocator.get("game-board-engine") as PIXIVFXLayer;
     if (!vfxLayer) throw new Error("PixiEngine not found in target locator");
@@ -121,7 +119,7 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
 
     // const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
     //const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
-    const anim2 = vfxLayer.animateSpritesheetConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
+    const anim2 = vfxLayer.animateSpritesheetConfettiOverlay(tile, ele, boardApp, vfxApp, (amount/100))
 
     this.logAction(playerId);
 

@@ -1,21 +1,7 @@
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
-import { useState, useRef } from "react";
+import {  useRef } from "react";
 import type { PlainStateOf, PlayerState } from "@color-wars/shared";
 import { useStore } from "@/stores/sessionStore";
-import { PLAYER } from "@color-wars/shared";
-import { PlayerMoney, PlayerCards, PlayerTerritories } from "./Counter";
-import { Separator } from "./ui/separator";
-import { Avatar } from "./ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
-
-function PickerPopover({ open, setOpen, enabled, trigger, children }: { open: boolean; setOpen: (v: boolean) => void; enabled: boolean; trigger: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <Popover open={open} onOpenChange={(v) => setOpen(v && enabled)}>
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      {enabled && <PopoverContent asChild>{children}</PopoverContent>}
-    </Popover>
-  );
-}
+import { PlayerMoney } from "./Counter";
 
 export const AvatarColorMap = {
   '#D46565': "/avatars/red.svg",

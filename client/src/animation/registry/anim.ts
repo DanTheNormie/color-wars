@@ -382,10 +382,10 @@ export function createFloatingDiff(container: HTMLElement, diff: number) {
   const statTextElHeight = statTextEl.offsetHeight;
   const statTextClass = statTextEl.className;
 
-  diffEl.textContent = `${diff > 0 ? "+" : ""}${diff}`;
+  diffEl.textContent = `${diff > 0 ? "+" : "-"}${diff}`;
 
   // Tailwind utility classes:
-  diffEl.className = `absolute left-[-20] top-0 font-bold pointer-events-none ${statTextClass}`.trim();
+  diffEl.className = `absolute left-[-6px] top-0 font-bold pointer-events-none ${statTextClass}`.trim();
 
   diffEl.style.color = diff > 0 ? "green" : "red";
 
