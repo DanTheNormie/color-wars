@@ -83,7 +83,9 @@ export class GameEngine {
     this.state.queueAction('MOVE_PLAYER', { fromTile, toTile, tokenId: client.sessionId })
     // this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
 
-
+    if(fromTile + roll >= this.state.game.diceTrack.length) {
+      this.financialConsolidation(client.sessionId)
+    }
 
     this.handleTileEffect(destTileConfig, player)
 
@@ -403,6 +405,12 @@ export class GameEngine {
     }
 
     this.state.queueAction('SHIFT_TRACK', { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) })
+
+    for (const [, player] of this.state.game.players) {
+      if(player.position === 0) {
+        this.financialConsolidation(player.id)
+      }
+    }
 
     this.state.game.turnPhase = 'resolving-shift';
   }

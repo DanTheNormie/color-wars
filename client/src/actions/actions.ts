@@ -395,3 +395,26 @@ export class DowngradeTerritoryAction extends BaseAction<"DOWNGRADE_TERRITORY"> 
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }
+
+export class FinancialConsolidationAction extends BaseAction<"FINANCIAL_CONSOLIDATION"> {
+  execute(): ActionHandle {
+    const { playerId, collections } = this.payload;
+    if (Object.keys(collections).length === 0) {
+      return new ActionHandle(Promise.resolve(), () => { }, () => { });
+    }
+    this.logAction(playerId);
+
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+    if (!engine) throw new Error("PixiEngine not found in target locator");
+
+    const outlineLayer = engine.getOutlineLayer();
+    if (!outlineLayer) throw new Error("OutlineLayer not found in engine");
+    useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + Object.values(collections).reduce((acc, c) => acc + c, 0));
+
+    return new ActionHandle(
+      outlineLayer.playFinancialConsolidation(collections),
+      () => { },
+      () => { }
+    );
+  }
+}

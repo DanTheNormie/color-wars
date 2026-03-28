@@ -91,6 +91,9 @@ export class PIXIGameBoard {
   public getTokenLayer() {
     return this.diceTrack?.getTokenLayer();
   }
+  public getOutlineLayer() {
+    return this.outlineLayer;
+  }
 
   /* ============================
      ============ INIT ==========

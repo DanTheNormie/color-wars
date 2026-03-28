@@ -17,7 +17,8 @@ import {
   UpdatePlayerMoneyAction,
   GameOverAction,
   UpgradeTerritoryAction,
-  DowngradeTerritoryAction
+  DowngradeTerritoryAction,
+  FinancialConsolidationAction
 } from "./actions";
 
 export class ActionFactory {
@@ -70,6 +71,9 @@ export class ActionFactory {
 
       case "DOWNGRADE_TERRITORY":
         return new DowngradeTerritoryAction(data);
+
+      case "FINANCIAL_CONSOLIDATION":
+        return new FinancialConsolidationAction(data);
 
       default:
         throw new Error(`Unknown Action Type, unable to create action: ${JSON.stringify(data)}`);

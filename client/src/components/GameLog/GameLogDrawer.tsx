@@ -85,6 +85,26 @@ const LogMessageItem = ({ entry }: { entry: GameLogEntry }) => {
       }
       return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is now solvent.</div>;
     }
+    case 'FINANCIAL_CONSOLIDATION': {
+      const collections = payload.collections as { [territoryID: string]: number };
+      const collection = Object.values(collections).reduce((acc:number, c:number) => acc + c, 0)
+      
+      if(collection === 0){
+        return <div className={logMessageStyle}>
+          <PlayerInline playerId={entry.playerId} /> collected <span className="text-green-600">${collection.toLocaleString()}</span> from their territories.
+        </div>;
+      }
+      
+      if(collection > 0){
+        return <div className={logMessageStyle}>
+          <PlayerInline playerId={entry.playerId} /> collected <span className="text-green-600">${collection.toLocaleString()}</span> from their territories.
+        </div>;
+      }else{
+        return <div className={logMessageStyle}>
+          <PlayerInline playerId={entry.playerId} /> paid <span className="text-red-600"> ${(-collection).toLocaleString()}</span> in Territory Maintenance.
+        </div>;
+      }
+    }
     default:
       return <div className={logMessageStyle}>{`<!-- log for action type: "${entry.type}" not implemented -->`}</div>;
   }

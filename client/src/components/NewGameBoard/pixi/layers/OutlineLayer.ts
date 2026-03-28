@@ -413,5 +413,63 @@ private findDeepestHex(hexes: Hex[]) {
       default: return null;
     }
   }
+
+  public async playFinancialConsolidation(collections: { [territoryId: string]: number }): Promise<void> {
+    const animPromises: Promise<void>[] = [];
+
+    Object.entries(collections).forEach(([territoryId, amount]) => {
+      if (amount === 0) return;
+
+      const center = this.territoryCenters.get(territoryId);
+      if (!center) return;
+
+      const isPositive = amount > 0;
+      const textStyle = new PIXI.TextStyle({
+        fontFamily: "Arial",
+        fontSize: 28,
+        fontWeight: "bold",
+        fill: isPositive ? 0x31d652 : 0xff3333, // Green for positive, red for negative
+        stroke: { color: 0x000000, width: 2 }, // Black stroke for readability
+      });
+
+      const text = new PIXI.Text({
+        text: isPositive ? `+${amount}` : `-${amount}`, 
+        style: textStyle
+      });
+      
+      text.anchor.set(0.5);
+      text.x = center.x;
+      text.y = center.y;
+      
+      this.iconsContainer.addChild(text);
+
+      const animPromise = new Promise<void>((resolve) => {
+        const startY = text.y;
+        
+        gsap.timeline({
+          onComplete: () => {
+            text.destroy();
+            resolve();
+          }
+        })
+          .fromTo(
+            text,
+            { y: startY, alpha: 0 },
+            { y: startY - 20, alpha: 1, duration: 0.4 }
+          )
+          .to(text, { duration: 1.2 }) // Wait 1 second
+          .to(text, {
+            y: startY - 40,
+            alpha: 0,
+            duration: 0.4,
+            ease: "power1.out"
+          });
+      });
+
+      animPromises.push(animPromise);
+    });
+
+    await Promise.all(animPromises);
+  }
 }
 
