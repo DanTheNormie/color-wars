@@ -252,6 +252,11 @@ export class GameRoom extends Room<{state: RoomState}> {
       logger.info('received shift track');
       this.gameEngine.shiftTrack(direction)
     })
+
+    this.onAction('SABOTAGE', (client, {victimId}) => {
+      logger.info("received sabotage from", client.sessionId, "on", victimId);
+      this.gameEngine.sabotage(client, victimId);
+    });
   }
 
   onAuth(client: Client, options: any, context: AuthContext) {

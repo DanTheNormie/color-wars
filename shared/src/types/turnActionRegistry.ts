@@ -1,5 +1,5 @@
 import { type TileConfig } from "../config/diceTrack.js";
-import { type TileState, type PlayerStatus } from "./RoomState.js";
+import { type TileState, type PlayerStatus, type StatusEffect } from "./RoomState.js";
 import { type DevelopmentType } from "./economyTypes.js";
 
 export const TURN_ACTION_REGISTRY = {
@@ -19,7 +19,10 @@ export const TURN_ACTION_REGISTRY = {
   GAME_OVER: {} as { winnerId: string },
   UPGRADE_TERRITORY: {} as { territoryId: string, buildingType: DevelopmentType },
   DOWNGRADE_TERRITORY: {} as { territoryId: string },
-
+  SABOTAGE: {} as { attackerId: string, victimId: string, amount: number },
+  APPLY_STATUS_EFFECT: {} as { playerId: string, statusEffect: StatusEffect },
+  REMOVE_STATUS_EFFECT: {} as { playerId: string, statusEffect: StatusEffect },
+  FINANCIAL_CONSOLIDATION: {} as {playerId: string, collections:{[territoryID: string]: number}}
 } as const;
 
 export type ActionType = keyof typeof TURN_ACTION_REGISTRY;

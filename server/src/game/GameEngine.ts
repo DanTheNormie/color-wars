@@ -1,14 +1,11 @@
-import { readFileSync } from "fs";
-import path from "path";
-import { PlayerState, RoomState, TerritoryState, TileState } from "@color-wars/shared";
+import { netYield, PlayerState, RoomState, TerritoryState, TileState } from "@color-wars/shared";
 import { PLAYER } from "@color-wars/shared";
-import { Client, Room } from "colyseus";
-import { StatusEffect } from "@color-wars/shared";
+import { Client } from "colyseus";
 import { StatusEffectID } from "@color-wars/shared";
 import { RewardService } from "./rewardService.js";
-import { RewardConfig } from "@color-wars/shared";
 import { MAPS } from "@color-wars/shared";
-import { type TileType, DICE_TRACK, TileConfig } from "@color-wars/shared";
+import { type RewardConfig, type TileType } from "@color-wars/shared";
+import { DICE_TRACK, TileConfig } from "@color-wars/shared";
 import { type DevelopmentType } from "@color-wars/shared";
 
 
@@ -96,12 +93,34 @@ export class GameEngine {
     if (this.state.game.turnPhase === 'awaiting-roll') this.state.game.turnPhase = 'awaiting-end-turn'
   }
 
+  financialConsolidation(playerId: string) {
+    const player = this.state.game.players.get(playerId)!;
+    const collections: { [territoryID: string]: number } = {};
+
+    const economyConfig = MAPS[this.state.mapID].economy
+
+    let total_amount = 0
+
+    for (const [territoryID, territoryState] of this.state.game.territoryOwnership.entries()) {
+      if (territoryState.ownerId === playerId) {
+        const territorySize = MAPS[this.state.mapID].map.territories.find(t => t.id === territoryID)?.hexes.length
+        const rent = netYield(territorySize!, territoryState.buildingType, economyConfig)
+
+        total_amount += rent
+        collections[territoryID] = rent
+      }
+    }
+    player.money += total_amount
+    this.state.queueAction('FINANCIAL_CONSOLIDATION', { playerId: player.id, collections: collections })
+  }
+
+
   updateFinancialStatus(playerId: string) {
     const player = this.state.game.players.get(playerId)!;
-    if((player.money >= 0 ) && player.status !== "healthy"){
+    if ((player.money >= 0) && player.status !== "healthy") {
       player.status = "healthy"
       this.state.queueAction('UPDATE_PLAYER_STATUS', { playerId: player.id, status: "healthy" })
-    }else if((player.money < 0) && player.status !== "in-debt"){
+    } else if ((player.money < 0) && player.status !== "in-debt") {
       player.status = "in-debt"
       this.state.queueAction('UPDATE_PLAYER_STATUS', { playerId: player.id, status: "in-debt" })
     }
@@ -191,7 +210,7 @@ export class GameEngine {
 
     this.state.queueAction('SELL_TERRITORY', { playerId: player.id, territoryID, amount: cost })
     // this.state.pushAction('SELL_TERRITORY', player.id, { playerId: player.id, territoryID, amount: cost })
-
+    this.updateFinancialStatus(player.id)
     player.money += cost;
     this.state.game.territoryOwnership.delete(territoryID)
   }
@@ -214,11 +233,11 @@ export class GameEngine {
     const player = this.state.game.players.get(client.sessionId)!;
     const territoryState = this.state.game.territoryOwnership.get(territoryID)!;
     const currentBuilding = territoryState.buildingType;
-    
+
     const territory = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!;
     const size = territory.hexes.length;
     const economy = MAPS[this.state.mapID].getTerritoryEconomy(size);
-    
+
     const refund = Math.floor(((economy as any)[currentBuilding].capEx) * 0.5);
 
     player.money += refund;
@@ -254,11 +273,11 @@ export class GameEngine {
   declareBankruptcy(client: Client) {
     const player = this.state.game.players.get(client.sessionId)!;
     player.status = "bankrupt"
-    
+
     // 1. Lose all money
     player.money = 0;
     player.cards.clear();
-    
+
     // 2. Lose all territories
     this.state.game.territoryOwnership.forEach((territoryState, territoryId) => {
       if (territoryState.ownerId === player.id) {
@@ -271,7 +290,7 @@ export class GameEngine {
     this.state.queueAction('UPDATE_PLAYER_MONEY', { playerId: player.id, amount: 0 })
 
     // 4. Pass turn if it's their turn
-    if (this.state.game.activePlayerId === player.id) {
+    if (this.state.game.activePlayerId === player.id && this.state.game.players.size > 2) {
       this.endTurn();
     } else {
       this.checkGameOver();
@@ -280,7 +299,7 @@ export class GameEngine {
 
   checkGameOver() {
     const activePlayers = Array.from(this.state.game.players.values()).filter(p => p.status !== "bankrupt");
-    
+
     // If only one player is left, they win
     if (activePlayers.length === 1) {
       const winner = activePlayers[0];
@@ -349,11 +368,11 @@ export class GameEngine {
 
   shiftTrack(direction: "forward" | "backward", count: number = 1) {
     const newTiles: TileConfig[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       const newTileConfig = this.generateNextTile();
       newTiles.push(newTileConfig);
-      
+
       if (direction === 'forward') {
         this.state.game.diceTrack.splice(1, 1);
         this.state.game.diceTrack.push(new TileState(newTileConfig.type, newTileConfig.amount, newTileConfig.label));
@@ -374,7 +393,7 @@ export class GameEngine {
           player.position = Math.max(0, player.position - count);
         } else {
           const newPosition = player.position + count;
-          if(newPosition > this.state.game.diceTrack.length - 1){
+          if (newPosition > this.state.game.diceTrack.length - 1) {
             player.position = 0;
           } else {
             player.position = newPosition;
@@ -382,7 +401,7 @@ export class GameEngine {
         }
       }
     }
-    
+
     this.state.queueAction('SHIFT_TRACK', { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) })
 
     this.state.game.turnPhase = 'resolving-shift';
@@ -417,12 +436,43 @@ export class GameEngine {
           player.hasRolled = false;
         }
       }
-      this.shiftTrack('backward', this.state.game.currentRound);
+      this.shiftTrack('backward', this.state.game.currentRound+30);
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }
     this.state.queueAction('UPDATE_ACTIVE_PLAYER', { playerId: this.state.game.activePlayerId })
     //this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: this.state.game.activePlayerId });
+  }
+
+  sabotage(client: Client, victimId: string) {
+    const attacker = this.state.game.players.get(client.sessionId)!;
+    const victim = this.state.game.players.get(victimId)!;
+
+    const amount = Math.floor(victim.money * 0.5);
+    const fromTile = victim.position;
+    const toTile = 0; // Reset to start
+
+    // Update state
+    victim.money -= amount;
+    attacker.money += amount;
+    victim.position = toTile;
+
+    // Queue actions
+    this.state.queueAction('SABOTAGE', {
+      attackerId: attacker.id,
+      victimId: victim.id,
+      amount: amount,
+    });
+    //this.state.queueAction('DECR_MONEY', { playerId: victim.id, amount });
+    //this.state.queueAction('INCR_MONEY', { playerId: attacker.id, amount });
+    //this.state.queueAction('MOVE_PLAYER', { fromTile, toTile, tokenId: victim.id });
+
+    this.updateFinancialStatus(attacker.id);
+    this.updateFinancialStatus(victim.id);
+
+    // After sabotage, they must end turn? The user didn't specify, 
+    // but usually these actions are once per turn.
+    // The validator checks 'awaiting-end-turn', so they can still do other things if allowed.
   }
 }
 

@@ -17,6 +17,37 @@ interface WithCardID extends WithPlayer {
 interface WithUpgrade extends WithTerritoryID {
   buildingType: string;
 }
+interface WithVictimID extends WithPlayer {
+  victimId: string;
+}
+
+export const requireVictimOnSameTile = (s: PlainStateOf<RoomState>, ctx: WithVictimID) => {
+  const attacker = s.game.players[ctx.senderId];
+  const victim = s.game.players[ctx.victimId];
+  if (!victim) throw new Error("Victim does not exist");
+  if (attacker.position !== victim.position) {
+    throw new Error("Victim must be on the same tile as you");
+  }
+};
+
+export const requireVictimIsNotSelf = (s: PlainStateOf<RoomState>, ctx: WithVictimID) => {
+  if (ctx.senderId === ctx.victimId) {
+    throw new Error("You cannot sabotage yourself");
+  }
+};
+
+export const requireVictimNotBankrupt = (s: PlainStateOf<RoomState>, ctx: WithVictimID) => {
+  const victim = s.game.players[ctx.victimId];
+  if (victim && victim.status === "bankrupt") {
+    throw new Error("You cannot sabotage a bankrupt player");
+  }
+};
+
+export const requireAwaitingEndTurnPhase = (s: PlainStateOf<RoomState>) => {
+  if (s.game.turnPhase !== "awaiting-end-turn") {
+    throw new Error("You can only sabotage after rolling but before ending your turn");
+  }
+};
 
 export const requireTerritoryExists = (s: PlainStateOf<RoomState>, ctx: WithTerritoryID) => {
   const mapID = s.mapID

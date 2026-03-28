@@ -77,6 +77,15 @@ const ACTION_RULES: {
     rules.requireIsUpgraded
   ],
   SHIFT_TRACK: [
+  ],
+  SABOTAGE: [
+    rules.requirePlayerExists,
+    rules.requirePlayersTurn,
+    rules.requireHasRolledDice,
+    rules.requireAwaitingEndTurnPhase,
+    rules.requireVictimIsNotSelf,
+    rules.requireVictimOnSameTile,
+    rules.requireVictimNotBankrupt
   ]
 };
 

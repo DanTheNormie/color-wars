@@ -18,6 +18,7 @@ export interface ClientMessages {
   UPGRADE_TERRITORY: { territoryID: string; buildingType: DevelopmentType; };
   DOWNGRADE_TERRITORY: { territoryID: string; };
   SHIFT_TRACK: { direction: "forward" | "backward" };
+  SABOTAGE: { victimId: string };
 }
 
 export interface QueuedAction<TPayload = unknown> {

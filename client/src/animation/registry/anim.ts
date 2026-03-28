@@ -482,9 +482,12 @@ export function buildTrackShiftAnimation(
   const maxIdx = sprites.length - 1;
   const targetCoords = sprites.map(s => ({ x: s.position.x, y: s.position.y }));
 
-  const newSprites = newTiles.map(nt => trackLayer.prepareNewTileSprite(nt, app));
-  const count = newTiles.length;
-  
+  const processedNewTiles = newTiles.length > sprites.length 
+    ? newTiles.slice(-(sprites.length - 1)) 
+    : newTiles;
+
+  const newSprites = processedNewTiles.map(nt => trackLayer.prepareNewTileSprite(nt, app));
+  const count = processedNewTiles.length;
   const stateUpdates: (() => void)[] = [];
 
   tl.eventCallback("onComplete", () => {
