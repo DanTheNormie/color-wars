@@ -444,7 +444,7 @@ export class GameEngine {
           player.hasRolled = false;
         }
       }
-      this.shiftTrack('backward', this.state.game.currentRound+30);
+      this.shiftTrack('backward', this.state.game.currentRound);
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }

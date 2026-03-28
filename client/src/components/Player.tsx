@@ -4,12 +4,12 @@ import { useStore } from "@/stores/sessionStore";
 import { PlayerMoney } from "./Counter";
 
 export const AvatarColorMap = {
-  '#D46565': "/avatars/red.svg",
-  '#65D479': "/avatars/green.svg",
-  '#2C4F7C': "/avatars/blug.svg",
-  '#6595D4': "/avatars/blue.svg",
+  '#D46565': "/avatars/red_round.svg",
+  '#65D479': "/avatars/green_round.svg",
+  '#6595D4': "/avatars/blue_round.svg",
+  '#8E65D4': "/avatars/purple_round.svg",
+  '#2C4F7C': "/avatars/blue_round.svg",
   '#00E5FF': "/avatars/scientist.png",
-  '#8E65D4': "/avatars/purple.svg",
   "#1C1C1E": "/avatars/spy.png",
   "#D4AF37": "/avatars/rich.png",
   "#8B0000": "/avatars/king.png",

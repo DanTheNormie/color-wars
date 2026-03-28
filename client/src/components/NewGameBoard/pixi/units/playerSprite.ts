@@ -18,7 +18,7 @@ export class PlayerSprite extends PIXI.Container {
     
 
     const body = new PIXI.Graphics();
-    body.roundPoly(0,0,15, 4, 4, this.degreeToRadian(45) ).fill({color}). stroke({ width: 1, color: 0xffffff });
+    body.circle(0,0,12).fill({color}).stroke({ width: 1, color: 0xffffff });
     this.player_box = new PIXI.Container();
     this.player_box.addChild(body);
     
@@ -29,9 +29,9 @@ export class PlayerSprite extends PIXI.Container {
     const eyeRadius = 3;
     const pupilRadius = 1;
 
-    const leftEyeX = -4;
-    const rightEyeX = 4;
-    const eyeY = -2;
+    const leftEyeX = -4.2;
+    const rightEyeX = 4.2;
+    const eyeY = -3;
 
     // helper for small random offset
     const randomOffset = (max: number) => (Math.random() - 0.5) * 2 * max;
