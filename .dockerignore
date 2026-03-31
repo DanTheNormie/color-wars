@@ -1,0 +1,14 @@
+node_modules
+client/node_modules
+server/node_modules
+shared/node_modules
+dist
+client/dist
+server/dist
+shared/dist
+.git
+.gitignore
+.dockerignore
+npm-debug.log
+.DS_Store
+.env
