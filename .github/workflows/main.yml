@@ -42,3 +42,4 @@ jobs:
             docker stop color-wars || true
             docker rm color-wars || true
             docker run -d --name color-wars -p 1111:1111 ${{ secrets.DOCKER_HUB_USERNAME }}/color-wars:latest
+            docker image prune -f
