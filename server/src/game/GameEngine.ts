@@ -52,6 +52,7 @@ export class GameEngine {
       player.money = 20000;
       player.position = 0;
       player.hasRolled = false;
+      player.hasBoughtTerritoryThisRound = false;
     }
 
     this.state.game.diceTrack.clear();
@@ -187,7 +188,9 @@ export class GameEngine {
   }
 
   buyTerritory(client: Client, territoryID: string) {
+    if (this.state.game.activePlayerId !== client.sessionId) return;
     const player = this.state.game.players.get(client.sessionId)!
+    if (player.hasBoughtTerritoryThisRound) return;
 
     const territorySize = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!.hexes.length
 
@@ -196,9 +199,9 @@ export class GameEngine {
     const cost = economy.BASE.capEx
 
     this.state.queueAction('BUY_TERRITORY', { playerId: player.id, territoryID, amount: cost })
-    // this.state.pushAction('BUY_TERRITORY', player.id, { playerId: player.id, territoryID, amount: cost })
 
     player.money -= cost;
+    player.hasBoughtTerritoryThisRound = true;
     this.state.game.territoryOwnership.set(territoryID, new TerritoryState(player.id))
   }
 
@@ -446,6 +449,7 @@ export class GameEngine {
       for (const [, player] of this.state.game.players) {
         if (player.status !== "bankrupt") {
           player.hasRolled = false;
+          player.hasBoughtTerritoryThisRound = false;
         }
       }
       this.shiftTrack('backward', this.state.game.currentRound);

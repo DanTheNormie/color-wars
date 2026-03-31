@@ -261,6 +261,7 @@ export class BuyTerritoryAction extends BaseAction<"BUY_TERRITORY"> {
     useMapStore.getState().setTerritoryColor(territoryID, playerColor);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
     useStore.getState().updateTerritoryOwnership(territoryID, playerId);
+    
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),

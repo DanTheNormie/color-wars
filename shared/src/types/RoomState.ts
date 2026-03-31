@@ -60,6 +60,7 @@ export class PlayerState extends Schema {
   @type("boolean") connected: boolean = true;
   @type("boolean") hasRolled: boolean = true;
   @type("string") status: PlayerStatus = "healthy";
+  @type("boolean") hasBoughtTerritoryThisRound: boolean = false;
   @type(["string"]) cards: ArraySchema<string> = new ArraySchema<string>();
   @type([StatusEffect]) statusEffects: ArraySchema<StatusEffect> = new ArraySchema<StatusEffect>();
 

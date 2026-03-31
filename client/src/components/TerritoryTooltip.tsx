@@ -63,8 +63,14 @@ export default function TerritoryTooltip() {
   const territoryOwnership = useStore((s) => s.state.game?.territoryOwnership);
   const players = useStore((s) => s.state.game?.players);
   const currentPlayerId = useStore((s) => s.currentPlayer?.id);
+  const activePlayerId = useStore((s) => s.state.game?.activePlayerId);
+  const isMyTurn = currentPlayerId === activePlayerId;
+  const hasBoughtThisRound = useStore((s) => s.state.game?.players[currentPlayerId]?.hasBoughtTerritoryThisRound);
+  const canBuy = isMyTurn && !hasBoughtThisRound;
   const phase = useStore((s) => s.state.room.phase);
-
+  console.log("hasBoughtThisRound", hasBoughtThisRound)
+  console.log("canBuy", canBuy)
+  console.log("isMyTurn", isMyTurn)
 
   const adjacentTerritories = getAdjacent(territoryId, currentMap);
   const adjacentOwnedByPlayer = getAdjacentOwnedByPlayer(currentPlayerId, territoryId, currentMap, territoryOwnership);
@@ -251,12 +257,20 @@ export default function TerritoryTooltip() {
         {/* ── Action Buttons ── */}
         <div>
           {!ownerId ? (
-            <button
-              className="w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold cursor-pointer transition-all duration-150 hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a] text-white"
-              onClick={handleBuy}
-            >
-              Purchase Territory for {baseCost}
-            </button>
+            <div className="flex flex-col items-center gap-1 w-full">
+              <button
+                className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold transition-all duration-150 text-white ${canBuy ? 'bg-[#16a34a] hover:bg-[#22c55e] cursor-pointer active:scale-[0.97]' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}
+                onClick={canBuy ? handleBuy : undefined}
+                disabled={!canBuy}
+              >
+                Purchase Territory for {baseCost}
+              </button>
+              {!canBuy && (
+                <span className="text-[10px] text-red-400 text-center px-2">
+                  {!isMyTurn ? "You can only buy on your turn." : "You can only buy 1 territory per round."}
+                </span>
+              )}
+            </div>
           ) : isOwnedByCurrentPlayer ? (
             (adjacentOwnedByPlayer.length < adjacentTerritories.length) ? (
               (adjacentOwnedByPlayer.length === 0) ? (

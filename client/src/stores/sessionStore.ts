@@ -62,6 +62,11 @@ export const useStore = create(
               rehydrated: false,
             } as StoreState,
             (set, get) => ({
+              setHasBoughtTerritoryThisRound: (playerId: string, hasBought: boolean) => {
+                set((z) => {
+                  z.state.game.players[playerId].hasBoughtTerritoryThisRound = hasBought
+                })
+              },
               setDiceTrack: (diceTrack: TileState[]) => {
                 set((z) => {
                   z.state.game.diceTrack = diceTrack

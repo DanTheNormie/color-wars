@@ -14,6 +14,13 @@ export default function AssetManager() {
   const sellTerritory = useStore((z)=> z.sellTerritory)
   const territoryID = useMapStore((z)=>z.selectedTerritoryId)
   const getTerritoryEconomy = useMapStore((z)=>z.getEconomyData)
+  
+  const activePlayerId = useStore((s) => s.state.game?.activePlayerId);
+  const currentPlayerId = useStore((s) => s.currentPlayer?.id);
+  const isMyTurn = currentPlayerId === activePlayerId;
+  const hasBoughtThisRound = useStore((s) => s.currentPlayer?.hasBoughtTerritoryThisRound);
+  const canBuy = isMyTurn && !hasBoughtThisRound;
+
   if(territoryID == null) {return null}
   const economy = Object.entries(getTerritoryEconomy()).map((d)=>{
     return{
@@ -25,6 +32,7 @@ export default function AssetManager() {
 
 
   const buyBase = () => {
+    if(!canBuy) return;
     buyTerritory(territoryID)
     setHasBase(true);
   }
@@ -43,9 +51,10 @@ export default function AssetManager() {
   });
 
   const renderActionCell = (rowType: string, idx: number) => {
-    const baseBtn = (label: string, onClick: () => void, destructive = false) => (
+    const baseBtn = (label: string, onClick: () => void, destructive = false, disabled = false) => (
       <Button
         onClick={onClick}
+        disabled={disabled}
         size="sm"
         variant={destructive ? "destructive" : "outline"}
         className="h-auto py-1 px-2 text-[clamp(10px,1vw,14px)] leading-none"
@@ -55,7 +64,18 @@ export default function AssetManager() {
     );
 
     if (!hasBase) {
-      if (rowType === "BASE") return baseBtn(`Buy Base for ${formatter.format(economy[0].capEx)}`, buyBase);
+      if (rowType === "BASE") {
+         return (
+           <div className="flex flex-col gap-1 items-center justify-center">
+             {baseBtn(`Buy Base for ${formatter.format(economy[0].capEx)}`, buyBase, false, !canBuy)}
+             {!canBuy && (
+                <span className="text-[10px] text-red-500 leading-tight">
+                  {!isMyTurn ? "Not your turn" : "Limit 1 per round"}
+                </span>
+             )}
+           </div>
+         );
+      }
       return null;
     }
 

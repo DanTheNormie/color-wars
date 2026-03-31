@@ -36,6 +36,7 @@ export interface LOCAL_EVENT {
   ADD_TRADE: { id: string; trade: any };
   UPDATE_TRADE: { id: string; trade: any };
   REMOVE_TRADE: { id: string };
+  UPDATE_PLAYER_HAS_BOUGHT_TERRITORY_THIS_ROUND: {id: string, hasBoughtTerritoryThisRound: boolean}
 }
 
 export type LocalEventType = Extract<keyof LOCAL_EVENT, string>;

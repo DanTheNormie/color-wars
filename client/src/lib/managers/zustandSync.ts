@@ -150,6 +150,10 @@ class ZustandSyncManager {
 
       GameEventBus.on("REMOVE_TRADE", ({ id }) => {
         useStore.getState().removeTrade(id);
+      }),
+
+      GameEventBus.on("UPDATE_PLAYER_HAS_BOUGHT_TERRITORY_THIS_ROUND", ({ id, hasBoughtTerritoryThisRound }) => {
+        useStore.getState().setHasBoughtTerritoryThisRound(id, hasBoughtTerritoryThisRound);
       })
     )
   }
