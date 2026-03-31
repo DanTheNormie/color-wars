@@ -1,46 +1,43 @@
-name: Deploy to EC2
+name: Build and Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
+  # JOB 1: Build the image on a native ARM runner
+  build-and-push:
+    runs-on: ubuntu-24.04-arm64
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PAT }}
 
-      - name: Deploy to EC2
-        run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            set -e
-      
-            cd color-wars
-      
-            echo "Pulling latest code..."
-            git fetch origin
-            git reset --hard origin/main
-      
-            echo "Installing dependencies..."
-            npm ci
-      
-            echo "Building app..."
-            npm run build
-      
-            cd server
-      
-            echo "Restarting PM2..."
-            pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
-      
-            pm2 save
-          EOF
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/color-wars:latest
+
+  # JOB 2: Deploy to your server via SSH
+  deploy:
+    needs: build-and-push # The glue! 
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Update Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/color-wars:latest
+            docker stop color-wars || true
+            docker rm color-wars || true
+            docker run -d --name color-wars -p 1111:1111 ${{ secrets.DOCKER_HUB_USERNAME }}/color-wars:latest
