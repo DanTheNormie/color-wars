@@ -88,13 +88,17 @@ const LogMessageItem = memo(({ entry }: { entry: GameLogEntry }) => {
       const collections = payload.collections as { [territoryID: string]: number };
       const collection = Object.values(collections || {}).reduce((acc:number, c:number) => acc + c, 0)
       
-      if(collection >= 0){
+      if(collection > 0){
         return <div className={logMessageStyle}>
-          <PlayerInline playerId={entry.playerId} /> collected <span className="text-green-600">${collection.toLocaleString()}</span> from their territories.
+          <PlayerInline playerId={entry.playerId} /> collected <span className="text-green-600">${collection.toLocaleString()}</span> from Territories.
+        </div>;
+      }else if(collection < 0){
+        return <div className={logMessageStyle}>
+          <PlayerInline playerId={entry.playerId} /> paid <span className="text-red-600"> ${(-collection).toLocaleString()}</span> in Territory Maintenance.
         </div>;
       }else{
         return <div className={logMessageStyle}>
-          <PlayerInline playerId={entry.playerId} /> paid <span className="text-red-600"> ${(-collection).toLocaleString()}</span> in Territory Maintenance.
+          <PlayerInline playerId={entry.playerId} /> had no Territory Income this round.
         </div>;
       }
     }

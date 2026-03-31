@@ -120,7 +120,7 @@ const TurnControls = () => {
       </div>
       <div className={`${(actionState == 'idle') ? '' : 'hidden'} flex w-full h-full flex-1 justify-center items-center flex-col gap-2 ${isNOTActivePlayer ? 'hidden' : ''}`}>
         <DiceHoldButton hasRolled={hasRolledDice} onHoldStart={holdStart} onHoldEnd={holdEnd} />
-        <div className={`${hasRolledDice ? '' : 'hidden'} w-full flex flex-col gap-2 justify-center`}>
+        <div className={`${!hasRolledDice ? 'hidden' : ''} w-full flex flex-col gap-2 justify-center`}>
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="w-full flex justify-center">

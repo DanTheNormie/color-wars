@@ -315,7 +315,7 @@ export const useStore = create(
                 if (!territoryId) return;
                 try {
                   network.send('BUY_TERRITORY', { territoryID: territoryId })
-                  GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
+                  //GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
                 } catch (error) {
                   console.warn("Unable to purchase territory", error);
                 }
@@ -324,7 +324,7 @@ export const useStore = create(
                 if (!territoryId) return;
                 try {
                   network.send('SELL_TERRITORY', { territoryID: territoryId })
-                  GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
+                  //GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
                 } catch (error) {
                   console.warn("Unable to purchase territory", error);
                 }

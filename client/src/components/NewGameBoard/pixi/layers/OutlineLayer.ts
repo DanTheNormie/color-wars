@@ -397,7 +397,7 @@ private findDeepestHex(hexes: Hex[]) {
     sprite.y = center.y;
     sprite.width = center.size; // Adjust size as needed
     sprite.height = center.size ;
-    sprite.tint = 0x000000;
+    sprite.tint = 0xFFFFFF;
     
     this.iconsContainer.addChild(sprite);
     this.buildingIcons.set(territoryId, sprite);
