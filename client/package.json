@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@colyseus/schema": "^4.0.8",
+    "@colyseus/sdk": "^0.17.26",
     "@floating-ui/react": "^0.27.19",
     "@gsap/react": "^2.1.2",
     "@pixi/devtools": "^2.0.1",
@@ -24,9 +25,9 @@
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/react-virtual": "^3.13.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "@colyseus/sdk": "^0.17.26",
     "date-fns": "^4.1.0",
     "gsap": "^3.14.1",
     "honeycomb-grid": "^4.1.5",

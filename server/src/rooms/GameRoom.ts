@@ -143,7 +143,9 @@ export class GameRoom extends Room<{state: RoomState}> {
 
       players.delete(client.sessionId);
       this.state.playersPings.delete(client.sessionId);
-      this.gameEngine.checkGameOver();
+      if(this.state.room.phase == 'active') {
+        this.gameEngine.checkGameOver();
+      }
     };
   
     const idx = playerOrder.indexOf(client.sessionId);
@@ -155,7 +157,7 @@ export class GameRoom extends Room<{state: RoomState}> {
       }
   
       // allow reconnect
-      await this.allowReconnection(client, 10);
+      await this.allowReconnection(client, 60);
   
       // client returned
       player.connected = true;

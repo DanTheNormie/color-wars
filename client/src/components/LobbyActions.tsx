@@ -54,12 +54,14 @@ const LobbyActions = () => {
     setTerritoryColor("intn", "#ff0000");
   }; */
   return (
-    <div className="flex flex-col gap-1">
-      {isLeader && <Button variant="pop" color="green" onClick={startGame}>Start Game</Button>}
-      <Button variant="pop" color="amber" onClick={handleCopyInvite}>
+    <div className="flex flex-col gap-1 justify-center items-center">
+      {isLeader && <Button variant="pop" color="green" className="w-40" onClick={startGame}>Start Game</Button>}
+      {!isLeader && <p className="mb-4 text-center text-lg">Please wait for the leader to start the game</p>}
+      
+      <Button variant="pop" color="amber" className="w-40" onClick={handleCopyInvite}>
         {copied ? "Copied!" : "Copy Invite Link"}
       </Button>
-      <Button variant="pop" color="rose" onClick={handleLeaveGame}>
+      <Button variant="pop" color="rose" className="w-40" onClick={handleLeaveGame}>
         Leave Game
       </Button>
       {/* <div className="flex gap-2 justify-center">
