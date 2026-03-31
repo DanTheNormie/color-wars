@@ -394,7 +394,7 @@ export class GameEngine {
       }
     }
     newTiles.reverse();
-
+    const ignorePlayerIds = new Set<string>();
     // Update player positions
     for (const [, player] of this.state.game.players) {
       if (player.position >= 1) {
@@ -408,13 +408,15 @@ export class GameEngine {
             player.position = newPosition;
           }
         }
+      }else{
+        ignorePlayerIds.add(player.id);
       }
     }
 
     this.state.queueAction('SHIFT_TRACK', { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) })
 
     for (const [, player] of this.state.game.players) {
-      if(player.position === 0) {
+      if(player.position === 0 && !ignorePlayerIds.has(player.id)) {
         this.financialConsolidation(player.id)
       }
     }
