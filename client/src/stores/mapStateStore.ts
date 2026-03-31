@@ -10,21 +10,25 @@ interface territoryEconomy {
         capEx: number;
         opEx: number;
         revenue: number;
+        minHexes: number | undefined;
     };
     CITY: {
         capEx: number;
         opEx: number;
         revenue: number;
+        minHexes: number | undefined;
     };
     FACTORY: {
         capEx: number;
         opEx: number;
         revenue: number;
+        minHexes: number | undefined;
     };
     MISSILE_SILO: {
         capEx: number;
         opEx: number;
         revenue: number;
+        minHexes: number | undefined;
     };
 }
 

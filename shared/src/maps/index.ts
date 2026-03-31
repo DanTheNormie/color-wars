@@ -26,22 +26,26 @@ const getEconomy = (territorySize: number, economy: EconomyConfig ) => {
     [DEVELOPMENT_TYPES.BASE]:{
       capEx: acquisitionCost(territorySize, economy),
       opEx: maintenanceCost(territorySize, DEVELOPMENT_TYPES.BASE, economy),
-      revenue: income(territorySize, DEVELOPMENT_TYPES.BASE, economy)
+      revenue: income(territorySize, DEVELOPMENT_TYPES.BASE, economy),
+      minHexes: economy.developments[DEVELOPMENT_TYPES.BASE]?.minHexes
     },
     [DEVELOPMENT_TYPES.CITY]: {
       capEx: buildCost(territorySize, DEVELOPMENT_TYPES.CITY, economy),
       opEx: maintenanceCost(territorySize, DEVELOPMENT_TYPES.CITY, economy),
       revenue: income(territorySize, DEVELOPMENT_TYPES.CITY, economy),
+      minHexes: economy.developments[DEVELOPMENT_TYPES.CITY]?.minHexes
     },
     [DEVELOPMENT_TYPES.FACTORY]: {
       capEx: buildCost(territorySize, DEVELOPMENT_TYPES.FACTORY, economy),
       opEx: maintenanceCost(territorySize, DEVELOPMENT_TYPES.FACTORY, economy),
-      revenue: income(territorySize, DEVELOPMENT_TYPES.FACTORY, economy)
+      revenue: income(territorySize, DEVELOPMENT_TYPES.FACTORY, economy),
+      minHexes: economy.developments[DEVELOPMENT_TYPES.FACTORY]?.minHexes
     },
     [DEVELOPMENT_TYPES.MISSILE_SILO]: {
       capEx: buildCost(territorySize, DEVELOPMENT_TYPES.MISSILE_SILO, economy),
       opEx: maintenanceCost(territorySize, DEVELOPMENT_TYPES.MISSILE_SILO, economy),
-      revenue: income(territorySize, DEVELOPMENT_TYPES.MISSILE_SILO, economy)
+      revenue: income(territorySize, DEVELOPMENT_TYPES.MISSILE_SILO, economy),
+      minHexes: economy.developments[DEVELOPMENT_TYPES.MISSILE_SILO]?.minHexes
     }
   }
 

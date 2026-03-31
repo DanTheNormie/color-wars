@@ -226,7 +226,12 @@ export default function TerritoryTooltip() {
         {/* ── Economy Stats List ── */}
         {economy && (
           <div className="flex flex-col gap-[8px] mb-4 mt-1">
-            {UPGRADES.map((upgrade) => {
+            {UPGRADES.filter((upgrade) => {
+              if (upgrade.id === "CAPITAL_MONUMENT") return true; // TODO: If CAPITAL is added to economy getTerritoryEconomy later
+              const layer = economy![upgrade.key as keyof typeof economy] as any;
+              const minHexes = layer?.minHexes || 0;
+              return !minHexes || (territory.hexes.length >= minHexes);
+            }).map((upgrade) => {
               let valStr = "???";
               let color = "#8e8e93";
               if (upgrade.id !== "CAPITAL_MONUMENT" && economy) {
@@ -295,12 +300,16 @@ export default function TerritoryTooltip() {
               )
             ) : (
               buildingType === "BASE" ? (
-                <div className="flex gap-2 justify-between">
+                <div className="flex gap-2 justify-around">
                   {[
                     { type: "CITY", label: "Build City" },
                     { type: "FACTORY", label: "Build Factory" },
                     { type: "MISSILE_SILO", label: "Build Missile Silo" },
-                  ].map(({ type, label }) => {
+                  ].filter(({ type }) => {
+                    const layer = economy ? (economy[type as keyof typeof economy] as any) : null;
+                    const minHexes = layer?.minHexes || 0;
+                    return !minHexes || (territory && territory.hexes.length >= minHexes);
+                  }).map(({ type, label }) => {
                     const cost = economy ? (economy[type as keyof typeof economy] as any)?.capEx ?? Infinity : Infinity;
                     const canAfford = currentPlayerMoney >= cost;
                     const canUpgrade = canAfford && isMyTurn;
@@ -342,7 +351,12 @@ export default function TerritoryTooltip() {
             { id: "FACTORY", icon: "/building-icons/factory.svg" },
             { id: "MISSILE_SILO", icon: "/building-icons/missile.svg" },
             { id: "CAPITAL_MONUMENT", icon: "/building-icons/monument.svg" },
-          ].map((item) => {
+          ].filter((item) => {
+            if (item.id === "CAPITAL_MONUMENT") return true; // For now
+            const layer = economy ? (economy[item.id as keyof typeof economy] as any) : null;
+            const minHexes = layer?.minHexes || 0;
+            return !minHexes || (territory && territory.hexes.length >= minHexes);
+          }).map((item) => {
             let priceStr = "???";
             if (item.id !== "CAPITAL_MONUMENT" && economy) {
               const layer = economy[item.id as keyof typeof economy] as any;

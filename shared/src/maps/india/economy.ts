@@ -24,11 +24,13 @@ export const INDIA_ECONOMY: EconomyConfig = {
       buildMultiplier: 3.0,
       maintenanceMultiplier: 0.5,
       incomeMultiplier: 0,
+      minHexes: 100,
     },
     [DEVELOPMENT_TYPES.CAPITAL]: {
       buildMultiplier: 10,
       maintenanceMultiplier: 1,
       incomeMultiplier: 0,
+      minHexes: 500,
     },
   },
 };

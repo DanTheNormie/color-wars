@@ -225,6 +225,12 @@ export class GameEngine {
     const player = this.state.game.players.get(client.sessionId)!;
     const territory = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!;
     const size = territory.hexes.length;
+    const economyConfig = MAPS[this.state.mapID].economy;
+    const minHexes = economyConfig.developments[buildingType]?.minHexes;
+    if (minHexes && size < minHexes) {
+      return; // Cannot upgrade if the territory doesn't meet the minHexes requirement
+    }
+
     const economy = MAPS[this.state.mapID].getTerritoryEconomy(size);
     const cost = (economy as any)[buildingType].capEx;
 
