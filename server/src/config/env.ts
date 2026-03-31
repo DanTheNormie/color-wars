@@ -1,6 +1,6 @@
 import path from "path";
 
-const DEFAULT_PORT = 2567;
+const DEFAULT_PORT = 1111;
 const DEFAULT_CLIENT_BUILD_PATH = path.resolve(process.cwd(), "../client/dist");
 
 const parsePort = (value: string | undefined) => {
@@ -34,10 +34,9 @@ const resolveClientBuildPath = (value: string | undefined) =>
   resolveOptionalPath(value) ?? DEFAULT_CLIENT_BUILD_PATH;
 
 export const env = {
-  nodeEnv: process.env.NODE_ENV ?? "development",
+  nodeEnv: process.env.NODE_ENV ?? "production",
   port: parsePort(process.env.PORT),
   logLevel: process.env.LOG_LEVEL ?? "info",
-  mapDefinitionPath: resolveOptionalPath(process.env.MAP_DEFINITION_PATH),
   clientBuildPath: resolveClientBuildPath(process.env.CLIENT_BUILD_PATH),
 };
 
