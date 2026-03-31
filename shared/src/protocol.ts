@@ -19,6 +19,20 @@ export interface ClientMessages {
   DOWNGRADE_TERRITORY: { territoryID: string; };
   SHIFT_TRACK: { direction: "forward" | "backward" };
   SABOTAGE: { victimId: string };
+  PROPOSE_TRADE: { 
+    targetPlayerId: string; 
+    offer: { 
+      playerAGivesCash: number; 
+      playerBGivesCash: number; 
+      playerAGivesCards: string[]; 
+      playerBGivesCards: string[]; 
+      playerAGivesTerritories: string[]; 
+      playerBGivesTerritories: string[]; 
+    } 
+  };
+  ACCEPT_TRADE: { tradeId: string };
+  DECLINE_TRADE: { tradeId: string };
+  CANCEL_TRADE: { tradeId: string };
 }
 
 export interface QueuedAction<TPayload = unknown> {

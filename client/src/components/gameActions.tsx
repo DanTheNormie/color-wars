@@ -19,7 +19,7 @@ const GameActions = () => {
     const roomPhase = useStore((z) => z.state.room?.phase)
     if (roomPhase !== "active") return null;
     return (
-        <div className="flex w-full justify-end  px-4">
+        <div className="flex w-full justify-end mt-4 px-2">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button variant={"outline"} className="bg-[#82181AAA]!">🏳️ Declare Bankruptcy</Button>

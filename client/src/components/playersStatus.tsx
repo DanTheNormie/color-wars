@@ -5,8 +5,8 @@ const PlayersStatus = () => {
   const players = useStore((z) => z.state.game.players);
 
   return (
-    <div className="flex w-full justify-center py-1 px-2">
-      <ul className=" flex w-full flex-col gap-2 overflow-hidden rounded-sm p-[2%]">
+    <div className="flex w-full justify-center">
+      <ul className=" flex w-full flex-col bg-secondary overflow-hidden rounded-sm">
         {Object.values(players).map((player: any) => (
           <Player key={player.id} player={player} />
         ))}

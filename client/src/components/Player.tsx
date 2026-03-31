@@ -36,7 +36,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
   return (
     <li
       ref={ref}
-      className={`player px-2 py-2 bg-secondary shadow-lg shadow-black/20 flex w-full items-center justify-around rounded-md transition-opacity ${!player.connected ? "opacity-40" : ""} ${player.status === 'bankrupt' ? "opacity-50 grayscale pointer-events-none" : ""}`}
+      className={`player px-4 py-2 bg-secondary flex w-full items-center justify-around rounded-md transition-opacity ${!player.connected ? "opacity-40" : ""} ${player.status === 'bankrupt' ? "opacity-50 grayscale pointer-events-none" : ""}`}
     >
       {/* LEFT — Player Info */}
       <div className="flex h-full w-full gap-2 items-center ">

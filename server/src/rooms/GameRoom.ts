@@ -3,7 +3,7 @@ import { AuthContext, Client, Delayed, Room, logger, CloseCode } from "colyseus"
 import { GameEngine } from "../game/GameEngine.js";
 import { DEFAULT } from "@color-wars/shared";
 import { validateOrThrow } from "@color-wars/shared";
-import { RoomState, PlayerState, DiceState } from "@color-wars/shared";
+import { RoomState, PlayerState } from "@color-wars/shared";
 import {
   ClientActionType,
   ServerActionType,
@@ -139,6 +139,8 @@ export class GameRoom extends Room<{state: RoomState}> {
         logger.debug('player removed: ', client.sessionId)
       }
   
+      this.gameEngine.cancelAllTradesForPlayer(playerId);
+
       players.delete(client.sessionId);
       this.state.playersPings.delete(client.sessionId);
       this.gameEngine.checkGameOver();
@@ -256,6 +258,26 @@ export class GameRoom extends Room<{state: RoomState}> {
     this.onAction('SABOTAGE', (client, {victimId}) => {
       logger.info("received sabotage from", client.sessionId, "on", victimId);
       this.gameEngine.sabotage(client, victimId);
+    });
+
+    this.onAction('PROPOSE_TRADE', (client, { targetPlayerId, offer }) => {
+      logger.info('received propose trade');
+      this.gameEngine.proposeTrade(client, targetPlayerId, offer);
+    });
+
+    this.onAction('ACCEPT_TRADE', (client, { tradeId }) => {
+      logger.info('received accept trade');
+      this.gameEngine.acceptTrade(client, tradeId);
+    });
+
+    this.onAction('DECLINE_TRADE', (client, { tradeId }) => {
+      logger.info('received decline trade');
+      this.gameEngine.declineTrade(client, tradeId);
+    });
+
+    this.onAction('CANCEL_TRADE', (client, { tradeId }) => {
+      logger.info('received cancel trade');
+      this.gameEngine.cancelTrade(client, tradeId);
     });
   }
 

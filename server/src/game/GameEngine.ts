@@ -1,4 +1,5 @@
-import { netYield, PlayerState, RoomState, TerritoryState, TileState } from "@color-wars/shared";
+import { netYield, PlayerState, RoomState, TerritoryState, TileState, Trade, TradeOffer } from "@color-wars/shared";
+import { ArraySchema } from "@colyseus/schema";
 import { PLAYER } from "@color-wars/shared";
 import { Client } from "colyseus";
 import { StatusEffectID } from "@color-wars/shared";
@@ -280,7 +281,10 @@ export class GameEngine {
     player.money = 0;
     player.cards.clear();
 
-    // 2. Lose all territories
+    // 2. Cancel all trades involving this player
+    this.cancelAllTradesForPlayer(player.id);
+
+    // 3. Lose all territories
     this.state.game.territoryOwnership.forEach((territoryState, territoryId) => {
       if (territoryState.ownerId === player.id) {
         this.state.game.territoryOwnership.delete(territoryId);
@@ -481,6 +485,106 @@ export class GameEngine {
     // After sabotage, they must end turn? The user didn't specify, 
     // but usually these actions are once per turn.
     // The validator checks 'awaiting-end-turn', so they can still do other things if allowed.
+  }
+
+  proposeTrade(client: Client, targetPlayerId: string, offer: {
+    playerAGivesCash: number;
+    playerBGivesCash: number;
+    playerAGivesCards: string[];
+    playerBGivesCards: string[];
+    playerAGivesTerritories: string[];
+    playerBGivesTerritories: string[];
+  }) {
+    const playerAId = client.sessionId;
+    const playerBId = targetPlayerId;
+    const tradeId = Math.random().toString(36).substring(2, 9);
+    
+    const tradeOffer = new TradeOffer(
+      offer.playerAGivesCash || 0,
+      offer.playerBGivesCash || 0,
+      new ArraySchema<string>(...(offer.playerAGivesCards || [])),
+      new ArraySchema<string>(...(offer.playerBGivesCards || [])),
+      new ArraySchema<string>(...(offer.playerAGivesTerritories || [])),
+      new ArraySchema<string>(...(offer.playerBGivesTerritories || []))
+    );
+    
+    const trade = new Trade(tradeId, playerAId, playerBId, tradeOffer);
+    this.state.game.activeTrades.set(tradeId, trade);
+    
+    this.state.queueAction('PROPOSE_TRADE', { tradeId, targetPlayerId, offer, senderId: playerAId });
+  }
+
+  acceptTrade(client: Client, tradeId: string) {
+    const trade = this.state.game.activeTrades.get(tradeId);
+    if (!trade) return;
+    
+    const playerA = this.state.game.players.get(trade.playerAId)!;
+    const playerB = this.state.game.players.get(trade.playerBId)!;
+
+    playerA.money -= trade.offer.playerAGivesCash;
+    playerA.money += trade.offer.playerBGivesCash;
+    playerB.money -= trade.offer.playerBGivesCash;
+    playerB.money += trade.offer.playerAGivesCash;
+
+    trade.offer.playerAGivesCards.forEach(card => {
+      const idx = playerA.cards.indexOf(card);
+      if(idx !== -1) playerA.cards.splice(idx, 1);
+      playerB.cards.push(card);
+    });
+    trade.offer.playerBGivesCards.forEach(card => {
+      const idx = playerB.cards.indexOf(card);
+      if(idx !== -1) playerB.cards.splice(idx, 1);
+      playerA.cards.push(card);
+    });
+
+    trade.offer.playerAGivesTerritories.forEach(territoryId => {
+      const ts = this.state.game.territoryOwnership.get(territoryId);
+      if (ts) ts.ownerId = playerB.id;
+    });
+    trade.offer.playerBGivesTerritories.forEach(territoryId => {
+      const ts = this.state.game.territoryOwnership.get(territoryId);
+      if (ts) ts.ownerId = playerA.id;
+    });
+
+    this.state.game.activeTrades.delete(tradeId);
+
+    this.updateFinancialStatus(playerA.id);
+    this.updateFinancialStatus(playerB.id);
+
+    this.state.queueAction('ACCEPT_TRADE', { tradeId, senderId: client.sessionId });
+  }
+
+  declineTrade(client: Client, tradeId: string) {
+    const trade = this.state.game.activeTrades.get(tradeId);
+    if (!trade) return;
+    
+    this.state.game.activeTrades.delete(tradeId);
+    this.state.queueAction('DECLINE_TRADE', { tradeId, senderId: client.sessionId });
+  }
+
+  cancelTrade(client: Client, tradeId: string) {
+    const trade = this.state.game.activeTrades.get(tradeId);
+    if (!trade) return;
+
+    if (trade.playerAId === client.sessionId) {
+      this.state.game.activeTrades.delete(tradeId);
+      // We can broadcast a CANCEL_TRADE or DECLINE_TRADE, DECLINE_TRADE clears the modal just fine
+      this.state.queueAction('DECLINE_TRADE', { tradeId, senderId: client.sessionId });
+    }
+  }
+
+  cancelAllTradesForPlayer(playerId: string) {
+    const tradesToCancel: string[] = [];
+    this.state.game.activeTrades.forEach((trade, tradeId) => {
+      if (trade.playerAId === playerId || trade.playerBId === playerId) {
+        tradesToCancel.push(tradeId);
+      }
+    });
+
+    for (const tradeId of tradesToCancel) {
+      this.state.game.activeTrades.delete(tradeId);
+      this.state.queueAction('DECLINE_TRADE', { tradeId, senderId: playerId });
+    }
   }
 }
 

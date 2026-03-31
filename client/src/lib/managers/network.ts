@@ -116,6 +116,17 @@ class Network {
         $(this.room.state.game).players.onRemove((_:any, playerId: string) => {
           GameEventBus.emit("REMOVE_PLAYER", { id: playerId });
         }),
+        $(this.room.state.game).activeTrades.onAdd((trade: any, tradeId: string) => {
+          GameEventBus.emit("ADD_TRADE", { id: tradeId, trade: trade.toJSON() });
+          this.stateChangeCallbacks.push(
+            $(trade).onChange(() => {
+              GameEventBus.emit("UPDATE_TRADE", { id: tradeId, trade: trade.toJSON() });
+            })
+          );
+        }),
+        $(this.room.state.game).activeTrades.onRemove((_: any, tradeId: string) => {
+          GameEventBus.emit("REMOVE_TRADE", { id: tradeId });
+        }),
         // $(this.room.state).playersPings.onChange((ping, playerId) => {
         //   // GameEventBus.emit("UPDATE_PLAYER_PING", { id: playerId, ping });
         // }),

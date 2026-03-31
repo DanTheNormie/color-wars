@@ -86,6 +86,26 @@ const ACTION_RULES: {
     rules.requireVictimIsNotSelf,
     rules.requireVictimOnSameTile,
     rules.requireVictimNotBankrupt
+  ],
+  PROPOSE_TRADE: [
+    rules.requirePlayerExists,
+    rules.requireValidProposeTrade
+  ],
+  ACCEPT_TRADE: [
+    rules.requirePlayerExists,
+    rules.requireTradeExists,
+    rules.requireTradeReceiver,
+    rules.requireValidAcceptTrade
+  ],
+  DECLINE_TRADE: [
+    rules.requirePlayerExists,
+    rules.requireTradeExists,
+    rules.requireTradeReceiver
+  ],
+  CANCEL_TRADE: [
+    rules.requirePlayerExists,
+    rules.requireTradeExists,
+    rules.requireTradeSender
   ]
 };
 

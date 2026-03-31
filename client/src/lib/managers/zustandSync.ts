@@ -138,6 +138,18 @@ class ZustandSyncManager {
 
       GameEventBus.on('UPDATE_DICE_TRACK', ({diceTrack}) => {
         useStore.getState().setDiceTrack(diceTrack)
+      }),
+
+      GameEventBus.on("ADD_TRADE", ({ id, trade }) => {
+        useStore.getState().addTrade(id, trade);
+      }),
+
+      GameEventBus.on("UPDATE_TRADE", ({ id, trade }) => {
+        useStore.getState().updateTrade(id, trade);
+      }),
+
+      GameEventBus.on("REMOVE_TRADE", ({ id }) => {
+        useStore.getState().removeTrade(id);
       })
     )
   }

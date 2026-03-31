@@ -418,6 +418,54 @@ export const useStore = create(
                   console.warn("Unable to shift track", error);
                 }
               },
+              sendProposeTrade: (payload: any) => {
+                try {
+                  network.send("PROPOSE_TRADE", payload);
+                } catch (error) {
+                  console.warn("Unable to propose trade", error);
+                }
+              },
+              sendAcceptTrade: (tradeId: string) => {
+                try {
+                  network.send("ACCEPT_TRADE", { tradeId });
+                } catch (error) {
+                  console.warn("Unable to accept trade", error);
+                }
+              },
+              sendDeclineTrade: (tradeId: string) => {
+                try {
+                  network.send("DECLINE_TRADE", { tradeId });
+                } catch (error) {
+                  console.warn("Unable to decline trade", error);
+                }
+              },
+              sendCancelTrade: (tradeId: string) => {
+                try {
+                  network.send("CANCEL_TRADE", { tradeId });
+                } catch (error) {
+                  console.warn("Unable to cancel trade", error);
+                }
+              },
+              addTrade: (id: string, trade: PlainStateOf<any>) => {
+                set((z) => {
+                  z.state.game.activeTrades ??= {};
+                  z.state.game.activeTrades[id] = trade;
+                });
+              },
+              removeTrade: (id: string) => {
+                set((z) => {
+                  if (z.state.game.activeTrades) {
+                    delete z.state.game.activeTrades[id];
+                  }
+                });
+              },
+              updateTrade: (id: string, trade: PlainStateOf<any>) => {
+                set((z) => {
+                  if (z.state.game.activeTrades) {
+                    z.state.game.activeTrades[id] = trade;
+                  }
+                });
+              },
             }),
           ),
         ),

@@ -14,6 +14,7 @@ import TerritoryTooltip from "@/components/TerritoryTooltip";
 import NowPlayingHeader from "@/components/NowPlayingHeader";
 import GameActions from "@/components/gameActions";
 import UserAssets from "@/components/UserAssets";
+import TradesList from "@/components/TradesList";
 import GameOverOverlay from "@/components/GameOverOverlay";
 import { httpEndpoint } from "@/lib/serverConfig";
 import { Input } from "@/components/ui/input";
@@ -162,12 +163,13 @@ const RoomPage = () => {
 
   return (
     <div className="flex w-full flex-col items-center justify-center">
-      <div id='game-container' className="w-full max-w-180 pb-[100vh] relative">
+      <div id='game-container' className="w-full max-w-180 pb-[100vh] px-2 relative">
         
         <NowPlayingHeader />
         <PixiCanvas />
         <PlayersStatus />
         <GameActions />
+        <TradesList />
         <UserAssets />
         
         

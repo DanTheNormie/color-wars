@@ -92,7 +92,7 @@ export class PlayerSprite extends PIXI.Container {
     }
     
     this.pulseTl = gsap.timeline()
-
+    this.zIndex = 100
     this.pulseTl.to(this.player_box, {
       pixi: {
         scale: 0.85,
@@ -107,7 +107,7 @@ export class PlayerSprite extends PIXI.Container {
   public stopPulse(){
     this.pulseTl?.kill()
     this.pulseTl = undefined
-    
+    this.zIndex = 0
     // Smoothly return to base scale
     gsap.to(this, {
       pixi: {

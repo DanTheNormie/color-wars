@@ -20,6 +20,20 @@ interface WithUpgrade extends WithTerritoryID {
 interface WithVictimID extends WithPlayer {
   victimId: string;
 }
+interface WithProposeTrade extends WithPlayer {
+  targetPlayerId: string;
+  offer: {
+    playerAGivesCash: number;
+    playerBGivesCash: number;
+    playerAGivesCards: string[];
+    playerBGivesCards: string[];
+    playerAGivesTerritories: string[];
+    playerBGivesTerritories: string[];
+  };
+}
+interface WithTradeId extends WithPlayer {
+  tradeId: string;
+}
 
 export const requireVictimOnSameTile = (s: PlainStateOf<RoomState>, ctx: WithVictimID) => {
   const attacker = s.game.players[ctx.senderId];
@@ -195,5 +209,80 @@ export const requireHasNotRolledDice = (s: PlainStateOf<RoomState>, c: WithPlaye
   const player = s.game.players[c.senderId];
   if (!player || player.hasRolled) {
     throw new Error("Player has already rolled dice this turn");
+  }
+};
+
+export const requireValidProposeTrade = (s: PlainStateOf<RoomState>, ctx: WithProposeTrade) => {
+  if (ctx.senderId === ctx.targetPlayerId) {
+    throw new Error("Cannot trade with yourself");
+  }
+  const sender = s.game.players[ctx.senderId];
+  if (!sender) throw new Error("Sender does not exist");
+  const target = s.game.players[ctx.targetPlayerId];
+  if (!target) throw new Error("Target player does not exist");
+  
+  if (sender.money < (ctx.offer.playerAGivesCash || 0)) {
+    throw new Error("You don't have enough cash for this trade");
+  }
+
+  const senderCards = new Set(sender.cards);
+  for (const card of (ctx.offer.playerAGivesCards || [])) {
+    if (!senderCards.has(card)) throw new Error("You don't own the offered card");
+  }
+
+  for (const territoryId of (ctx.offer.playerAGivesTerritories || [])) {
+    if (s.game.territoryOwnership[territoryId]?.ownerId !== ctx.senderId) {
+       throw new Error(`You don't own territory ${territoryId}`);
+    }
+  }
+};
+
+export const requireTradeExists = (s: PlainStateOf<RoomState>, ctx: WithTradeId) => {
+  if (!s.game.activeTrades[ctx.tradeId]) throw new Error("Trade does not exist");
+};
+
+export const requireTradeReceiver = (s: PlainStateOf<RoomState>, ctx: WithTradeId) => {
+  const trade = s.game.activeTrades[ctx.tradeId];
+  if (trade && trade.playerBId !== ctx.senderId) {
+    throw new Error("You are not the receiver of this trade");
+  }
+};
+
+export const requireTradeSender = (s: PlainStateOf<RoomState>, ctx: WithTradeId) => {
+  const trade = s.game.activeTrades[ctx.tradeId];
+  if (trade && trade.playerAId !== ctx.senderId) {
+    throw new Error("You are not the sender of this trade");
+  }
+};
+
+export const requireValidAcceptTrade = (s: PlainStateOf<RoomState>, ctx: WithTradeId) => {
+  const trade = s.game.activeTrades[ctx.tradeId];
+  if (!trade) return;
+
+  const playerA = s.game.players[trade.playerAId];
+  const playerB = s.game.players[trade.playerBId];
+
+  // Verify Player A still has their side
+  if (playerA.money < (trade.offer.playerAGivesCash || 0)) throw new Error("Proposer no longer has enough cash");
+  const playerACards = new Set(playerA.cards);
+  for (const card of (trade.offer.playerAGivesCards || [])) {
+    if (!playerACards.has(card)) throw new Error("Proposer no longer has the offered cards");
+  }
+  for (const territoryId of (trade.offer.playerAGivesTerritories || [])) {
+    if (s.game.territoryOwnership[territoryId]?.ownerId !== trade.playerAId) {
+       throw new Error("Proposer no longer owns the offered territories");
+    }
+  }
+
+  // Verify Player B has their side
+  if (playerB.money < (trade.offer.playerBGivesCash || 0)) throw new Error("You don't have enough cash for this trade");
+  const playerBCards = new Set(playerB.cards);
+  for (const card of (trade.offer.playerBGivesCards || [])) {
+    if (!playerBCards.has(card)) throw new Error("You don't own the required cards");
+  }
+  for (const territoryId of (trade.offer.playerBGivesTerritories || [])) {
+    if (s.game.territoryOwnership[territoryId]?.ownerId !== trade.playerBId) {
+       throw new Error(`You don't own the required territory ${territoryId}`);
+    }
   }
 };

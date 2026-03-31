@@ -33,6 +33,9 @@ export interface LOCAL_EVENT {
   SET_TERRITORY_INFO_DRAWER: {open: boolean}
   CHANGE_MAP_ID: {mapID: MapID}
   UPDATE_DICE_TRACK: {diceTrack: TileState[]}
+  ADD_TRADE: { id: string; trade: any };
+  UPDATE_TRADE: { id: string; trade: any };
+  REMOVE_TRADE: { id: string };
 }
 
 export type LocalEventType = Extract<keyof LOCAL_EVENT, string>;
