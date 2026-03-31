@@ -49,7 +49,7 @@ export class GameEngine {
   startGame() {
     for (const playerID of this.state.game.playerOrder) {
       const player = this.state.game.players.get(playerID)!;
-      player.money = 20000;
+      player.money = 200000;
       player.position = 0;
       player.hasRolled = false;
       player.hasBoughtTerritoryThisRound = false;
@@ -454,7 +454,7 @@ export class GameEngine {
           player.hasBoughtTerritoryThisRound = false;
         }
       }
-      this.shiftTrack('backward', this.state.game.currentRound);
+      this.shiftTrack('backward', Math.max(10,this.state.game.currentRound));
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }

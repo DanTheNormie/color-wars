@@ -65,8 +65,9 @@ export default function TerritoryTooltip() {
   const currentPlayerId = useStore((s) => s.currentPlayer?.id);
   const activePlayerId = useStore((s) => s.state.game?.activePlayerId);
   const isMyTurn = currentPlayerId === activePlayerId;
-  const hasBoughtThisRound = useStore((s) => s.state.game?.players[currentPlayerId]?.hasBoughtTerritoryThisRound);
+  const hasBoughtThisRound = useStore((s) => s.state.game?.players[currentPlayerId as string]?.hasBoughtTerritoryThisRound);
   const canBuy = isMyTurn && !hasBoughtThisRound;
+  const currentPlayerMoney = useStore((s) => currentPlayerId ? s.state.game?.players[currentPlayerId]?.money ?? 0 : 0);
   const phase = useStore((s) => s.state.room.phase);
   console.log("hasBoughtThisRound", hasBoughtThisRound)
   console.log("canBuy", canBuy)
@@ -164,6 +165,8 @@ export default function TerritoryTooltip() {
   if (!isOpen || !territory) return null;
 
   const baseCost = economy ? fmt.format(economy.BASE.capEx) : "—";
+  const baseCostRaw = economy ? economy.BASE.capEx : Infinity;
+  const hasEnoughForPurchase = currentPlayerMoney >= baseCostRaw;
 
   // Try to determine sell value roughly as half capEx. If not applicable, blank.
   const capExObj = economy ? economy[buildingType as keyof typeof economy] : null;
@@ -259,15 +262,19 @@ export default function TerritoryTooltip() {
           {!ownerId ? (
             <div className="flex flex-col items-center gap-1 w-full">
               <button
-                className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold transition-all duration-150 text-white ${canBuy ? 'bg-[#16a34a] hover:bg-[#22c55e] cursor-pointer active:scale-[0.97]' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}
-                onClick={canBuy ? handleBuy : undefined}
-                disabled={!canBuy}
+                className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold transition-all duration-150 text-white ${canBuy && hasEnoughForPurchase ? 'bg-[#16a34a] hover:bg-[#22c55e] cursor-pointer active:scale-[0.97]' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}
+                onClick={canBuy && hasEnoughForPurchase ? handleBuy : undefined}
+                disabled={!(canBuy && hasEnoughForPurchase)}
               >
                 Purchase Territory for {baseCost}
               </button>
-              {!canBuy && (
+              {!(canBuy && hasEnoughForPurchase) && (
                 <span className="text-[10px] text-red-400 text-center px-2">
-                  {!isMyTurn ? "You can only buy on your turn." : "You can only buy 1 territory per round."}
+                  {!isMyTurn 
+                    ? "You can only buy on your turn." 
+                    : !hasEnoughForPurchase 
+                      ? "Not enough funds." 
+                      : "You can only buy 1 territory per round."}
                 </span>
               )}
             </div>
@@ -289,29 +296,37 @@ export default function TerritoryTooltip() {
             ) : (
               buildingType === "BASE" ? (
                 <div className="flex gap-2 justify-between">
-                  <button
-                    className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
-                    onClick={() => handleUpgrade("CITY")}
-                  >
-                    Build City
-                  </button>
-                  <button
-                    className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
-                    onClick={() => handleUpgrade("FACTORY")}
-                  >
-                    Build Factory
-                  </button>
-                  <button
-                    className="py-[6px] px-2 rounded text-[10px] font-semibold text-white cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
-                    onClick={() => handleUpgrade("MISSILE_SILO")}
-                  >
-                    Build Missile Silo
-                  </button>
+                  {[
+                    { type: "CITY", label: "Build City" },
+                    { type: "FACTORY", label: "Build Factory" },
+                    { type: "MISSILE_SILO", label: "Build Missile Silo" },
+                  ].map(({ type, label }) => {
+                    const cost = economy ? (economy[type as keyof typeof economy] as any)?.capEx ?? Infinity : Infinity;
+                    const canAfford = currentPlayerMoney >= cost;
+                    const canUpgrade = canAfford && isMyTurn;
+                    return (
+                      <button
+                        key={type}
+                        className={`py-[6px] px-2 rounded text-[10px] font-semibold text-white transition-all duration-150 ${
+                          canUpgrade
+                            ? "cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
+                            : "bg-gray-500 cursor-not-allowed opacity-50"
+                        }`}
+                        onClick={canUpgrade ? () => handleUpgrade(type as DevelopmentType) : undefined}
+                        disabled={!canUpgrade}
+                        title={!isMyTurn ? "You can only upgrade on your turn" : !canAfford ? "Not enough funds" : ""}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <button
-                  className="w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-white cursor-pointer transition-all duration-150 hover:bg-[#ca8a04] active:scale-[0.97] bg-[#eab308]"
-                  onClick={handleDowngrade}
+                  className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-white transition-all duration-150 ${isMyTurn ? "cursor-pointer hover:bg-[#ca8a04] active:scale-[0.97] bg-[#eab308]" : "bg-gray-500 cursor-not-allowed opacity-50"}`}
+                  onClick={isMyTurn ? handleDowngrade : undefined}
+                  disabled={!isMyTurn}
+                  title={!isMyTurn ? "You can only downgrade on your turn" : ""}
                 >
                   Downgrade to BASE (50% refund)
                 </button>

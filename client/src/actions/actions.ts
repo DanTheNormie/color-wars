@@ -382,8 +382,21 @@ export class GameOverAction extends BaseAction<"GAME_OVER"> {
 
 export class UpgradeTerritoryAction extends BaseAction<"UPGRADE_TERRITORY"> {
   execute(): ActionHandle {
-    const { territoryId, buildingType } = this.payload;
-    useStore.getState().sendUpgradeTerritoryIntent(territoryId, buildingType);
+    const { playerId, territoryID, buildingType, amount } = this.payload;
+    useStore.getState().upgradeTerritory(territoryID, buildingType);
+    useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
+
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+    if (engine) {
+      const outlineLayer = engine.getOutlineLayer();
+      if (outlineLayer) {
+        return new ActionHandle(
+          outlineLayer.playFinancialConsolidation({ [territoryID]: -amount }),
+          () => { },
+          () => { }
+        );
+      }
+    }
 
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
@@ -391,8 +404,22 @@ export class UpgradeTerritoryAction extends BaseAction<"UPGRADE_TERRITORY"> {
 
 export class DowngradeTerritoryAction extends BaseAction<"DOWNGRADE_TERRITORY"> {
   execute(): ActionHandle {
-    const { territoryId } = this.payload;
-    useStore.getState().sendDowngradeTerritoryIntent(territoryId);
+    const { playerId, territoryID, amount } = this.payload;
+    useStore.getState().downgradeTerritory(territoryID);
+    useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
+
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+    if (engine) {
+      const outlineLayer = engine.getOutlineLayer();
+      if (outlineLayer) {
+        return new ActionHandle(
+          outlineLayer.playFinancialConsolidation({ [territoryID]: amount }),
+          () => { },
+          () => { }
+        );
+      }
+    }
+
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }
