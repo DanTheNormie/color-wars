@@ -496,7 +496,7 @@ private findDeepestHex(hexes: Hex[]) {
       { alpha: 0 },
       {
         alpha: 1,
-        duration: 0.6,
+        duration: 1.0,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut"

@@ -453,6 +453,11 @@ export class GameEngine {
     for (const [, player] of this.state.game.players) {
       if(player.position === 0 && !ignorePlayerIds.has(player.id)) {
         this.financialConsolidation(player.id)
+        if (player.isVictoryLap) {
+          this.state.game.turnPhase = 'game-over';
+          this.state.queueAction('GAME_OVER', { winnerId: player.id });
+          return;
+        }
       }
     }
 

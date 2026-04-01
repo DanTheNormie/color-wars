@@ -153,8 +153,13 @@ export default function TerritoryTooltip() {
   }, [tid, sellTerritory, closeTooltip]);
 
   const handleUpgrade = useCallback((type: DevelopmentType) => {
-    if (tid) upgradeTerritory(tid, type);
-  }, [tid, upgradeTerritory]);
+    if (tid) {
+      upgradeTerritory(tid, type);
+      if (type === "CAPITAL") {
+        closeTooltip();
+      }
+    }
+  }, [tid, upgradeTerritory, closeTooltip]);
 
   const handleDowngrade = useCallback(() => {
     if (tid) downgradeTerritory(tid);
