@@ -22,7 +22,7 @@ const GameActions = lazy(() => import("@/components/gameActions"));
 const UserAssets = lazy(() => import("@/components/UserAssets"));
 const TradesList = lazy(() => import("@/components/TradesList"));
 const GameOverOverlay = lazy(() => import("@/components/GameOverOverlay"));
-const VictoryOverlay = lazy(() => import("@/components/VictoryOverlay"));
+// const VictoryOverlay = lazy(() => import("@/components/VictoryOverlay"));
 
 export interface RoomInfo {
   roomId: string;
@@ -189,7 +189,7 @@ const RoomPage = () => {
           
           <CardSelectionOverlay />
           <GameOverOverlay />
-          <VictoryOverlay />
+          {/* <VictoryOverlay /> */}
           <VFXLayer />
           <TerritoryTooltip />
         </div>
