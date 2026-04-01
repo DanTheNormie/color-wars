@@ -62,6 +62,7 @@ export class PlayerState extends Schema {
   @type("string") status: PlayerStatus = "healthy";
   @type("boolean") hasBoughtTerritoryThisRound: boolean = false;
   @type("boolean") hasSabotagedThisRound: boolean = false;
+  @type("boolean") isVictoryLap: boolean = false;
   @type(["string"]) cards: ArraySchema<string> = new ArraySchema<string>();
   @type([StatusEffect]) statusEffects: ArraySchema<StatusEffect> = new ArraySchema<StatusEffect>();
 

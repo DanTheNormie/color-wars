@@ -22,12 +22,16 @@ export class OutlineLayer extends PIXI.Container {
   private territoryCenters: Map<string, { x: number; y: number, size: number }> = new Map();
   private buildingIcons: Map<string, PIXI.Sprite> = new Map();
   private unsubscribeStore: (() => void) | null = null;
+  private capitalGlows: Map<string, PIXI.Graphics> = new Map();
+  private capitalGlowsFill: Map<string, PIXI.Graphics> = new Map();
 
   constructor() {
     super();
     // Order matters: Fills at bottom, Borders on top
     this.fillsContainer = new PIXI.Container();
+    this.fillsContainer.sortableChildren = true;
     this.bordersContainer = new PIXI.Container();
+    this.bordersContainer.sortableChildren = true;
     this.iconsContainer = new PIXI.Container();
 
     this.addChild(this.fillsContainer);
@@ -52,7 +56,21 @@ export class OutlineLayer extends PIXI.Container {
     if (this.unsubscribeStore) {
       this.unsubscribeStore();
     }
+    this.removeCapitalGlow();
     super.destroy(options);
+  }
+
+  private removeCapitalGlow() {
+    this.capitalGlows.forEach((glow) => {
+      gsap.killTweensOf(glow);
+      glow.destroy();
+    });
+    this.capitalGlows.clear();
+    this.capitalGlowsFill.forEach((glow) => {
+      gsap.killTweensOf(glow);
+      glow.destroy();
+    });
+    this.capitalGlowsFill.clear();
   }
 
 
@@ -65,6 +83,7 @@ export class OutlineLayer extends PIXI.Container {
     this.territoryCenters.clear();
     this.buildingIcons.clear();
     this.stopAllPulses();
+    this.removeCapitalGlow();
 
     const { hexSize } = map.grid;
     const hexMap = new Map<string, string>();
@@ -138,10 +157,14 @@ export class OutlineLayer extends PIXI.Container {
       const cx = width * (hex.q + hex.r / 2);
       const cy = hexSize * 1.5 * hex.r;
 
-      this.territoryCenters.set(territoryID, { x: cx, y: cy, size: Math.max(distance * width, 5) });
+      this.territoryCenters.set(territoryID, { x: cx, y: cy, size: Math.max(distance * width, width * 0.6) });
       const ownership = useStore.getState().state?.game?.territoryOwnership[territoryID]
       const buildingType = ownership?.buildingType || 'BASE'
-      this.updateTerritoryIcon(territoryID, buildingType)
+      
+      // console.log('buildingType', buildingType)
+      // if(buildingType === 'CAPITAL') {
+      //   this.setCapitalPulse(territoryID, true)
+      // }
       // const iconPath = this.getIconPath('CITY');
       // if (!iconPath) return;
 
@@ -169,6 +192,7 @@ export class OutlineLayer extends PIXI.Container {
 
       this.fillsContainer.addChild(gFill);
       this.bordersContainer.addChild(gBorder);
+      this.updateTerritoryIcon(territoryID, buildingType)
     });
 
     // Initial State:
@@ -366,13 +390,26 @@ private findDeepestHex(hexes: Hex[]) {
     obj.fill.tint = color
   }
 
-  private updateAllIcons(ownership: Record<string, { buildingType: DevelopmentType }>) {
-    Object.entries(ownership).forEach(([territoryId, data]) => {
+  public updateAllIcons(ownership: any) {
+    const updatedIds = new Set<string>();
+
+    const rawEntries = ownership.entries ? Array.from(ownership.entries()) : Object.entries(ownership);
+    const entries = rawEntries as [string, any][];
+
+    entries.forEach(([territoryId, data]) => {
       this.updateTerritoryIcon(territoryId, data.buildingType);
+      updatedIds.add(territoryId);
+    });
+
+    // Cleanup territories that no longer have buildings or are no longer owned
+    this.buildingIcons.forEach((_, territoryId) => {
+      if (!updatedIds.has(territoryId)) {
+        this.updateTerritoryIcon(territoryId, "BASE");
+      }
     });
   }
 
-  private updateTerritoryIcon(territoryId: string, buildingType: DevelopmentType) {
+  public updateTerritoryIcon(territoryId: string, buildingType: DevelopmentType) {
     const center = this.territoryCenters.get(territoryId);
     if (!center) {
       return
@@ -382,6 +419,11 @@ private findDeepestHex(hexes: Hex[]) {
     if (existing) {
       this.iconsContainer.removeChild(existing);
       this.buildingIcons.delete(territoryId);
+    }
+
+    // --- Handle Capital Glow ---
+    if(buildingType === "CAPITAL") {
+      this.setCapitalPulse(territoryId, true);
     }
 
     if (buildingType === "BASE" || !buildingType) {
@@ -401,6 +443,65 @@ private findDeepestHex(hexes: Hex[]) {
     
     this.iconsContainer.addChild(sprite);
     this.buildingIcons.set(territoryId, sprite);
+  }
+
+  private setCapitalPulse(territoryId: string, active: boolean) {
+    const existing = this.capitalGlows.get(territoryId);
+    const existingFill = this.capitalGlowsFill.get(territoryId);
+    if (!active) {
+      if (existing) {
+        gsap.killTweensOf(existing);
+        this.bordersContainer.removeChild(existing);
+        existing.destroy();
+        this.capitalGlows.delete(territoryId);
+      }
+      if (existingFill) {
+        gsap.killTweensOf(existingFill);
+        this.bordersContainer.removeChild(existingFill);
+        existingFill.destroy();
+        this.capitalGlowsFill.delete(territoryId);
+      }
+      return;
+    }
+
+    if (existing) return;
+
+    const data = this.stateGraphics.get(territoryId);
+    if (!data) return;
+
+    // Create a glow by cloning the border graphics
+    const glow_border = data.border.clone();
+    const glow_fill = data.fill.clone();
+    glow_border.tint = 0xFFD700; // Gold glow
+    glow_fill.tint = 0xFFD700; // Gold glow
+    //glow_border.blendMode = 'add';
+    //glow_fill.blendMode = 'add';
+    
+    // Apply a blur filter for soft glow aesthetics
+    const blur = new PIXI.BlurFilter();
+    blur.strength = 2;
+    glow_border.filters = [blur];
+    glow_fill.filters = [blur];
+    glow_fill.alpha = 0.5;
+    glow_border.zIndex = 1; // Stay behind the main sharp border
+    glow_fill.zIndex = -2; // Stay behind the border glow
+    
+    this.bordersContainer.addChild(glow_fill); 
+    this.bordersContainer.addChild(glow_border); 
+    this.capitalGlows.set(territoryId, glow_border);
+    this.capitalGlowsFill.set(territoryId, glow_fill);
+
+    // Premium pulse animation
+    gsap.fromTo([glow_border, glow_fill], 
+      { alpha: 0 },
+      {
+        alpha: 1,
+        duration: 0.6,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      }
+    );
   }
 
   private getIconPath(type: DevelopmentType): string | null {

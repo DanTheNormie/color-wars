@@ -22,7 +22,8 @@ export const TURN_ACTION_REGISTRY = {
   SABOTAGE: {} as { attackerId: string, victimId: string, amount: number },
   APPLY_STATUS_EFFECT: {} as { playerId: string, statusEffect: StatusEffect },
   REMOVE_STATUS_EFFECT: {} as { playerId: string, statusEffect: StatusEffect },
-  FINANCIAL_CONSOLIDATION: {} as {playerId: string, collections:{[territoryID: string]: number}}
+  FINANCIAL_CONSOLIDATION: {} as {playerId: string, collections:{[territoryID: string]: number}},
+  VICTORY_LAP_STARTED: {} as { playerId: string }
 } as const;
 
 export type ActionType = keyof typeof TURN_ACTION_REGISTRY;

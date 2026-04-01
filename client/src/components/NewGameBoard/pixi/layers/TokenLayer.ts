@@ -165,8 +165,9 @@ export class TokenLayer extends PIXI.Container {
         if (!unit) return;
 
         const config = layoutConfig[index];
+        const tokenData = state.tokens[tokenId];
 
-        this.applyTransform(unit, tileSprite, config, animate, tokenId === state.activeTokenId);
+        this.applyTransform(unit, tileSprite, config, animate, tokenId === state.activeTokenId, !!tokenData?.isVictoryLap);
       });
     });
   }
@@ -174,7 +175,7 @@ export class TokenLayer extends PIXI.Container {
   /**
    * Helper to reduce code duplication
    */
-  private applyTransform(unit: PlayerSprite, tile: PIXI.Sprite, config: any, animate: boolean, pulse?: boolean) {
+  private applyTransform(unit: PlayerSprite, tile: PIXI.Sprite, config: LayoutConfig, animate: boolean, pulse?: boolean, isVictoryLap?: boolean) {
     const targetX = tile.x + config.x;
     const targetY = tile.y + config.y;
     // Calculate scale relative to base size.
@@ -199,6 +200,7 @@ export class TokenLayer extends PIXI.Container {
           } else {
             unit.stopPulse();
           }
+          unit.setGoldenAura(!!isVictoryLap);
         },
       });
     } else {
@@ -209,6 +211,7 @@ export class TokenLayer extends PIXI.Container {
       } else {
         unit.stopPulse();
       }
+      unit.setGoldenAura(!!isVictoryLap);
     }
   }
 

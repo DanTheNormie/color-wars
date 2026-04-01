@@ -160,6 +160,16 @@ export const requireValidUpgradeChoice = (s: PlainStateOf<RoomState>, ctx: WithU
   if (!territoryState) throw new Error("Territory is not owned");
   
   const currentBuilding = (territoryState as any).buildingType || "BASE";
+
+  // CAPITAL can only be built on a CITY
+  if (ctx.buildingType === "CAPITAL") {
+    if (currentBuilding !== "CITY") {
+      throw new Error(`Capital can only be built on a City. Currently: ${currentBuilding}`);
+    }
+    return;
+  }
+
+  // All other upgrades require BASE
   if (currentBuilding !== "BASE") {
     throw new Error(`Territory must be downgraded to BASE before switching building types. Currently: ${currentBuilding}`);
   }

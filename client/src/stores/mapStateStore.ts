@@ -30,6 +30,12 @@ interface territoryEconomy {
         revenue: number;
         minHexes: number | undefined;
     };
+    CAPITAL: {
+        capEx: number;
+        opEx: number;
+        revenue: number;
+        minHexes: number | undefined;
+    }
 }
 
 

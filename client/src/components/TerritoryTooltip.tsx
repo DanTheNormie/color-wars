@@ -28,7 +28,7 @@ const UPGRADES = [
   { id: "CITY", label: "with City", icon: "/building-icons/city.svg", key: "CITY" },
   { id: "FACTORY", label: "with Factory", icon: "/building-icons/factory.svg", key: "FACTORY" },
   { id: "MISSILE_SILO", label: "with Missile Silo", icon: "/building-icons/missile.svg", key: "MISSILE_SILO" },
-  { id: "CAPITAL_MONUMENT", label: "with Capital Monument", icon: "/building-icons/monument.svg", key: "CAPITAL_MONUMENT" },
+  { id: "CAPITAL", label: "with Capital Monument", icon: "/building-icons/monument.svg", key: "CAPITAL" },
 ];
 
 const SELL_LABELS: Record<string, string> = {
@@ -36,7 +36,7 @@ const SELL_LABELS: Record<string, string> = {
   CITY: "City",
   FACTORY: "Factory",
   MISSILE_SILO: "Missile Silo",
-  CAPITAL_MONUMENT: "Capital Monument",
+  CAPITAL: "Capital Monument",
 };
 
 /* ─── Tooltip Component ─── */
@@ -130,7 +130,6 @@ export default function TerritoryTooltip() {
 
   // Ownership building logic
   const buildingType = ownership ? (ownership as any).buildingType ?? "BASE" : "BASE";
-  const sellLabel = SELL_LABELS[buildingType] || "Territory";
 
   let economy: ReturnType<typeof getEconomyData> | null = null;
   try {
@@ -170,7 +169,7 @@ export default function TerritoryTooltip() {
 
   // Try to determine sell value roughly as half capEx. If not applicable, blank.
   const capExObj = economy ? economy[buildingType as keyof typeof economy] : null;
-  const sellValue = (capExObj && buildingType !== "CAPITAL_MONUMENT")
+  const sellValue = capExObj
     ? fmt.format((capExObj as any).capEx / 2)
     : "";
 
@@ -200,12 +199,23 @@ export default function TerritoryTooltip() {
               {territory.name}
             </span>
             {isOwnedByCurrentPlayer && (
-              <div
-                className="bg-[#c22d2d] text-white text-[9px] font-semibold px-[5px] py-[2px] rounded uppercase cursor-pointer hover:bg-[#dc2626] transition-colors"
-                onClick={handleSell}
-              >
-                Sell {sellLabel} {sellValue ? `for ${sellValue}` : ""}
-              </div>
+              buildingType !== "BASE" ? (
+                <div
+                  className="bg-[#c22d2d] text-white text-[9px] font-semibold px-[5px] py-[2px] rounded uppercase cursor-pointer hover:bg-[#eab308] transition-colors"
+                  onClick={isMyTurn ? handleDowngrade : undefined}
+                  style={{ opacity: isMyTurn ? 1 : 0.5, cursor: isMyTurn ? 'pointer' : 'not-allowed' }}
+                  title={!isMyTurn ? "You can only downgrade on your turn" : ""}
+                >
+                  Downgrade {SELL_LABELS[buildingType]}<br />(50% refund)
+                </div>
+              ) : (
+                <div
+                  className="bg-[#c22d2d] text-white text-[9px] font-semibold px-[5px] py-[2px] rounded uppercase cursor-pointer hover:bg-[#dc2626] transition-colors"
+                  onClick={handleSell}
+                >
+                  Sell Territory {sellValue ? `for ${sellValue}` : ""}
+                </div>
+              )
             )}
           </div>
           <div className="flex flex-col items-end shrink-0 gap-[16px]">
@@ -227,14 +237,13 @@ export default function TerritoryTooltip() {
         {economy && (
           <div className="flex flex-col gap-[8px] mb-4 mt-1">
             {UPGRADES.filter((upgrade) => {
-              if (upgrade.id === "CAPITAL_MONUMENT") return true; // TODO: If CAPITAL is added to economy getTerritoryEconomy later
               const layer = economy![upgrade.key as keyof typeof economy] as any;
               const minHexes = layer?.minHexes || 0;
               return !minHexes || (territory.hexes.length >= minHexes);
             }).map((upgrade) => {
               let valStr = "???";
               let color = "#8e8e93";
-              if (upgrade.id !== "CAPITAL_MONUMENT" && economy) {
+              if (economy) {
                 const layer = economy[upgrade.key as keyof typeof economy] as any;
                 if (layer) {
                   const val = layer.revenue - layer.opEx;
@@ -284,7 +293,7 @@ export default function TerritoryTooltip() {
               )}
             </div>
           ) : isOwnedByCurrentPlayer ? (
-            (adjacentOwnedByPlayer.length < adjacentTerritories.length) ? (
+             (adjacentOwnedByPlayer.length < adjacentTerritories.length) ? (
               (adjacentOwnedByPlayer.length === 0) ? (
                 <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
                   {adjacentTerritories.length === 1
@@ -330,16 +339,36 @@ export default function TerritoryTooltip() {
                     );
                   })}
                 </div>
-              ) : (
-                <button
-                  className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-white transition-all duration-150 ${isMyTurn ? "cursor-pointer hover:bg-[#ca8a04] active:scale-[0.97] bg-[#eab308]" : "bg-gray-500 cursor-not-allowed opacity-50"}`}
-                  onClick={isMyTurn ? handleDowngrade : undefined}
-                  disabled={!isMyTurn}
-                  title={!isMyTurn ? "You can only downgrade on your turn" : ""}
-                >
-                  Downgrade to BASE (50% refund)
-                </button>
-              )
+              ) : buildingType === "CITY" ? (
+                /* ── CITY: can upgrade to Capital ── */
+                (() => {
+                  const capitalLayer = economy ? (economy["CAPITAL" as keyof typeof economy] as any) : null;
+                  const capitalMinHexes = capitalLayer?.minHexes || 0;
+                  const meetsMinHexes = !capitalMinHexes || (territory && territory.hexes.length >= capitalMinHexes);
+                  const capitalCost = capitalLayer?.capEx ?? Infinity;
+                  const canAffordCapital = currentPlayerMoney >= capitalCost;
+                  const canBuildCapital = canAffordCapital && isMyTurn && meetsMinHexes;
+
+                  return meetsMinHexes ? (
+                    <button
+                      className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-white transition-all duration-150 ${
+                        canBuildCapital
+                          ? "cursor-pointer hover:bg-[#a855f7] active:scale-[0.97] bg-[#ca8a04]"
+                          : "bg-gray-500 cursor-not-allowed opacity-50"
+                      }`}
+                      onClick={canBuildCapital ? () => handleUpgrade("CAPITAL" as DevelopmentType) : undefined}
+                      disabled={!canBuildCapital}
+                      title={!isMyTurn ? "You can only build on your turn" : !canAffordCapital ? `Not enough funds (need ${fmt.format(capitalCost)})` : ""}
+                    >
+                      Build Capital ({fmt.format(capitalCost)})
+                    </button>
+                  ) : (
+                    <div className="flex gap-2 justify-center text-[10px] text-[#a1a1aa] text-center w-full">
+                      Territory needs {capitalMinHexes}+ hexes for Capital
+                    </div>
+                  );
+                })()
+              ) : null /* FACTORY / MISSILE_SILO: only downgrade available (handled by sell/downgrade button above) */
             )
           ) : null}
         </div>
@@ -350,15 +379,14 @@ export default function TerritoryTooltip() {
             { id: "CITY", icon: "/building-icons/city.svg" },
             { id: "FACTORY", icon: "/building-icons/factory.svg" },
             { id: "MISSILE_SILO", icon: "/building-icons/missile.svg" },
-            { id: "CAPITAL_MONUMENT", icon: "/building-icons/monument.svg" },
+            { id: "CAPITAL", icon: "/building-icons/monument.svg" },
           ].filter((item) => {
-            if (item.id === "CAPITAL_MONUMENT") return true; // For now
             const layer = economy ? (economy[item.id as keyof typeof economy] as any) : null;
             const minHexes = layer?.minHexes || 0;
             return !minHexes || (territory && territory.hexes.length >= minHexes);
           }).map((item) => {
             let priceStr = "???";
-            if (item.id !== "CAPITAL_MONUMENT" && economy) {
+            if (economy) {
               const layer = economy[item.id as keyof typeof economy] as any;
               if (layer) {
                 priceStr = fmt.format(layer.capEx);

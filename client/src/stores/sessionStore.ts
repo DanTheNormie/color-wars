@@ -77,6 +77,11 @@ export const useStore = create(
                   z.state.game.players[playerId].hasSabotagedThisRound = hasSabotaged
                 })
               },
+              setVictoryLap: (playerId: string, isVictoryLap: boolean) => {
+                set((z) => {
+                  z.state.game.players[playerId].isVictoryLap = isVictoryLap
+                })
+              },
               setDiceTrack: (diceTrack: TileState[]) => {
                 set((z) => {
                   z.state.game.diceTrack = diceTrack

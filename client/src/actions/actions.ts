@@ -263,7 +263,14 @@ export class BuyTerritoryAction extends BaseAction<"BUY_TERRITORY"> {
     useMapStore.getState().setTerritoryColor(territoryID, playerColor);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
     useStore.getState().updateTerritoryOwnership(territoryID, playerId);
-    
+
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+    if (engine) {
+      const outlineLayer = engine.getOutlineLayer();
+      if (outlineLayer) {
+        outlineLayer.updateTerritoryIcon(territoryID, "BASE");
+      }
+    }
 
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),
@@ -282,6 +289,14 @@ export class SellTerritoryAction extends BaseAction<"SELL_TERRITORY"> {
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
     useStore.getState().updateTerritoryOwnership(territoryID, null);
 
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+    if (engine) {
+      const outlineLayer = engine.getOutlineLayer();
+      if (outlineLayer) {
+        outlineLayer.updateTerritoryIcon(territoryID, "BASE");
+      }
+    }
+
     return new ActionHandle(
       new Promise<void>((resolve) => resolve()),
       () => { },
@@ -295,10 +310,11 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
     const { newTiles, shiftDirection, diceTrack } = this.payload;
     const trackLayer = pixiTargetLocator.get<DiceTrackLayer>("diceTrackLayer");
     const tokenLayer = pixiTargetLocator.get<TokenLayer>("tokenLayer");
-    const engine = pixiTargetLocator.get("game-board-engine") as any;
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
 
     if (!trackLayer || !tokenLayer || !engine) throw new Error("Missing dependencies for SHIFT_TRACK");
     const app = engine.getApp();
+    if (!app) throw new Error("Pixi App not ready");
 
     this.logAction("");
     //TODO: find out side effects of upsertToken
@@ -385,6 +401,7 @@ export class GameOverAction extends BaseAction<"GAME_OVER"> {
 export class UpgradeTerritoryAction extends BaseAction<"UPGRADE_TERRITORY"> {
   execute(): ActionHandle {
     const { playerId, territoryID, buildingType, amount } = this.payload;
+    this.logAction(playerId);
     useStore.getState().upgradeTerritory(territoryID, buildingType);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
 
@@ -392,8 +409,10 @@ export class UpgradeTerritoryAction extends BaseAction<"UPGRADE_TERRITORY"> {
     if (engine) {
       const outlineLayer = engine.getOutlineLayer();
       if (outlineLayer) {
+        outlineLayer.playFinancialConsolidation({ [territoryID]: -amount })
+        outlineLayer.updateTerritoryIcon(territoryID, buildingType);
         return new ActionHandle(
-          outlineLayer.playFinancialConsolidation({ [territoryID]: -amount }),
+          Promise.resolve(),
           () => { },
           () => { }
         );
@@ -407,6 +426,7 @@ export class UpgradeTerritoryAction extends BaseAction<"UPGRADE_TERRITORY"> {
 export class DowngradeTerritoryAction extends BaseAction<"DOWNGRADE_TERRITORY"> {
   execute(): ActionHandle {
     const { playerId, territoryID, amount } = this.payload;
+    this.logAction(playerId);
     useStore.getState().downgradeTerritory(territoryID);
     useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
 
@@ -414,8 +434,10 @@ export class DowngradeTerritoryAction extends BaseAction<"DOWNGRADE_TERRITORY"> 
     if (engine) {
       const outlineLayer = engine.getOutlineLayer();
       if (outlineLayer) {
+        outlineLayer.updateTerritoryIcon(territoryID, "BASE");
+        outlineLayer.playFinancialConsolidation({ [territoryID]: amount })
         return new ActionHandle(
-          outlineLayer.playFinancialConsolidation({ [territoryID]: amount }),
+          Promise.resolve(),
           () => { },
           () => { }
         );
@@ -471,7 +493,8 @@ export class SabotageAction extends BaseAction<"SABOTAGE"> {
          useStore.getState().updatePlayerMoney(attackerId, useStore.getState().state.game.players[attackerId].money + amount);
          useStore.getState().updatePlayerMoney(victimId, useStore.getState().state.game.players[victimId].money - amount);
          
-         useDiceTrackStore.getState().upsertToken({ id: victimId, tileId: "track-tile-0" });
+         useDiceTrackStore.getState().upsertToken({ id: victimId, tileId: "track-tile-0", isVictoryLap: false });
+         victimUnit.setGoldenAura(false);
          
          resolve();
       });
@@ -481,6 +504,57 @@ export class SabotageAction extends BaseAction<"SABOTAGE"> {
       teleportAnimationTask,
       () => { },
       () => { }
+    );
+  }
+}
+
+export class VictoryLapStartedAction extends BaseAction<"VICTORY_LAP_STARTED"> {
+  execute(): ActionHandle {
+    const { playerId } = this.payload;
+    const unit = pixiTargetLocator.get<PlayerSprite>(playerId);
+    if (!unit) throw new Error("PlayerSprite not found for VictoryLapStartedAction");
+
+    const startTile = pixiTargetLocator.get<PIXI.Container>("track-tile-0");
+    if (!startTile) throw new Error("Start tile not found");
+
+    // 1. Set isVictoryLap on client state
+    useStore.getState().setVictoryLap(playerId, true);
+
+    // 2. Emit event for VictoryOverlay component
+    GameEventBus.emit("VICTORY_LAP_STARTED", { playerId });
+
+    this.logAction(playerId);
+
+    // 3. Play the existing teleport animation, then apply golden aura
+    const teleportAnim = animatePlayerTeleportToStart(unit, startTile);
+
+    return new ActionHandle(
+      new Promise<void>((resolve) => {
+        teleportAnim.eventCallback("onComplete", () => {
+          unit.setGoldenAura(true);
+          useDiceTrackStore.getState().upsertToken({ id: playerId, tileId: "track-tile-0", isVictoryLap: true });
+          
+          // Ensure the Capital Monument glow is active
+          const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+          if (engine) {
+            const outlineLayer = engine.getOutlineLayer();
+            if (outlineLayer) {
+              const ownership = useStore.getState().state?.game?.territoryOwnership;
+              if (ownership) {
+                const capitalId = Object.keys(ownership).find(tid => 
+                  ownership[tid].ownerId === playerId && ownership[tid].buildingType === "CAPITAL"
+                );
+                if (capitalId) {
+                  outlineLayer.updateTerritoryIcon(capitalId, "CAPITAL");
+                }
+              }
+            }
+          }
+          resolve();
+        });
+      }),
+      () => { },
+      () => { },
     );
   }
 }

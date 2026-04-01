@@ -7,7 +7,7 @@ export const TEST_ECONOMY: EconomyConfig = {
     [DEVELOPMENT_TYPES.BASE]: { buildMultiplier: 1,maintenanceMultiplier: 0,incomeMultiplier: 0 },
     [DEVELOPMENT_TYPES.CITY]: { buildMultiplier: 0.2, maintenanceMultiplier: 0, incomeMultiplier: 0 },
     [DEVELOPMENT_TYPES.FACTORY]: { buildMultiplier: 1, maintenanceMultiplier: 1, incomeMultiplier: 1 },
-    [DEVELOPMENT_TYPES.MISSILE_SILO]: { buildMultiplier: 10, maintenanceMultiplier: 5, incomeMultiplier: 0, minHexes: 5 },
-    [DEVELOPMENT_TYPES.CAPITAL]: { buildMultiplier: 10, maintenanceMultiplier: 1, incomeMultiplier: 0, minHexes: 10 },
+    [DEVELOPMENT_TYPES.MISSILE_SILO]: { buildMultiplier: 0, maintenanceMultiplier: 0, incomeMultiplier: 0, minHexes: 5, fixedCost: 5000, fixedMaintenance: 500 },
+    [DEVELOPMENT_TYPES.CAPITAL]: { buildMultiplier: 0, maintenanceMultiplier: 0, incomeMultiplier: 0, minHexes: 10, fixedCost: 10000, fixedMaintenance: 1000 },
   },
 };

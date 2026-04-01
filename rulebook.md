@@ -1,68 +1,118 @@
-# Color Wars: Official Rulebook
+GAME SYSTEM PROMPT: RULEBOOK & MECHANICS
+1. Game Overview & Objective
 
-## Overview
-**Color Wars** is a high-stakes, real-time multiplayer board game of territory conquest, economic management, and cutthroat betrayals. Players roll dice to move around a circular track, acquire hex-based territories on the map, and race to build the ultimate monument: **The Capital**, while avoiding bankruptcy and sabotage from their "friends".
+Title: [Insert Game Name]
+Genre: Multiplayer Turn-Based Strategy / Economic Board Game
+Objective: Be the first player to build the "Capital Monument," teleport to the Start tile, and successfully complete one full "Victory Lap" around the board without being killed.
+2. Board Layout
 
-## 1. Game Flow
-The game is played in rounds. During a round, players take turns moving around the Dice Track on the perimeter of the map.
-1. **Roll:** At the start of your turn, roll two 6-sided dice (2d6).
-2. **Move:** Your token moves clockwise along the Dice Track by the rolled amount.
-3. **Resolve Tile Effect:** Depending on where you land, you may gain money, lose money, or draw cards.
-4. **Action Phase:** Before ending your turn, you may buy or sell territories, upgrade existing properties with Buildings, purchase Permits from the Shop, strike Trade deals with other players, or deploy Cards.
-5. **End Turn:** Pass the turn to the next player. Once every player completes a turn, the Round Tracker increments.
+The game consists of two interactive layers:
 
-## 2. The Economy & Banking
-There are two places your money can be: your **Backpack** and your **Safe Account**.
-*   **Starting Capital:** To ensure no player goes bankrupt on Turn 1 due to an unlucky die roll, every player begins the game with `$10,000` pre-loaded into their Safe Account (enough to survive the highest base Tax tile or a low-end Penalty tile).
-*   **The Backpack:** All money you gain during your turn (from territories, selling, or track tiles) goes into your Backpack. **This money is entirely at risk.**
-*   **The Safe Account:** When you cross the **START** tile on the Dice Track, all money in your Backpack is securely transferred to your Safe Account.
-*   **The Kill Mechanic:** If a player lands on the exact same tile as you, they will trigger a **Kill**. They will mug you and steal the entire contents of your Backpack. You keep your Safe Account.
-*   **Safe Zones (Kill Immunity):** A player cannot trigger a Kill on the **START** tile or any **SAFE** tile. If multiple players land on a Safe Zone simultaneously, no muggings occur. They are neutral ground.
+    The Outer Ring (Dice Track): A modular track of tiles that surrounds the map. Players roll 2d6 to move their tokens clockwise around this track.
 
-## 3. The Dice Track
-The edge of the board contains 34 tiles.
-*   **START**: Crossing this banks your Backpack cash and cards into your Safe Account. (This tile is permanent and never shifts or decays).
-*   **INCOME**: Instantly adds a fixed amount of cash to your Backpack.
-*   **TAX**: Instantly deducts a fixed amount of cash.
-*   **REWARD**: Grants a windfall of randomized cash.
-*   **PENALTY**: Deducts a devastating amount of randomized cash.
-*   **SURPRISE**: Reveals 3 cards from the deck. You must choose 1 to keep in your Backpack.
-*   **SAFE / NEUTRAL**: No effect. Take a breath.
+    The Inner Map (Territories): A map divided into purchasable territories (e.g., states/provinces). Players buy and upgrade these territories to generate income and build weapons/monuments.
 
-### 3.1 Dynamic Track Decay & Forecasting
-*   **The Shift:** After every full set of player turns (one round), the entire track shifts by one tile, and a new tile enters the board.
-*   **Progressive Toxicity:** The tiles introduced early in the game are safe and profitable (`INCOME`, `REWARD`, `SAFE`). As the rounds progress, the deck of incoming tiles becomes increasingly toxic, heavily weighted towards `TAX` and `PENALTY` tiles. 
-*   **The Forecast Queue:** Players can see the next 3 to 5 tiles queued to enter the track, allowing for strategic planning and panicked asset liquidation.
-*   **Track Manipulation (City Council):** During the Action Phase, a player may pay an exorbitant fee at the Shop to either permanently freeze a specific tile from shifting or overwrite a shifting tile with a `SAFE` tile.
+3. Turn Sequence
 
-### 3.2 Mitigation Hooks
-*   **Shielding:** A Shield Card can be burned to completely negate the effects of a `TAX` or `PENALTY` tile.
-*   **Movement Control:** Players can acquire consumable cards that grant micro-agency over their movement (e.g., "Move +1/-1 space", "Roll 1d6 instead of 2d6") to sidestep hazards or intentionally land on other players.
+Each player's turn follows a strict sequence:
 
-## 4. Territory, Development & The Shop
-The map is constructed of varying-sized Territories. Any unoccupied territory you land on or pass adjacent to can be purchased.
-*   **Base Territory (The Bleed):** Unimproved land is a liability. You must pay a Base Maintenance fee every round for each empty territory you own.
-*   **The Empire Tax:** The bleeding gets worse the more empty land you hoard. Maintenance costs increase exponentially for every Base Territory you own beyond the first.
-*   **The Shop:** You can purchase specific **Permits** from the Shop at a high, flat rate at any time during your Action Phase. Permits are required to upgrade territories. (Alternatively, you may find these permits for free on SURPRISE tiles).
-*   **Upgrades:** You can build structures to stop the bleed or generate profit, provided you have the required Permit.
-    *   🏙️ **City:** Requires a *City Permit*. Greatly reduces maintenance costs and stops the bleed.
-    *   🏭 **Factory:** Requires an *Industrial Permit*. Generates massive profit every round, but has high maintenance if its income is blocked.
-    *   🚀 **Missile Silo:** Requires a *Military Clearance Permit*. Generates no income and has bankrupting maintenance costs, but allows you to forcefully vacate an opponent's territory.
-        *   *Constraint 1 (Size Limits):* A Missile Silo cannot be built on small territories. It requires a medium or large territory.
-        *   *Constraint 2 (Flat Pricing):* Unlike Cities and Factories, the build cost and maintenance cost of a Missile Silo is a high, flat rate, regardless of the territory size underneath it.
+    Roll & Move: Roll 2d6 and move the player token clockwise along the outer track.
 
-## 5. Trading & Extortion
-Trades can be initiated, negotiated, and accepted or rejected by any player at any time, regardless of whose turn it is.
-*   You may negotiate the exchange of Money (from your Account), Cards, or Territories.
+    Tile Resolution: Apply the effect of the tile landed on.
 
-## 6. Bankruptcy
-If your Account and Backpack balances drop below $0, you must liquidate assets (Sell Territories or Buildings at a fraction of their value). If you have zero assets and are still in the negative, you are **Bankrupt** and eliminated from the game. All your remaining land returns to the bank.
+    PvP Resolution: If the player lands exactly on a tile occupied by another player, trigger the "Kill" mechanic.
 
-## 7. Victory Conditions
-To win Color Wars, you must achieve one of the following:
-1.  **Last Player Standing:** Survive while every other player goes Bankrupt.
-2.  **The Capital (Monument Victory):** This is the primary way to win the game.
-    *   You must construct **The Capital** monument on one of your territories.
-    *   *Constraint 1 (The Blueprint):* You must possess a **Capital Blueprint Card**. There are exactly two Blueprints in the entire game. One is hidden in the SURPRISE tile deck; the other is available in the Shop for an exorbitant sum.
-    *   *Constraint 2 (The Requirements):* You must also possess 1 Missile Card, 1 Shield Card, an upgraded territory (Factory or City) to place it on, and a massive cash investment.
-    *   *The Checkmate Phase (Panic Mode):* Once The Capital is built, the map enters Panic Mode. You must survive one full rotation of the turn order without going Bankrupt or having your Capital destroyed (e.g., by an opponent's Missile Silo). If the turn reaches you again and the Capital stands, you win.
+    Map Action: The player may purchase up to one unowned territory per turn.
+
+    Upgrades & Trade: The player may upgrade owned territories (if conditions are met) and/or trade with other players.
+
+    Vote & End Turn: The player casts a vote for the track shift direction (Clockwise or Anti-Clockwise) and ends their turn.
+
+4. Tile Types & Outer Track Rules
+
+As the game progresses, newly spawned tiles contain higher rewards and harsher penalties to escalate the stakes.
+
+    Start: Passes/landing grant base income.
+
+    Empty: No effect.
+
+    Safe: Protects the player from being "Killed" by other players.
+
+    Random Reward: Grants a positive RNG effect or item.
+
+    Penalty/Tax: Deducts money from the player.
+
+    Surprise: Draws a card (WIP) with unpredictable effects.
+
+    Instant Fixed Money: Grants a random, flat payout between $1,000 and $5,000.
+
+The "Kill" Mechanic (PvP):
+If Player A lands on the exact same tile as Player B:
+
+    Player A steals exactly 50% of Player B's current total cash.
+
+    Player B is instantly teleported back to the Start tile.
+
+5. The Shifting Track & Voting System
+
+At the end of a global round (once a set of turns is completed by all players), the entire outer dice track physically shifts.
+
+    Player Movement: Players stand on their current tiles and are physically moved along with the shifting board.
+
+    Spawning/Despawning: As the track shifts, a new tile is added right after the Start tile, and the oldest tile is deleted from before the Start tile.
+
+    Voting System: Players vote for the shift direction (Clockwise or Anti-Clockwise) as part of their "End Turn" action. The majority vote dictates the shift direction for that round. Ties default to Clockwise.
+
+    Momentum & Reset Logic: The shift amount grows linearly (1 tile, then 2 tiles, up to a maximum of 10 tiles per shift) as long as the track shifts in the same continuous direction.
+
+    Direction Change: If the track momentum is currently shifting Clockwise (e.g., at a speed of 7), and the players successfully vote to shift Anti-Clockwise, the momentum breaks. The track shifts in the new direction, but the speed resets to 1.
+
+6. Economy, Territories, & Trading
+
+    Purchasing: Players can buy exactly 1 territory per turn.
+
+    Trading: Players can trade Money, Territories, and Cards with each other at any point during their turn.
+
+    Upgrade Requirements: To build structures on a territory, a player must own all adjacent territories to that specific plot.
+
+7. Buildings & Upgrades
+
+Territories can be upgraded into specific structures.
+
+    City: Low build cost. Generates a small amount of income per round.
+
+    Factory: High build cost. Generates a large amount of income per round.
+
+    Missile Silo: * Fixed build cost.
+
+        Has a minimum territory size requirement to build.
+
+        Penalty: Subtracts from the player's income per round.
+
+        Action: Requires a "Missile Card" to fire. Once fired, it can target any territory on the map, forcefully vacating it and destroying the upgrade, resetting it to neutral.
+
+8. Cards (Work-In-Progress)
+
+Players can hold cards in their inventory. Currently defined cards include:
+
+    Missile Card: Consumable. Required to fire a constructed Missile Silo.
+
+9. Endgame: The Capital Monument & The Victory Lap
+
+This is the win condition of the game.
+
+    Building the Monument: A player can build the Capital Monument on a fully upgraded territory (City/Factory). It requires a minimum territory size.
+
+    The Trigger: Once built, the purchasing player is immediately teleported to the Start tile.
+
+    The Victory Lap: To win the game, that player must complete one full lap around the shifting board and cross the Start tile again.
+
+    Interruption: If the player is "Killed" by an opponent during their Victory Lap:
+
+        They lose 50% of their cash to the attacker.
+
+        They are teleported back to the Start tile.
+
+        Their Capital Monument is downgraded.
+
+        They must rebuild the Monument to attempt the Victory Lap again.

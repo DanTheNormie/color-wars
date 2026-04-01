@@ -16,6 +16,7 @@ import GameActions from "@/components/gameActions";
 import UserAssets from "@/components/UserAssets";
 import TradesList from "@/components/TradesList";
 import GameOverOverlay from "@/components/GameOverOverlay";
+import VictoryOverlay from "@/components/VictoryOverlay";
 import { httpEndpoint } from "@/lib/serverConfig";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -179,6 +180,7 @@ const RoomPage = () => {
         </ActionArea>
         <CardSelectionOverlay />
         <GameOverOverlay />
+        <VictoryOverlay />
         <VFXLayer />
         <TerritoryTooltip />
       </div>

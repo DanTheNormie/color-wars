@@ -55,7 +55,19 @@ export class GameEngine {
       player.hasBoughtTerritoryThisRound = false;
       player.hasSabotagedThisRound = false;
     }
+    //debug
+    const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
+    const tIDs = MAPS['INDIA'].map.territories.map(t => t.id)
 
+    for (const tID of tIDs) {
+      this.state.game.territoryOwnership.set(tID, new TerritoryState(testPlayer.id))
+      this.state.queueAction('BUY_TERRITORY', { playerId: testPlayer.id, territoryID: tID, amount: 10000 })
+      const territoryState = this.state.game.territoryOwnership.get(tID)!;
+      territoryState.buildingType = 'CITY';
+      this.state.queueAction('UPGRADE_TERRITORY', { playerId: testPlayer.id, territoryID: tID, buildingType: 'CITY', amount: 10000 });
+    }
+    //debug
+    
     this.state.game.diceTrack.clear();
     for (const tileConfig of DICE_TRACK) {
       this.state.game.diceTrack.push(new TileState(tileConfig.type, tileConfig.amount, tileConfig.label));
@@ -85,6 +97,13 @@ export class GameEngine {
     player.position = toTile;
     this.state.queueAction('MOVE_PLAYER', { fromTile, toTile, tokenId: client.sessionId })
     // this.state.pushAction("MOVE_PLAYER", client.sessionId, { fromTile, toTile, tokenId: client.sessionId });
+
+    // Victory Lap win detection — first player to cross Start wins
+    if (player.isVictoryLap && (fromTile + roll >= this.state.game.diceTrack.length)) {
+      this.state.game.turnPhase = 'game-over';
+      this.state.queueAction('GAME_OVER', { winnerId: client.sessionId });
+      return;
+    }
 
     if(fromTile + roll >= this.state.game.diceTrack.length) {
       this.financialConsolidation(client.sessionId)
@@ -192,7 +211,7 @@ export class GameEngine {
     if (this.state.game.activePlayerId !== client.sessionId) return;
     const player = this.state.game.players.get(client.sessionId)!
     if (player.hasBoughtTerritoryThisRound) return;
-
+    
     const territorySize = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!.hexes.length
 
     const economy = MAPS[this.state.mapID].getTerritoryEconomy(territorySize)
@@ -240,6 +259,15 @@ export class GameEngine {
     territoryState.buildingType = buildingType;
 
     this.state.queueAction('UPGRADE_TERRITORY', { playerId: player.id, territoryID, buildingType, amount: cost });
+
+    // Capital Monument: teleport to Start and begin victory lap
+    if (buildingType === 'CAPITAL') {
+      player.position = 0;
+      player.isVictoryLap = true;
+
+      // Client-side VictoryLapStartedAction handles the teleport animation
+      this.state.queueAction('VICTORY_LAP_STARTED', { playerId: player.id });
+    }
   }
 
   downgradeTerritory(client: Client, territoryID: string) {

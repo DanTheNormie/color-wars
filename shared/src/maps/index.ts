@@ -46,6 +46,12 @@ const getEconomy = (territorySize: number, economy: EconomyConfig ) => {
       opEx: maintenanceCost(territorySize, DEVELOPMENT_TYPES.MISSILE_SILO, economy),
       revenue: income(territorySize, DEVELOPMENT_TYPES.MISSILE_SILO, economy),
       minHexes: economy.developments[DEVELOPMENT_TYPES.MISSILE_SILO]?.minHexes
+    },
+    [DEVELOPMENT_TYPES.CAPITAL]: {
+      capEx: buildCost(territorySize, DEVELOPMENT_TYPES.CAPITAL, economy),
+      opEx: maintenanceCost(territorySize, DEVELOPMENT_TYPES.CAPITAL, economy),
+      revenue: income(territorySize, DEVELOPMENT_TYPES.CAPITAL, economy),
+      minHexes: economy.developments[DEVELOPMENT_TYPES.CAPITAL]?.minHexes
     }
   }
 
@@ -60,14 +66,18 @@ export function acquisitionCost(size: number, economy: EconomyConfig) {
 }
 
 export function maintenanceCost(size: number, dev: DevelopmentType, economy: EconomyConfig) {
+  const devConfig = economy.developments[dev];
+  if (devConfig.fixedMaintenance != null) return devConfig.fixedMaintenance;
   const base = acquisitionCost(size, economy);
   if(dev == 'BASE') return niceRound(base * economy.baseMaintenanceMultiplier);
-  return niceRound(base *  economy.developments[dev].maintenanceMultiplier);
+  return niceRound(base * devConfig.maintenanceMultiplier);
 }
 
 export function buildCost(size: number, dev: DevelopmentType, economy: EconomyConfig) {
   if (dev === "BASE") return 0;
-  return niceRound(acquisitionCost(size, economy) * economy.developments[dev].buildMultiplier);
+  const devConfig = economy.developments[dev];
+  if (devConfig.fixedCost != null) return devConfig.fixedCost;
+  return niceRound(acquisitionCost(size, economy) * devConfig.buildMultiplier);
 }
 
 export function income(size: number, dev: DevelopmentType, economy: EconomyConfig) {

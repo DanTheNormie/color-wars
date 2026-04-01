@@ -7,6 +7,7 @@ export interface TokenData {
   id: string;
   color: number;
   tileId: string; // The "Resting" logical position
+  isVictoryLap?: boolean;
 }
 
 interface GameState {
@@ -18,7 +19,7 @@ interface GameState {
   removeToken: (id: string) => void;
   moveToken: (id: string, tileId: string) => void;
   setActiveToken: (id: string | null) => void;
-  upsertToken: (tokenData: { id: string; tileId: string; color?: number }) => void;
+  upsertToken: (tokenData: { id: string; tileId: string; color?: number; isVictoryLap?: boolean }) => void;
   clear: () => void;
 }
 
@@ -41,13 +42,14 @@ export const useDiceTrackStore = create<GameState>()(
             set((state) => {
               delete state.tokens[id];
             }),
-          upsertToken: (partial: { id: string; tileId: string; color?: number }) =>
+          upsertToken: (partial: { id: string; tileId: string; color?: number; isVictoryLap?: boolean }) =>
             set((state) => {
               if (!state.tokens[partial.id]) {
                 state.tokens[partial.id] = {
                   id: partial.id,
                   color: partial.color ?? 0xffffff,
                   tileId: partial.tileId,
+                  isVictoryLap: partial.isVictoryLap ?? false,
                 };
               } else {
                 state.tokens[partial.id] = {

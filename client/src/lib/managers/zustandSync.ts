@@ -9,6 +9,7 @@ import { useMapStore } from "@/stores/mapStateStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useGameLogStore } from "@/stores/gameLogStore";
 import { pixiTargetLocator } from "@/animation/target-locator";
+import type { PIXIGameBoard } from "@/components/NewGameBoard/pixi/engine";
 import type { TerritoryState } from "../../../../shared/dist/types/RoomState";
 
 class ZustandSyncManager {
@@ -53,7 +54,7 @@ class ZustandSyncManager {
           if(player.id == state.game.activePlayerId){
             useDiceTrackStore.getState().setActiveToken(player.id)
           }
-          useDiceTrackStore.getState().upsertToken({ id: player.id, tileId: `track-tile-${player.position}`, color: hexStringToHexNumber(player.color) });
+          useDiceTrackStore.getState().upsertToken({ id: player.id, tileId: `track-tile-${player.position}`, color: hexStringToHexNumber(player.color), isVictoryLap: player.isVictoryLap });
           state.game.territoryOwnership.forEach((territory:TerritoryState, territoryId:string) => {
             if(territory.ownerId == player.id){
               useMapStore.getState().setTerritoryColor(territoryId, player.color)
@@ -64,6 +65,13 @@ class ZustandSyncManager {
             }
           })
         });
+
+        // Initialize OutlineLayer pulses/icons for all territories
+        const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+        if (engine && engine.getOutlineLayer()) {
+          engine.getOutlineLayer()?.updateAllIcons(state.game.territoryOwnership);
+        }
+
         useMapStore.getState().setMapID(state.mapID)
       }),
 

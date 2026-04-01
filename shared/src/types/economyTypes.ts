@@ -11,6 +11,8 @@ export type DevelopmentConfig = {
   maintenanceMultiplier: number
   incomeMultiplier: number
   minHexes?: number
+  fixedCost?: number
+  fixedMaintenance?: number
 }
 
 export const DEVELOPMENT_TYPES = {
