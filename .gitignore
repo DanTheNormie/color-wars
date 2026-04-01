@@ -12,3 +12,4 @@ helpers/hex-map-editor/node_modules
 **/.env.local
 **/.env.*.local
 ai_temp
+implementation_plan.md
