@@ -154,6 +154,10 @@ class ZustandSyncManager {
 
       GameEventBus.on("UPDATE_PLAYER_HAS_BOUGHT_TERRITORY_THIS_ROUND", ({ id, hasBoughtTerritoryThisRound }) => {
         useStore.getState().setHasBoughtTerritoryThisRound(id, hasBoughtTerritoryThisRound);
+      }),
+
+      GameEventBus.on("UPDATE_PLAYER_HAS_SABOTAGED_THIS_ROUND", ({ id, hasSabotagedThisRound }) => {
+        useStore.getState().setHasSabotagedThisRound(id, hasSabotagedThisRound);
       })
     )
   }

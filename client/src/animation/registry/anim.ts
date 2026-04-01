@@ -567,3 +567,33 @@ export function buildTrackShiftAnimation(
 
   return tl;
 }
+
+export function animatePlayerTeleportToStart(unit: PlayerSprite, startTile: PIXI.Container) {
+  const tl = gsap.timeline();
+  
+  const origScaleX = unit.scale.x;
+  const origScaleY = unit.scale.y;
+
+  tl.to(unit, {
+    pixi: { scaleX: 0, scaleY: 0, rotation: 720, alpha: 0 },
+    duration: 0.5,
+    ease: "power2.in",
+    onStart: () => {
+      unit.stopPulse();
+      unit.isAnimating = true;
+    }
+  })
+  .set(unit, { pixi: { x: startTile.x, y: startTile.y } })
+  .to(unit, {
+    pixi: { scaleX: origScaleX, scaleY: origScaleY, rotation: 0, alpha: 1 },
+    duration: 0.5,
+    ease: "back.out(1.7)",
+    onComplete: () => {
+      unit.isAnimating = false;
+      unit.currentTileId = startTile.label;
+      console.log("Completed teleport to start tile");
+    }
+  });
+
+  return tl;
+}

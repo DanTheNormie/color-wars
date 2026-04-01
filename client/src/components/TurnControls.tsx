@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useStore } from "@/stores/sessionStore";
 import BetterDice, { type DiceController } from "./BetterDice";
 import { nanoid } from "nanoid";
@@ -10,6 +10,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { GameEventBus } from "@/lib/managers/GameEventBus";
+import SabotageModal from "./SabotageModal";
+import { Sword } from "lucide-react";
 
 const TurnControls = () => {
   const sendDiceMode = useStore((z) => z.sendDiceMode);
@@ -26,6 +28,12 @@ const TurnControls = () => {
   const actionState = useStore((z) => z.actionState);
   const currentPlayerStatus = useStore((z) => z.state.game.players[currentPlayerID]?.status ?? "healthy");
   const hasRolledDice = useStore((z) => z.state.game.players[currentPlayerID]?.hasRolled ?? false);
+  const currentTile = useStore((z) => z.state.game.diceTrack[z.state.game.players[currentPlayerID]?.position ?? 0]);
+
+  const hasSabotagedThisRound = useStore((z) => z.state.game.players[currentPlayerID]?.hasSabotagedThisRound ?? false);
+  const players = useStore((z) => z.state.game.players);
+  
+  const [isSabotageModalOpen, setIsSabotageModalOpen] = useState(false);
 
   const holdStartRef = useRef<number | null>(null);
 
@@ -104,7 +112,11 @@ const TurnControls = () => {
     }
   };
 
-
+  const isTileSafe = currentTile && (currentTile.type === 'START' || currentTile.type === 'SAFE');
+  const validVictimsCount = Object.values(players).filter(
+    (p) => p.id !== currentPlayerID && p.position === players[currentPlayerID]?.position && p.status !== "bankrupt"
+  ).length;
+  const canSabotage = !hasSabotagedThisRound && !isTileSafe && validVictimsCount > 0;
 
   return (
     <section className="relative flex h-full w-full items-center justify-between">
@@ -123,12 +135,22 @@ const TurnControls = () => {
         <div className={`${!hasRolledDice ? 'hidden' : ''} w-full flex flex-col gap-2 justify-center`}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="w-full flex justify-center">
+              <span className="w-full flex justify-center flex-col items-center gap-2">
                 <Button
                   className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""}`}
                   onClick={endTurnHandler}>
                   End Turn {currentPlayerStatus == 'in-debt' ? '⚠️' : ''}
                 </Button>
+                {/* Sabotage Button logic */}
+                {canSabotage &&
+                  <Button 
+                    variant={"destructive"}
+                    onClick={() => setIsSabotageModalOpen(true)}
+                  >
+                    <Sword className="w-4 h-4 mr-2" />
+                    Sabotage
+                  </Button>
+                }
               </span>
             </TooltipTrigger>
 
@@ -140,6 +162,7 @@ const TurnControls = () => {
           </Tooltip>
         </div>
       </div>
+      <SabotageModal isOpen={isSabotageModalOpen} onClose={() => setIsSabotageModalOpen(false)} />
     </section>
   );
 };

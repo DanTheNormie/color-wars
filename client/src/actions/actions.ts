@@ -1,4 +1,4 @@
-import { animateCoinConfetti, animateUnitHop } from "@/animation/registry/anim";
+import { animateCoinConfetti, animateUnitHop, animatePlayerTeleportToStart } from "@/animation/registry/anim";
 import { BaseAction } from "./core";
 import { ActionHandle } from "@/animation/driver/AnimationHandle";
 import { pixiTargetLocator } from "@/animation/target-locator";
@@ -14,6 +14,7 @@ import type { PIXIVFXLayer } from "@/components/vfxOverlayLayer/pixi/vfxEngine";
 import { DiceTrackLayer } from "@/components/NewGameBoard/pixi/layers/DiceTrackLayer";
 import { TokenLayer } from "@/components/NewGameBoard/pixi/layers/TokenLayer";
 import { buildTrackShiftAnimation } from "../animation/registry/anim";
+import { GameEventBus } from "@/lib/managers/GameEventBus";
 
 //import { network } from "@/lib/managers/network";
 
@@ -57,6 +58,7 @@ export class HexHop extends BaseAction<"MOVE_PLAYER"> {
       unit.isAnimating = false;
       useDiceTrackStore.getState().upsertToken({ id: unit.id, tileId: finalTileId });
       useDiceTrackStore.getState().setActiveToken(unit.id);
+      useStore.getState().updatePlayerPosition(tokenId, toTile);
       this.logAction(useStore.getState().state.game.activePlayerId);
     });
     return actionHandle;
@@ -441,6 +443,42 @@ export class FinancialConsolidationAction extends BaseAction<"FINANCIAL_CONSOLID
 
     return new ActionHandle(
       outlineLayer.playFinancialConsolidation(collections),
+      () => { },
+      () => { }
+    );
+  }
+}
+
+export class SabotageAction extends BaseAction<"SABOTAGE"> {
+  execute(): ActionHandle {
+    const { attackerId, victimId, amount } = this.payload;
+    const victimUnit = pixiTargetLocator.get<PlayerSprite>(victimId);
+    if (!victimUnit) throw new Error("PlayerSprite victim unit not found for SabotageAction");
+
+    const trackTile0 = pixiTargetLocator.get<PIXI.Container>("track-tile-0");
+    if (!trackTile0) throw new Error("Start tile not found");
+
+    this.logAction(attackerId);
+
+    const teleportAnimationTask = new Promise<void>((resolve) => {
+      const teleportAnim = animatePlayerTeleportToStart(victimUnit, trackTile0);
+      
+      // Setup the event to finish the animation promise when it stops
+      teleportAnim.eventCallback("onComplete", () => {
+         GameEventBus.emit("TOAST", { content: "Sabotage successful!", type: "info", duration: 3000 });
+         
+         // Update state logic
+         useStore.getState().updatePlayerMoney(attackerId, useStore.getState().state.game.players[attackerId].money + amount);
+         useStore.getState().updatePlayerMoney(victimId, useStore.getState().state.game.players[victimId].money - amount);
+         
+         useDiceTrackStore.getState().upsertToken({ id: victimId, tileId: "track-tile-0" });
+         
+         resolve();
+      });
+    });
+
+    return new ActionHandle(
+      teleportAnimationTask,
       () => { },
       () => { }
     );

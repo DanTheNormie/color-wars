@@ -57,6 +57,22 @@ export const requireVictimNotBankrupt = (s: PlainStateOf<RoomState>, ctx: WithVi
   }
 };
 
+export const requireHasNotSabotaged = (s: PlainStateOf<RoomState>, ctx: WithPlayer) => {
+  const player = s.game.players[ctx.senderId];
+  if (player && player.hasSabotagedThisRound) {
+    throw new Error("You can only sabotage once per turn");
+  }
+};
+
+export const requireTileNotSafe = (s: PlainStateOf<RoomState>, ctx: WithPlayer) => {
+  const player = s.game.players[ctx.senderId];
+  if (!player) return;
+  const tile = s.game.diceTrack[player.position];
+  if (tile && (tile.type === "SAFE" || tile.type === "START")) {
+    throw new Error("You cannot sabotage on a safe tile");
+  }
+};
+
 export const requireAwaitingEndTurnPhase = (s: PlainStateOf<RoomState>) => {
   if (s.game.turnPhase !== "awaiting-end-turn") {
     throw new Error("You can only sabotage after rolling but before ending your turn");

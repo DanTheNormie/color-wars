@@ -114,6 +114,9 @@ class Network {
             $(player).listen("hasBoughtTerritoryThisRound", (hasBoughtTerritoryThisRound: boolean) => {
               GameEventBus.emit("UPDATE_PLAYER_HAS_BOUGHT_TERRITORY_THIS_ROUND", { id: playerId, hasBoughtTerritoryThisRound });
             }),
+            $(player).listen("hasSabotagedThisRound", (hasSabotagedThisRound: boolean) => {
+              GameEventBus.emit("UPDATE_PLAYER_HAS_SABOTAGED_THIS_ROUND", { id: playerId, hasSabotagedThisRound });
+            }),
           );
         }),
         $(this.room.state.game).players.onRemove((_:any, playerId: string) => {

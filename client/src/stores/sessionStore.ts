@@ -62,9 +62,19 @@ export const useStore = create(
               rehydrated: false,
             } as StoreState,
             (set, get) => ({
+              updatePlayerPosition: (playerId: string, position: number) => {
+                set((z) => {
+                  z.state.game.players[playerId].position = position
+                })
+              },
               setHasBoughtTerritoryThisRound: (playerId: string, hasBought: boolean) => {
                 set((z) => {
                   z.state.game.players[playerId].hasBoughtTerritoryThisRound = hasBought
+                })
+              },
+              setHasSabotagedThisRound: (playerId: string, hasSabotaged: boolean) => {
+                set((z) => {
+                  z.state.game.players[playerId].hasSabotagedThisRound = hasSabotaged
                 })
               },
               setDiceTrack: (diceTrack: TileState[]) => {
@@ -442,6 +452,13 @@ export const useStore = create(
                   network.send("DECLINE_TRADE", { tradeId });
                 } catch (error) {
                   console.warn("Unable to decline trade", error);
+                }
+              },
+              sendSabotage: (victimId: string) => {
+                try {
+                  network.send("SABOTAGE", { victimId });
+                } catch (error) {
+                  console.warn("Unable to sabotage", error);
                 }
               },
               sendCancelTrade: (tradeId: string) => {

@@ -53,6 +53,7 @@ export class GameEngine {
       player.position = 0;
       player.hasRolled = false;
       player.hasBoughtTerritoryThisRound = false;
+      player.hasSabotagedThisRound = false;
     }
 
     this.state.game.diceTrack.clear();
@@ -458,6 +459,7 @@ export class GameEngine {
         if (player.status !== "bankrupt") {
           player.hasRolled = false;
           player.hasBoughtTerritoryThisRound = false;
+          player.hasSabotagedThisRound = false;
         }
       }
       this.shiftTrack('backward', Math.max(10,this.state.game.currentRound));
@@ -480,6 +482,7 @@ export class GameEngine {
     victim.money -= amount;
     attacker.money += amount;
     victim.position = toTile;
+    attacker.hasSabotagedThisRound = true;
 
     // Queue actions
     this.state.queueAction('SABOTAGE', {

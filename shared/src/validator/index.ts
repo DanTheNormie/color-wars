@@ -82,10 +82,12 @@ const ACTION_RULES: {
     rules.requirePlayerExists,
     rules.requirePlayersTurn,
     rules.requireHasRolledDice,
+    rules.requireHasNotSabotaged,
     rules.requireAwaitingEndTurnPhase,
     rules.requireVictimIsNotSelf,
     rules.requireVictimOnSameTile,
-    rules.requireVictimNotBankrupt
+    rules.requireVictimNotBankrupt,
+    rules.requireTileNotSafe
   ],
   PROPOSE_TRADE: [
     rules.requirePlayerExists,
