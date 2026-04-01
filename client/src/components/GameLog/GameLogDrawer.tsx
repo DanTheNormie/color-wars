@@ -102,6 +102,37 @@ const LogMessageItem = memo(({ entry }: { entry: GameLogEntry }) => {
         </div>;
       }
     }
+    case 'GAME_OVER': {
+      const winnerId = payload.winnerId;
+      const isYou = winnerId === useStore.getState().currentPlayer?.id;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={winnerId} /> {isYou ? "have" : "has"} won the game!
+      </div>;
+    }
+    case 'VICTORY_LAP_STARTED': {
+      const isYou = entry.playerId === useStore.getState().currentPlayer?.id;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={entry.playerId} /> {isYou ? "have" : "has"} started {isYou ? "your" : "their"} <span className="text-yellow-400">victory lap</span>!
+      </div>;
+    }
+    case 'UPGRADE_TERRITORY': {
+      const isYou = entry.playerId === useStore.getState().currentPlayer?.id;
+      const territoryID = payload.territoryID;
+      const buildingType = payload.buildingType;
+      const amount = payload.amount;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={entry.playerId} /> {isYou ? "have" : "has"} upgraded <TerritoryInline territoryId={territoryID} /> to a {buildingType} for <span className="text-red-600">${amount.toLocaleString()}</span>.
+      </div>;
+    }
+    case 'DOWNGRADE_TERRITORY': {
+      const isYou = entry.playerId === useStore.getState().currentPlayer?.id;
+      const territoryID = payload.territoryID;
+      const buildingType = payload.buildingType;
+      const amount = payload.amount;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={entry.playerId} /> {isYou ? "have" : "has"} downgraded <TerritoryInline territoryId={territoryID} /> to a {buildingType} for <span className="text-green-600">${amount.toLocaleString()}</span>.
+      </div>;
+    }
     default:
       return <div className={logMessageStyle}>{`<!-- log for action type: "${entry.type}" not implemented -->`}</div>;
   }
