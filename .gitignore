@@ -8,7 +8,7 @@ server/node_modules
 shared/node_modules
 client/node_modules
 helpers/hex-map-editor/node_modules
-.env
-.env.local
-.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
 ai_temp
