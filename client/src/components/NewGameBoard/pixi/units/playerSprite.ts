@@ -85,7 +85,7 @@ export class PlayerSprite extends PIXI.Container {
     this.rayContainer.visible = false;
     this.addChildAt(this.rayContainer, 0);
 
-    this.createRays();
+    //this.createRays();
 
     this.crownSprite = new PIXI.Sprite();
     this.crownSprite.anchor.set(0.5, 1);
@@ -106,37 +106,37 @@ export class PlayerSprite extends PIXI.Container {
     });
   }
 
-  private createRays() {
-    const rayCount = 12;
-    const rayLength = 24;
-    const rayAngle = (Math.PI * 2) / rayCount;
+  // private createRays() {
+  //   const rayCount = 12;
+  //   const rayLength = 24;
+  //   const rayAngle = (Math.PI * 2) / rayCount;
 
-    for (let i = 0; i < rayCount; i++) {
-      const ray = new PIXI.Graphics();
+  //   for (let i = 0; i < rayCount; i++) {
+  //     const ray = new PIXI.Graphics();
       
-      const angleOffset = rayAngle * i;
+  //     const angleOffset = rayAngle * i;
       
-      // Radiating ray: Triangle from center
-      // Use a linear gradient for the ray
-      const rayGradient = new PIXI.FillGradient({
-        type: 'linear',
-        start: { x: 0, y: 0 },
-        end: { x: rayLength, y: 0 },
-      });
-      rayGradient.addColorStop(0, 'rgba(255, 215, 0, 0.7)');
-      //rayGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.5)');
-      rayGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+  //     // Radiating ray: Triangle from center
+  //     // Use a linear gradient for the ray
+  //     const rayGradient = new PIXI.FillGradient({
+  //       type: 'linear',
+  //       start: { x: 0, y: 0 },
+  //       end: { x: rayLength, y: 0 },
+  //     });
+  //     rayGradient.addColorStop(0, 'rgba(255, 215, 0, 0.7)');
+  //     //rayGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.5)');
+  //     rayGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
 
-      ray.poly([
-        0, 0,
-        rayLength, -2,
-        rayLength, 2
-      ]).fill({ fill: rayGradient });
+  //     ray.poly([
+  //       0, 0,
+  //       rayLength, -2,
+  //       rayLength, 2
+  //     ]).fill({ fill: rayGradient });
 
-      ray.rotation = angleOffset;
-      this.rayContainer!.addChild(ray);
-    }
-  }
+  //     ray.rotation = angleOffset;
+  //     this.rayContainer!.addChild(ray);
+  //   }
+  // }
 
   public setSelected(selected: boolean) {
     this.player_box.tint = selected ? 0xffff00 : 0xffffff;
@@ -192,12 +192,12 @@ export class PlayerSprite extends PIXI.Container {
       if (this.victoryLapTl) return; // Already active or animating
       
       // Reset states for animation
-      if (this.rayContainer) {
-        this.rayContainer.visible = true;
-        this.rayContainer.alpha = 0;
-        this.rayContainer.scale.set(0.2);
-        this.rayContainer.rotation = 0;
-      }
+      // if (this.rayContainer) {
+      //   this.rayContainer.visible = true;
+      //   this.rayContainer.alpha = 0;
+      //   this.rayContainer.scale.set(0.2);
+      //   this.rayContainer.rotation = 0;
+      // }
       
       if (this.crownSprite) {
         this.crownSprite.visible = true;
@@ -207,32 +207,32 @@ export class PlayerSprite extends PIXI.Container {
 
       this.victoryLapTl = gsap.timeline();
 
-      if (this.rayContainer) {
-        // Entrance: scale up and fade in
-        this.victoryLapTl.to(this.rayContainer, {
-          pixi: { scale: 1, alpha: 1 },
-          duration: 0.6,
-          ease: "back.out(1.7)"
-        }, 0);
+      // if (this.rayContainer) {
+      //   // Entrance: scale up and fade in
+      //   this.victoryLapTl.to(this.rayContainer, {
+      //     pixi: { scale: 1, alpha: 1 },
+      //     duration: 0.6,
+      //     ease: "back.out(1.7)"
+      //   }, 0);
 
-        // Loop: Continuous rotation
-        const rotTl = gsap.timeline({ repeat: -1 });
-        rotTl.to(this.rayContainer, {
-          pixi: { rotation: "+=360" },
-          duration: 12,
-          ease: "none",
-        });
-        this.victoryLapTl.add(rotTl, 0);
+      //   // Loop: Continuous rotation
+      //   const rotTl = gsap.timeline({ repeat: -1 });
+      //   rotTl.to(this.rayContainer, {
+      //     pixi: { rotation: "+=360" },
+      //     duration: 12,
+      //     ease: "none",
+      //   });
+      //   this.victoryLapTl.add(rotTl, 0);
 
-        // Loop: Gentle alpha pulse
-        const pulseTl = gsap.timeline({ repeat: -1, yoyo: true });
-        pulseTl.to(this.rayContainer, {
-          alpha: 0.4,
-          duration: 1.5,
-          ease: "sine.inOut"
-        });
-        this.victoryLapTl.add(pulseTl, 0);
-      }
+      //   // Loop: Gentle alpha pulse
+      //   const pulseTl = gsap.timeline({ repeat: -1, yoyo: true });
+      //   pulseTl.to(this.rayContainer, {
+      //     alpha: 0.4,
+      //     duration: 1.5,
+      //     ease: "sine.inOut"
+      //   });
+      //   this.victoryLapTl.add(pulseTl, 0);
+      // }
 
       if (this.crownSprite) {
         // Entrance: Drop down onto head

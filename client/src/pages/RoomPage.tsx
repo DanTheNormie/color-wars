@@ -1,26 +1,28 @@
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState, lazy, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useStore } from "@/stores/sessionStore";
-import TurnControls from "@/components/TurnControls";
-import PlayersStatus from "@/components/playersStatus";
 import { useNetworkStore } from "@/stores/networkStore";
 import { useCountdown } from "@/hooks/useCountdown";
-import LobbyActions from "@/components/LobbyActions";
-import ActionArea from "@/components/ActionArea";
-import { PixiCanvas } from "@/components/NewGameBoard/components/PixiCanvas";
-import { CardSelectionOverlay } from "@/lib/cardOverlay";
-import { VFXLayer } from "@/components/vfxOverlayLayer/vfxLayer";
-import TerritoryTooltip from "@/components/TerritoryTooltip";
-import NowPlayingHeader from "@/components/NowPlayingHeader";
-import GameActions from "@/components/gameActions";
-import UserAssets from "@/components/UserAssets";
-import TradesList from "@/components/TradesList";
-import GameOverOverlay from "@/components/GameOverOverlay";
-import VictoryOverlay from "@/components/VictoryOverlay";
 import { httpEndpoint } from "@/lib/serverConfig";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Zap } from "lucide-react";
+
+// Lazy load components
+const TurnControls = lazy(() => import("@/components/TurnControls"));
+const PlayersStatus = lazy(() => import("@/components/playersStatus"));
+const LobbyActions = lazy(() => import("@/components/LobbyActions"));
+const ActionArea = lazy(() => import("@/components/ActionArea"));
+const PixiCanvas = lazy(() => import("@/components/NewGameBoard/components/PixiCanvas").then(m => ({ default: m.PixiCanvas })));
+const CardSelectionOverlay = lazy(() => import("@/lib/cardOverlay").then(m => ({ default: m.CardSelectionOverlay })));
+const VFXLayer = lazy(() => import("@/components/vfxOverlayLayer/vfxLayer").then(m => ({ default: m.VFXLayer })));
+const TerritoryTooltip = lazy(() => import("@/components/TerritoryTooltip"));
+const NowPlayingHeader = lazy(() => import("@/components/NowPlayingHeader"));
+const GameActions = lazy(() => import("@/components/gameActions"));
+const UserAssets = lazy(() => import("@/components/UserAssets"));
+const TradesList = lazy(() => import("@/components/TradesList"));
+const GameOverOverlay = lazy(() => import("@/components/GameOverOverlay"));
+const VictoryOverlay = lazy(() => import("@/components/VictoryOverlay"));
 
 export interface RoomInfo {
   roomId: string;
@@ -88,7 +90,7 @@ const RoomPage = () => {
   if (!rehydrated || networkState === "connecting" || networkState === "reconnecting" || isJoining) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p className="text-4xl">Connecting to room...</p>
+        <p className="text-4xl text-white">Connecting...</p>
       </div>
     );
   }
@@ -96,7 +98,7 @@ const RoomPage = () => {
   if (autoReconnect.inprogress && autoReconnect.attempt < 3) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p className="text-4xl">connection lost. retrying in {remainingSeconds}s...</p>
+        <p className="text-4xl text-white">connection lost. retrying in {remainingSeconds}s...</p>
       </div>
     );
   }
@@ -106,7 +108,7 @@ const RoomPage = () => {
       return (
         <div className="flex h-screen w-full items-center justify-center">
           <div className="flex h-full w-full flex-col items-center justify-center text-center">
-            <h1 className="text-4xl mb-4">{infoError}</h1>
+            <h1 className="text-4xl mb-4 text-white">{infoError}</h1>
             <Button className="mt-4" onClick={() => navigate("/")}>
               Return to Lobby
             </Button>
@@ -152,8 +154,8 @@ const RoomPage = () => {
 
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <div className="flex h-full w-full flex-col items-center justify-center">
-          <h1 className="text-4xl">Connection Lost</h1>
+        <div className="flex h-full w-full flex-col items-center justify-center text-center">
+          <h1 className="text-4xl text-white">Connection Lost</h1>
           <Button className="mt-4" onClick={() => navigate("/")}>
             Return to Lobby
           </Button>
@@ -163,28 +165,36 @@ const RoomPage = () => {
   }
 
   return (
-    <div className="flex w-full flex-col items-center justify-center">
-      <div id='game-container' className="w-full max-w-180 pb-[100vh] px-2 relative">
-        
-        <NowPlayingHeader />
-        <PixiCanvas />
-        <PlayersStatus />
-        <GameActions />
-        <TradesList />
-        <UserAssets />
-        
-        
-        <ActionArea>
-          {roomPhase === "active" && <TurnControls />}
-          {roomPhase === "lobby" && <LobbyActions />}
-        </ActionArea>
-        <CardSelectionOverlay />
-        <GameOverOverlay />
-        <VictoryOverlay />
-        <VFXLayer />
-        <TerritoryTooltip />
+    <Suspense 
+      fallback={
+        <div className="flex h-screen w-full items-center justify-center bg-[#0a0a0c]">
+          <p className="text-4xl text-white animate-pulse">Loading Game...</p>
+        </div>
+      }
+    >
+      <div className="flex w-full flex-col items-center justify-center">
+        <div id='game-container' className="w-full max-w-180 pb-[100vh] px-2 relative">
+          
+          <NowPlayingHeader />
+          <PixiCanvas />
+          <PlayersStatus />
+          <GameActions />
+          <TradesList />
+          <UserAssets />
+          
+          <ActionArea>
+            {roomPhase === "active" && <TurnControls />}
+            {roomPhase === "lobby" && <LobbyActions />}
+          </ActionArea>
+          
+          <CardSelectionOverlay />
+          <GameOverOverlay />
+          <VictoryOverlay />
+          <VFXLayer />
+          <TerritoryTooltip />
+        </div>
       </div>
-    </div>
+    </Suspense>
   );
 };
 
