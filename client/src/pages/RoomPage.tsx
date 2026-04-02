@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, lazy, Suspense } from "react";
+import { useLayoutEffect, useState, lazy, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useStore } from "@/stores/sessionStore";
 import { useNetworkStore } from "@/stores/networkStore";
@@ -7,6 +7,7 @@ import { httpEndpoint } from "@/lib/serverConfig";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Zap } from "lucide-react";
+import { soundManager } from "@/lib/managers/sound";
 
 // Lazy load components
 const TurnControls = lazy(() => import("@/components/TurnControls"));
@@ -49,6 +50,12 @@ const RoomPage = () => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [infoError, setInfoError] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [isPreparingAudio, setIsPreparingAudio] = useState(false);
+
+  useEffect(() => {
+    soundManager.onProgress((p) => setAudioProgress(p));
+  }, []);
   
   const playerName = useStore((z) => z.room.playerName) || "";
   const setPlayerName = useStore((z) => z.setPlayerName);
@@ -79,20 +86,37 @@ const RoomPage = () => {
   const handleJoinRoom = async () => {
     if (!roomId) return;
     setIsJoining(true);
+    setIsPreparingAudio(true);
     try {
+      // Step 1: Prepare Audio Assets
+      await soundManager.prepare();
+      setIsPreparingAudio(false);
+
+      // Step 2: Join Room
       await joinRoom(roomId);
     } catch (err) {
       console.error(err);
-      setInfoError("Failed to join room.");
+      setInfoError("Failed to join room or load assets.");
     } finally {
       setIsJoining(false);
+      setIsPreparingAudio(false);
     }
   };
 
   if (!rehydrated || networkState === "connecting" || networkState === "reconnecting" || isJoining) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <p className="text-4xl text-white">Connecting...</p>
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-[#0a0a0c]">
+        <p className="text-4xl text-white">
+          {isPreparingAudio ? `Preparing Audio Assets: ${Math.round(audioProgress)}%` : "Connecting..."}
+        </p>
+        {isPreparingAudio && (
+          <div className="mt-8 h-2 w-64 overflow-hidden rounded-full bg-zinc-800">
+            <div 
+              className="h-full bg-cyan-500 transition-all duration-300"
+              style={{ width: `${audioProgress}%` }}
+            />
+          </div>
+        )}
       </div>
     );
   }

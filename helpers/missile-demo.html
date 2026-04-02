@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Missile Launch Demo — PixiJS</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.2/pixi.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0e14;
+      color: #e6edf3;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #8b949e;
+      margin-bottom: 1.25rem;
+    }
+
+    #canvas-wrap {
+      border-radius: 10px;
+      border: 0.5px solid #30363d;
+      overflow: hidden;
+      cursor: crosshair;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    canvas { display: block; width: 100%; }
+
+    #status-bar {
+      margin-top: 0.6rem;
+      font-size: 12px;
+      color: #8b949e;
+      text-align: center;
+      height: 18px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-top: 1.1rem;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .ctrl label {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8b949e;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ctrl-row input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 3px;
+      background: #30363d;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .ctrl-row input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #e6edf3;
+      cursor: pointer;
+      border: 2px solid #0d1117;
+      box-shadow: 0 0 0 1px #30363d;
+    }
+
+    .ctrl-row span {
+      font-size: 13px;
+      font-weight: 500;
+      min-width: 30px;
+      text-align: right;
+      color: #e6edf3;
+    }
+
+    #fire-btn {
+      margin-top: 1.1rem;
+      width: 100%;
+      max-width: 760px;
+      padding: 11px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: 8px;
+      border: 0.5px solid #30363d;
+      background: transparent;
+      color: #e6edf3;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    #fire-btn:hover:not(:disabled) {
+      background: #161b22;
+      border-color: #58a6ff;
+    }
+
+    #fire-btn:active:not(:disabled) { transform: scale(0.99); }
+
+    #fire-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .hint {
+      margin-top: 1.5rem;
+      font-size: 11px;
+      color: #484f58;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .dot-green { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #4caf50; margin-right: 4px; vertical-align: middle; }
+    .dot-red { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #f44336; margin-right: 4px; vertical-align: middle; }
+  </style>
+</head>
+<body>
+
+<h1>Missile Launch Demo &mdash; PixiJS</h1>
+
+<div id="canvas-wrap">
+  <canvas id="c" width="760" height="320"></canvas>
+</div>
+
+<p id="status-bar">Click canvas to set start point</p>
+
+<div class="controls">
+  <div class="ctrl">
+    <label>Arc height</label>
+    <div class="ctrl-row">
+      <input type="range" min="40" max="220" value="120" id="s-arc" step="1">
+      <span id="o-arc">120</span>
+    </div>
+  </div>
+  <div class="ctrl">
+    <label>Duration (frames)</label>
+    <div class="ctrl-row">
+      <input type="range" min="40" max="200" value="90" id="s-dur" step="1">
+      <span id="o-dur">90</span>
+    </div>
+  </div>
+  <div class="ctrl">
+    <label>Trail length</label>
+    <div class="ctrl-row">
+      <input type="range" min="5" max="50" value="20" id="s-trail" step="1">
+      <span id="o-trail">20</span>
+    </div>
+  </div>
+</div>
+
+<button id="fire-btn" disabled>Set start + end points first</button>
+
+<p class="hint">
+  <span class="dot-green"></span>First click = launch point &nbsp;&nbsp;
+  <span class="dot-red"></span>Second click = target &nbsp;&nbsp; Then hit Fire
+</p>
+
+<script>
+(function () {
+  const W = 760, H = 320;
+  const canvas = document.getElementById('c');
+
+  const app = new PIXI.Application({
+    view: canvas,
+    width: W,
+    height: H,
+    backgroundColor: 0x0d1117,
+    antialias: true,
+    resolution: window.devicePixelRatio || 1,
+    autoDensity: true,
+  });
+
+  const gfxBg       = new PIXI.Graphics();
+  const gfxGround   = new PIXI.Graphics();
+  const gfxTrail    = new PIXI.Graphics();
+  const gfxMissile  = new PIXI.Graphics();
+  const gfxExplosion= new PIXI.Graphics();
+  const gfxMarkers  = new PIXI.Graphics();
+  app.stage.addChild(gfxBg, gfxGround, gfxTrail, gfxMissile, gfxExplosion, gfxMarkers);
+
+  /* ── Background ── */
+  function drawBg() {
+    gfxBg.clear();
+    gfxBg.beginFill(0x0d1117); gfxBg.drawRect(0,0,W,H); gfxBg.endFill();
+    for (let i = 0; i < 80; i++) {
+      gfxBg.beginFill(0xffffff, 0.08 + ((i * 7) % 5) * 0.04);
+      gfxBg.drawCircle((i * 193) % W, (i * 97) % (H - 40), 0.9);
+      gfxBg.endFill();
+    }
+    gfxGround.clear();
+    gfxGround.beginFill(0x161b22); gfxGround.drawRect(0, H-30, W, 30); gfxGround.endFill();
+    gfxGround.lineStyle(0.5, 0x30363d);
+    gfxGround.moveTo(0, H-30); gfxGround.lineTo(W, H-30);
+    for (let x = 0; x < W; x += 18) {
+      const bh = 3 + Math.sin(x * 0.09) * 7 + Math.sin(x * 0.22) * 3;
+      gfxGround.beginFill(0x21262d);
+      gfxGround.drawRect(x, H-30, 16, -bh);
+      gfxGround.endFill();
+    }
+  }
+  drawBg();
+
+  const GROUND = H - 30;
+  const statusEl = document.getElementById('status-bar');
+  const fireBtn  = document.getElementById('fire-btn');
+
+  /* ── Sliders ── */
+  ['arc','dur','trail'].forEach(k => {
+    const s = document.getElementById('s-' + k);
+    const o = document.getElementById('o-' + k);
+    s.addEventListener('input', () => o.textContent = s.value);
+  });
+
+  /* ── Click state ── */
+  let p1 = null, p2 = null, clickPhase = 0, animating = false;
+
+  function getXY(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (W / rect.width),
+      y: Math.min((e.clientY - rect.top) * (H / rect.height), GROUND - 5),
+    };
+  }
+
+  document.getElementById('canvas-wrap').addEventListener('click', e => {
+    if (animating) return;
+    const pt = getXY(e);
+    if (clickPhase === 0) {
+      p1 = pt; p2 = null; clickPhase = 1;
+      statusEl.textContent = `Launch set (${Math.round(p1.x)}, ${Math.round(p1.y)}) — now click target`;
+      fireBtn.disabled = true;
+      fireBtn.textContent = 'Set target point first';
+    } else {
+      p2 = pt; clickPhase = 0;
+      statusEl.textContent = `Launch (${Math.round(p1.x)},${Math.round(p1.y)}) → Target (${Math.round(p2.x)},${Math.round(p2.y)})`;
+      fireBtn.disabled = false;
+      fireBtn.textContent = 'Fire missile';
+    }
+    drawMarkers();
+  });
+
+  function drawMarkers() {
+    gfxMarkers.clear();
+    if (p1) {
+      gfxMarkers.lineStyle(1.5, 0x4caf50, 0.9);
+      gfxMarkers.drawCircle(p1.x, p1.y, 6);
+      gfxMarkers.beginFill(0x4caf50); gfxMarkers.drawCircle(p1.x, p1.y, 2.5); gfxMarkers.endFill();
+    }
+    if (p2) {
+      gfxMarkers.lineStyle(1.5, 0xf44336, 0.9);
+      gfxMarkers.moveTo(p2.x-9, p2.y); gfxMarkers.lineTo(p2.x+9, p2.y);
+      gfxMarkers.moveTo(p2.x, p2.y-9); gfxMarkers.lineTo(p2.x, p2.y+9);
+    }
+  }
+
+  /* ── Math helpers ── */
+  function bezier(t, a, b, c) {
+    const mt = 1 - t;
+    return { x: mt*mt*a.x + 2*mt*t*b.x + t*t*c.x, y: mt*mt*a.y + 2*mt*t*b.y + t*t*c.y };
+  }
+  function bezierTan(t, a, b, c) {
+    const mt = 1 - t;
+    return { x: 2*mt*(b.x-a.x)+2*t*(c.x-b.x), y: 2*mt*(b.y-a.y)+2*t*(c.y-b.y) };
+  }
+  function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+  /* ── Animation state ── */
+  let frame = 0, totalFrames = 0, flyDone = false;
+  let trail = [], exParts = [], exRings = [];
+  let flashA = 0, flashR = 0, flashX = 0, flashY = 0;
+  let cp = null;
+
+  function resetAnim() {
+    animating = false; flyDone = false; frame = 0;
+    trail = []; exParts = []; exRings = []; flashA = 0; flashR = 0;
+    gfxTrail.clear(); gfxMissile.clear(); gfxExplosion.clear();
+  }
+
+  fireBtn.addEventListener('click', () => {
+    if (!p1 || !p2 || animating) return;
+    resetAnim();
+    animating = true;
+    totalFrames = parseInt(document.getElementById('s-dur').value);
+    const arcH = parseInt(document.getElementById('s-arc').value);
+    cp = { x: (p1.x + p2.x) / 2, y: Math.min(p1.y, p2.y) - arcH };
+    fireBtn.disabled = true;
+    fireBtn.textContent = 'In flight...';
+    statusEl.textContent = 'Missile away!';
+    app.ticker.add(tick);
+  });
+
+  function spawnExplosion(x, y) {
+    flashX = x; flashY = y; flashA = 1; flashR = 0;
+    const colors = [0xf44336, 0xff9800, 0xffeb3b, 0xffffff, 0xff5722];
+    for (let i = 0; i < 18; i++) {
+      const ang = (i / 18) * Math.PI * 2 + Math.random() * 0.5;
+      const spd = 2 + Math.random() * 4.5;
+      exParts.push({
+        x, y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd * 0.7 - 1.5,
+        a: 1, size: 1.5 + Math.random() * 3,
+        color: colors[i % colors.length],
+        life: 0, max: 45 + Math.floor(Math.random() * 30),
+      });
+    }
+    exRings.push({ x, y, r: 2, maxR: 80, a: 0.9, life: 0, max: 40, color: 0xf44336 });
+    exRings.push({ x, y, r: 2, maxR: 55, a: 0.75, life: 0, max: 30, color: 0xffeb3b });
+  }
+
+  function tick() {
+    const trailLen = parseInt(document.getElementById('s-trail').value);
+
+    if (!flyDone) {
+      frame++;
+      const t = ease(Math.min(frame / totalFrames, 1));
+      const pos = bezier(t, p1, cp, p2);
+      const tan = bezierTan(t, p1, cp, p2);
+      const ang = Math.atan2(tan.y, tan.x);
+
+      trail.push({ x: pos.x, y: pos.y });
+      if (trail.length > trailLen) trail.shift();
+
+      gfxTrail.clear();
+      trail.forEach((pt, i) => {
+        const fa = (i / trail.length) * 0.55;
+        const fr = 0.5 + (i / trail.length) * 2.5;
+        gfxTrail.beginFill(0xffffff, fa);
+        gfxTrail.drawCircle(pt.x, pt.y, fr);
+        gfxTrail.endFill();
+      });
+
+      gfxMissile.clear();
+      gfxMissile.x = pos.x; gfxMissile.y = pos.y; gfxMissile.rotation = ang;
+      gfxMissile.beginFill(0xffffff, 0.95);
+      gfxMissile.drawEllipse(0, 0, 6, 2.8);
+      gfxMissile.endFill();
+      gfxMissile.beginFill(0xf44336, 0.9);
+      gfxMissile.moveTo(6, 0); gfxMissile.lineTo(13, 0); gfxMissile.lineTo(6, -2.5);
+      gfxMissile.endFill();
+
+      if (frame >= totalFrames) {
+        flyDone = true;
+        gfxMissile.clear();
+        spawnExplosion(p2.x, p2.y);
+      }
+      return;
+    }
+
+    /* Explosion phase */
+    gfxExplosion.clear();
+
+    if (flashA > 0) {
+      flashR += 5; flashA -= 0.055;
+      gfxExplosion.beginFill(0xffffff, Math.max(0, flashA));
+      gfxExplosion.drawCircle(flashX, flashY, flashR);
+      gfxExplosion.endFill();
+    }
+
+    exRings.forEach(r => {
+      r.r += (r.maxR - r.r) * 0.13;
+      r.life++; r.a = (1 - r.life / r.max) * 0.85;
+      if (r.a > 0) {
+        gfxExplosion.lineStyle(1.5, r.color, r.a);
+        gfxExplosion.drawCircle(r.x, r.y, r.r);
+        gfxExplosion.lineStyle(0);
+      }
+    });
+
+    exParts.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life++;
+      p.a = Math.max(0, 1 - p.life / p.max);
+      if (p.a > 0) {
+        gfxExplosion.beginFill(p.color, p.a);
+        gfxExplosion.drawCircle(p.x, p.y, p.size * p.a);
+        gfxExplosion.endFill();
+      }
+    });
+
+    const done = flashA <= 0
+      && exRings.every(r => r.life >= r.max)
+      && exParts.every(p => p.life >= p.max);
+
+    if (done) {
+      app.ticker.remove(tick);
+      resetAnim();
+      drawMarkers();
+      fireBtn.disabled = false;
+      fireBtn.textContent = 'Fire missile';
+      statusEl.textContent = 'Click canvas to reposition, or fire again';
+    }
+  }
+})();
+</script>
+</body>
+</html>
