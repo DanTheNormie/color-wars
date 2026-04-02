@@ -117,6 +117,9 @@ class Network {
             $(player).listen("hasSabotagedThisRound", (hasSabotagedThisRound: boolean) => {
               GameEventBus.emit("UPDATE_PLAYER_HAS_SABOTAGED_THIS_ROUND", { id: playerId, hasSabotagedThisRound });
             }),
+            $(player).listen("hasLaunchedMissileThisRound", (hasLaunchedMissileThisRound: boolean) => {
+              GameEventBus.emit("UPDATE_PLAYER_HAS_LAUNCHED_MISSILE_THIS_ROUND", { id: playerId, hasLaunchedMissileThisRound });
+            }),
           );
         }),
         $(this.room.state.game).players.onRemove((_:any, playerId: string) => {

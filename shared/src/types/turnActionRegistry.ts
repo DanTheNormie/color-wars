@@ -23,7 +23,8 @@ export const TURN_ACTION_REGISTRY = {
   APPLY_STATUS_EFFECT: {} as { playerId: string, statusEffect: StatusEffect },
   REMOVE_STATUS_EFFECT: {} as { playerId: string, statusEffect: StatusEffect },
   FINANCIAL_CONSOLIDATION: {} as {playerId: string, collections:{[territoryID: string]: number}},
-  VICTORY_LAP_STARTED: {} as { playerId: string }
+  VICTORY_LAP_STARTED: {} as { playerId: string },
+  MISSILE_LAUNCHED: {} as { attackerId: string; fromTerritoryID: string; targetTerritoryID: string; evictedPlayerId: string }
 } as const;
 
 export type ActionType = keyof typeof TURN_ACTION_REGISTRY;

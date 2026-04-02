@@ -45,6 +45,8 @@ interface MapState {
   error: string | null;
   hoveredTerritoryId: string | null;
   selectedTerritoryId: string | null;
+  missileSourceId: string | null;
+  missileTargetIds: string[];
   colorMap: Map<string, string>;
   current_map: GameMap;
   current_mapID: MapID;
@@ -52,6 +54,8 @@ interface MapState {
   fetchMap: (url: string) => Promise<GameMap | null>;
   setHoveredTerritory: (id: string | null) => void;
   setSelectedTerritory: (id: string | null) => void;
+  setMissileSource: (id: string | null) => void;
+  setMissileTargets: (ids: string[]) => void;
   setTerritoryColor: (id: string, color: string) => void;
   removeTerritoryColor: (id: string) => void;
   setMapID: (mapID: MapID) => void;
@@ -69,6 +73,8 @@ export const useMapStore = create<MapState>()(
             error: null as string | null,
             hoveredTerritoryId: null as string | null,
             selectedTerritoryId: null as string | null,
+            missileSourceId: null as string | null,
+            missileTargetIds: [] as string[],
             colorMap: new Map<string, string>(),
             current_map: MAPS.INDIA.map as GameMap,
             current_mapID: MAPS.INDIA.id as MapID
@@ -110,6 +116,16 @@ export const useMapStore = create<MapState>()(
             setSelectedTerritory: (id: string | null) => {
               set((state) => {
                 state.selectedTerritoryId = id;
+              });
+            },
+            setMissileSource: (id: string | null) => {
+              set((state) => {
+                state.missileSourceId = id;
+              });
+            },
+            setMissileTargets: (ids: string[]) => {
+              set((state) => {
+                state.missileTargetIds = ids;
               });
             },
             setTerritoryColor: (territoryID: string, color: string) => {

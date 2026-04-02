@@ -49,11 +49,12 @@ export class GameEngine {
   startGame() {
     for (const playerID of this.state.game.playerOrder) {
       const player = this.state.game.players.get(playerID)!;
-      player.money = 200000;
+      player.money = 20000;
       player.position = 0;
       player.hasRolled = false;
       player.hasBoughtTerritoryThisRound = false;
       player.hasSabotagedThisRound = false;
+      player.hasLaunchedMissileThisRound = false;
     }
     //debug
     // const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
@@ -259,6 +260,11 @@ export class GameEngine {
     territoryState.buildingType = buildingType;
 
     this.state.queueAction('UPGRADE_TERRITORY', { playerId: player.id, territoryID, buildingType, amount: cost });
+
+    // Track when missile silo was built (to prevent same-round launch)
+    if (buildingType === 'MISSILE_SILO') {
+      player.missileSiloBuiltRound = this.state.game.currentRound;
+    }
 
     // Capital Monument: teleport to Start and begin victory lap
     if (buildingType === 'CAPITAL') {
@@ -493,9 +499,10 @@ export class GameEngine {
           player.hasRolled = false;
           player.hasBoughtTerritoryThisRound = false;
           player.hasSabotagedThisRound = false;
+          player.hasLaunchedMissileThisRound = false;
         }
       }
-      this.shiftTrack('backward', Math.max(10,this.state.game.currentRound));
+      this.shiftTrack('backward', Math.min(10,this.state.game.currentRound));
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }
@@ -530,7 +537,33 @@ export class GameEngine {
     this.updateFinancialStatus(attacker.id);
     this.updateFinancialStatus(victim.id);
 
-    // After sabotage, they must end turn? The user didn't specify, 
+    // After sabotage, they must end turn? The user didn't specify,
+    // but usually these actions are once per turn.
+    // The validator checks 'awaiting-end-turn', so they can still do other things if allowed.
+  }
+
+  launchMissile(client: Client, fromTerritoryID: string, targetTerritoryID: string) {
+    const attacker = this.state.game.players.get(client.sessionId)!;
+    const targetTerritory = this.state.game.territoryOwnership.get(targetTerritoryID)!;
+    const evictedPlayerId = targetTerritory.ownerId;
+
+    // Remove ownership of target territory (evacuation)
+    this.state.game.territoryOwnership.delete(targetTerritoryID);
+
+    // Mark that this player has launched a missile this round
+    attacker.hasLaunchedMissileThisRound = true;
+
+    // Queue the visual action
+    this.state.queueAction('MISSILE_LAUNCHED', {
+      attackerId: attacker.id,
+      fromTerritoryID,
+      targetTerritoryID,
+      evictedPlayerId,
+    });
+
+    this.updateFinancialStatus(attacker.id);
+    this.updateFinancialStatus(evictedPlayerId);
+    // After missile launch, they must end turn? The user didn't specify,
     // but usually these actions are once per turn.
     // The validator checks 'awaiting-end-turn', so they can still do other things if allowed.
   }

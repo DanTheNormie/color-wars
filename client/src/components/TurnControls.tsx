@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/tooltip"
 import { GameEventBus } from "@/lib/managers/GameEventBus";
 import SabotageModal from "./SabotageModal";
-import { Sword } from "lucide-react";
+import MissileLaunchModal from "./MissileLaunchModal";
+import { Sword, Rocket } from "lucide-react";
 
 const TurnControls = () => {
   const sendDiceMode = useStore((z) => z.sendDiceMode);
@@ -34,6 +35,7 @@ const TurnControls = () => {
   const players = useStore((z) => z.state.game.players);
   
   const [isSabotageModalOpen, setIsSabotageModalOpen] = useState(false);
+  const [isMissileModalOpen, setIsMissileModalOpen] = useState(false);
 
   const holdStartRef = useRef<number | null>(null);
 
@@ -118,6 +120,10 @@ const TurnControls = () => {
   ).length;
   const canSabotage = !hasSabotagedThisRound && !isTileSafe && validVictimsCount > 0;
 
+  const hasMissileSilo = Object.values(useStore.getState().state.game.territoryOwnership || {}).some(
+    (t: any) => t.ownerId === currentPlayerID && t.buildingType === "MISSILE_SILO"
+  );
+
   return (
     <section className="relative flex h-full w-full items-center justify-between">
       <div className="flex relative w-full h-full flex-1 grow-2 justify-center gap-[1%] items-center">
@@ -151,6 +157,15 @@ const TurnControls = () => {
                     Sabotage
                   </Button>
                 }
+                {hasMissileSilo &&
+                  <Button 
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                    onClick={() => setIsMissileModalOpen(true)}
+                  >
+                    <Rocket className="w-4 h-4 mr-2" />
+                    Launch Missile
+                  </Button>
+                }
               </span>
             </TooltipTrigger>
 
@@ -163,6 +178,7 @@ const TurnControls = () => {
         </div>
       </div>
       <SabotageModal isOpen={isSabotageModalOpen} onClose={() => setIsSabotageModalOpen(false)} />
+      <MissileLaunchModal isOpen={isMissileModalOpen} onClose={() => setIsMissileModalOpen(false)} />
     </section>
   );
 };

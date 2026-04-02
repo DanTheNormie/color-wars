@@ -558,3 +558,45 @@ export class VictoryLapStartedAction extends BaseAction<"VICTORY_LAP_STARTED"> {
     );
   }
 }
+import { animateMissileLaunch } from "@/animation/registry/missile";
+
+export class MissileLaunchedAction extends BaseAction<"MISSILE_LAUNCHED"> {
+  execute(): ActionHandle {
+    const { fromTerritoryID, targetTerritoryID, attackerId } = this.payload;
+
+    const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+    if (!engine) throw new Error("PixiEngine not found for MissileLaunchedAction");
+
+    const outlineLayer = engine.getOutlineLayer();
+    if (!outlineLayer) throw new Error("OutlineLayer not found");
+
+    const startPos = outlineLayer.getTerritoryCenter(fromTerritoryID);
+    const endPos = outlineLayer.getTerritoryCenter(targetTerritoryID);
+
+    if (!startPos || !endPos) {
+      console.warn("Missile start/end position missing", { startPos, endPos });
+      return new ActionHandle(Promise.resolve(), () => {}, () => {});
+    }
+
+    if (!engine.getApp()) throw new Error("PIXI App not found");
+    // 1. Play animation
+    const missileAnim = animateMissileLaunch(outlineLayer, startPos, endPos);
+
+    return new ActionHandle(
+      new Promise<void>((resolve) => {
+        missileAnim.eventCallback("onComplete", () => {
+          // 2. Update state: Evacuate territory
+          useStore.getState().updateTerritoryOwnership(targetTerritoryID, null);
+          useMapStore.getState().removeTerritoryColor(targetTerritoryID); // Reset to secondary/neutral color
+          
+          outlineLayer.updateTerritoryIcon(targetTerritoryID, "BASE");
+          
+          this.logAction(attackerId);
+          resolve();
+        });
+      }),
+      () => {},
+      () => {}
+    );
+  }
+}

@@ -262,6 +262,11 @@ export class GameRoom extends Room<{state: RoomState}> {
       this.gameEngine.sabotage(client, victimId);
     });
 
+    this.onAction('LAUNCH_MISSILE', (client, {fromTerritoryID, targetTerritoryID}) => {
+      logger.info("received launch missile from", client.sessionId, "from", fromTerritoryID, "to", targetTerritoryID);
+      this.gameEngine.launchMissile(client, fromTerritoryID, targetTerritoryID);
+    });
+
     this.onAction('PROPOSE_TRADE', (client, { targetPlayerId, offer }) => {
       logger.info('received propose trade');
       this.gameEngine.proposeTrade(client, targetPlayerId, offer);

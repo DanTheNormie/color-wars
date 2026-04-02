@@ -466,6 +466,18 @@ export const useStore = create(
                   console.warn("Unable to sabotage", error);
                 }
               },
+              sendLaunchMissile: (fromTerritoryID: string, targetTerritoryID: string) => {
+                try {
+                  network.send("LAUNCH_MISSILE", { fromTerritoryID, targetTerritoryID });
+                } catch (error) {
+                  console.warn("Unable to launch missile", error);
+                }
+              },
+              setHasLaunchedMissileThisRound: (playerId: string, hasLaunched: boolean) => {
+                set((z) => {
+                  z.state.game.players[playerId].hasLaunchedMissileThisRound = hasLaunched;
+                });
+              },
               sendCancelTrade: (tradeId: string) => {
                 try {
                   network.send("CANCEL_TRADE", { tradeId });

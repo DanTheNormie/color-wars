@@ -63,6 +63,8 @@ export class PlayerState extends Schema {
   @type("boolean") hasBoughtTerritoryThisRound: boolean = false;
   @type("boolean") hasSabotagedThisRound: boolean = false;
   @type("boolean") isVictoryLap: boolean = false;
+  @type("boolean") hasLaunchedMissileThisRound: boolean = false;
+  @type("number") missileSiloBuiltRound: number = -1;
   @type(["string"]) cards: ArraySchema<string> = new ArraySchema<string>();
   @type([StatusEffect]) statusEffects: ArraySchema<StatusEffect> = new ArraySchema<StatusEffect>();
 

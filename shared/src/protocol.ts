@@ -19,6 +19,7 @@ export interface ClientMessages {
   DOWNGRADE_TERRITORY: { territoryID: string; };
   SHIFT_TRACK: { direction: "forward" | "backward" };
   SABOTAGE: { victimId: string };
+  LAUNCH_MISSILE: { fromTerritoryID: string; targetTerritoryID: string };
   PROPOSE_TRADE: { 
     targetPlayerId: string; 
     offer: { 

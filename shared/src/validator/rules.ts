@@ -34,6 +34,62 @@ interface WithProposeTrade extends WithPlayer {
 interface WithTradeId extends WithPlayer {
   tradeId: string;
 }
+interface WithMissileLaunch extends WithPlayer {
+  fromTerritoryID: string;
+  targetTerritoryID: string;
+}
+
+export const requireOwnsFromTerritory = (s: PlainStateOf<RoomState>, ctx: WithMissileLaunch) => {
+  const territoryState = s.game.territoryOwnership[ctx.fromTerritoryID];
+  if (!territoryState || territoryState.ownerId !== ctx.senderId) {
+    throw new Error("You do not own the launch territory");
+  }
+};
+
+export const requireMissileSiloOnTerritory = (s: PlainStateOf<RoomState>, ctx: WithMissileLaunch) => {
+  const territoryState = s.game.territoryOwnership[ctx.fromTerritoryID];
+  if (!territoryState || (territoryState as any).buildingType !== "MISSILE_SILO") {
+    throw new Error("Launch territory does not have a Missile Silo");
+  }
+};
+
+export const requireHasNotLaunchedMissile = (s: PlainStateOf<RoomState>, ctx: WithPlayer) => {
+  const player = s.game.players[ctx.senderId];
+  if (player && (player as any).hasLaunchedMissileThisRound) {
+    throw new Error("You can only launch one missile per round");
+  }
+};
+
+export const requireNotBuiltThisRound = (s: PlainStateOf<RoomState>, ctx: WithPlayer) => {
+  const player = s.game.players[ctx.senderId];
+  if (player && (player as any).missileSiloBuiltRound >= s.game.currentRound) {
+    throw new Error("Cannot launch a missile the same round the silo was built");
+  }
+};
+
+export const requireTargetIsAdjacent = (s: PlainStateOf<RoomState>, ctx: WithMissileLaunch) => {
+  const mapID = s.mapID;
+  const adjacencies = (MAPS[mapID].map as any).adjacencies;
+  if (!adjacencies) throw new Error("Map has no adjacency data");
+  const neighbors: string[] = adjacencies[ctx.fromTerritoryID] || [];
+  if (!neighbors.includes(ctx.targetTerritoryID)) {
+    throw new Error("Target territory is not adjacent to the launch site");
+  }
+};
+
+export const requireTargetIsOwned = (s: PlainStateOf<RoomState>, ctx: WithMissileLaunch) => {
+  const territoryState = s.game.territoryOwnership[ctx.targetTerritoryID];
+  if (!territoryState) {
+    throw new Error("Target territory is not owned by anyone");
+  }
+};
+
+export const requireTargetNotSelf = (s: PlainStateOf<RoomState>, ctx: WithMissileLaunch) => {
+  const territoryState = s.game.territoryOwnership[ctx.targetTerritoryID];
+  if (territoryState && territoryState.ownerId === ctx.senderId) {
+    throw new Error("You cannot fire a missile at your own territory");
+  }
+};
 
 export const requireVictimOnSameTile = (s: PlainStateOf<RoomState>, ctx: WithVictimID) => {
   const attacker = s.game.players[ctx.senderId];

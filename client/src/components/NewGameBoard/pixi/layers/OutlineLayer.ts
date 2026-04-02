@@ -50,6 +50,22 @@ export class OutlineLayer extends PIXI.Container {
         }
       }
     );
+
+    const mapUnsub = (useMapStore).subscribe(
+      (state) => ({ 
+        source: state.missileSourceId, 
+        targets: state.missileTargetIds 
+      }),
+      ({ source, targets }) => {
+        this.updateMissileHighlights(source, targets);
+      }
+    );
+
+    const existingUnsub = this.unsubscribeStore;
+    this.unsubscribeStore = () => {
+      if (existingUnsub) existingUnsub();
+      mapUnsub();
+    };
   }
 
   public destroy(options?: PIXI.DestroyOptions) {
@@ -308,7 +324,27 @@ private findDeepestHex(hexes: Hex[]) {
     this.activeSelectId = selectId;
   }
 
-  private startPulse(territoryID: string) {
+  private updateMissileHighlights(sourceId: string | null, targetIds: string[]) {
+    // Clear previous if they were there
+    this.stopAllPulses(); 
+    
+    // In missile mode, we might want to keep the select/hover borders or clear them
+    // Let's clear them for clarity
+    if (this.activeHoverId) this.toggleBorder(this.activeHoverId, false);
+    if (this.activeSelectId) this.toggleBorder(this.activeSelectId, false);
+
+    if (sourceId) {
+      this.toggleBorder(sourceId, true, 0xffa500); // Orange for source
+      this.startPulse(sourceId, 0xffa500);
+    }
+
+    targetIds.forEach(tid => {
+      this.toggleBorder(tid, true, 0xff4500); // OrangeRed for targets
+      this.startPulse(tid, 0xff4500);
+    });
+  }
+
+  private startPulse(territoryID: string, pulseColor: number = 0xffd700) {
     const obj = this.stateGraphics.get(territoryID);
     if (!obj) return;
 
@@ -317,9 +353,9 @@ private findDeepestHex(hexes: Hex[]) {
       this.pulseTweens.get(territoryID)?.kill();
     }
     obj.border.zIndex = 1;
-    // Pulse the FILL tint between default and gold
+    // Pulse the FILL tint between default and color
     const tween = gsap.to(obj.border, {
-      pixi: { tint: 0xffd700 }, // Gold
+      pixi: { tint: pulseColor }, // Custom color
       duration: 1.0,
       repeat: -1,
       yoyo: true,
@@ -408,6 +444,12 @@ private findDeepestHex(hexes: Hex[]) {
       }
     });
   }
+
+  public getTerritoryCenter(territoryId: string): { x: number; y: number } | null {
+    const center = this.territoryCenters.get(territoryId);
+    return center ? { x: center.x, y: center.y } : null;
+  }
+
 
   public updateTerritoryIcon(territoryId: string, buildingType: DevelopmentType) {
     const center = this.territoryCenters.get(territoryId);

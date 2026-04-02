@@ -38,6 +38,7 @@ export interface LOCAL_EVENT {
   REMOVE_TRADE: { id: string };
   UPDATE_PLAYER_HAS_BOUGHT_TERRITORY_THIS_ROUND: {id: string, hasBoughtTerritoryThisRound: boolean}
   UPDATE_PLAYER_HAS_SABOTAGED_THIS_ROUND: {id: string, hasSabotagedThisRound: boolean}
+  UPDATE_PLAYER_HAS_LAUNCHED_MISSILE_THIS_ROUND: {id: string, hasLaunchedMissileThisRound: boolean}
   VICTORY_LAP_STARTED: {playerId: string}
 }
 

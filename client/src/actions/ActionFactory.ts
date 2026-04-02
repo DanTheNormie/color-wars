@@ -20,7 +20,8 @@ import {
   DowngradeTerritoryAction,
   FinancialConsolidationAction,
   SabotageAction,
-  VictoryLapStartedAction
+  VictoryLapStartedAction,
+  MissileLaunchedAction
 } from "./actions";
 
 export class ActionFactory {
@@ -82,6 +83,9 @@ export class ActionFactory {
 
       case "VICTORY_LAP_STARTED":
         return new VictoryLapStartedAction(data);
+
+      case "MISSILE_LAUNCHED":
+        return new MissileLaunchedAction(data);
 
       default:
         throw new Error(`Unknown Action Type, unable to create action: ${JSON.stringify(data)}`);

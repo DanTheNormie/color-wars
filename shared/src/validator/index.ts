@@ -108,6 +108,20 @@ const ACTION_RULES: {
     rules.requirePlayerExists,
     rules.requireTradeExists,
     rules.requireTradeSender
+  ],
+  LAUNCH_MISSILE: [
+    rules.requireActivePhase,
+    rules.requirePlayerExists,
+    rules.requirePlayersTurn,
+    rules.requireHasRolledDice,
+    // rules.requireAwaitingEndTurnPhase,
+    rules.requireHasNotLaunchedMissile,
+    rules.requireNotBuiltThisRound,
+    rules.requireOwnsFromTerritory,
+    rules.requireMissileSiloOnTerritory,
+    rules.requireTargetIsAdjacent,
+    rules.requireTargetIsOwned,
+    rules.requireTargetNotSelf,
   ]
 };
 
