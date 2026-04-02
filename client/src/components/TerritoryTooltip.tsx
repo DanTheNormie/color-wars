@@ -298,18 +298,18 @@ export default function TerritoryTooltip() {
               )}
             </div>
           ) : isOwnedByCurrentPlayer ? (
-             (adjacentOwnedByPlayer.length < adjacentTerritories.length) ? (
+             (adjacentOwnedByPlayer.length < Math.min(2, adjacentTerritories.length)) ? (
               (adjacentOwnedByPlayer.length === 0) ? (
                 <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
                   {adjacentTerritories.length === 1
                     ? "you need to own the adjacent territory to upgrade"
-                    : `you need to own all ${adjacentTerritories.length} adjacent territories to upgrade`}
+                    : `you need to own at least 2 adjacent territories to upgrade`}
                 </div>
               ) : (
                 <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
-                  {adjacentTerritories.length - adjacentOwnedByPlayer.length === 1
-                    ? "purchase the last adjacent territory to upgrade"
-                    : `purchase remaining ${adjacentTerritories.length - adjacentOwnedByPlayer.length} adjacent territories to upgrade`}
+                  {Math.min(2, adjacentTerritories.length) - adjacentOwnedByPlayer.length === 1
+                    ? "purchase one more adjacent territory to upgrade"
+                    : `purchase remaining ${Math.min(2, adjacentTerritories.length) - adjacentOwnedByPlayer.length} adjacent territories to upgrade`}
                 </div>
               )
             ) : (

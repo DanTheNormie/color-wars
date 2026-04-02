@@ -187,14 +187,20 @@ export const requireValidSelectedCard = (s: PlainStateOf<RoomState>, ctx: WithCa
 export const requireAdjacentOwnership = (s: PlainStateOf<RoomState>, ctx: WithTerritoryID) => {
   const mapID = s.mapID;
   const adjacencies = (MAPS[mapID].map as any).adjacencies;
-  if (!adjacencies) return; // If no adjacencies defined, skip rule (or throw if required)
+  if (!adjacencies) return; 
   
   const neighbors = adjacencies[ctx.territoryID] || [];
+  let ownedCount = 0;
   for (const neighborId of neighbors) {
     const ownership = s.game.territoryOwnership[neighborId];
-    if (!ownership || ownership.ownerId !== ctx.senderId) {
-      throw new Error(`You must own all adjacent territories to upgrade. Missing: ${neighborId}`);
+    if (ownership && ownership.ownerId === ctx.senderId) {
+      ownedCount++;
     }
+  }
+
+  const requiredCount = Math.min(2, neighbors.length);
+  if (ownedCount < requiredCount) {
+    throw new Error(`You must own at least ${requiredCount} adjacent territories to upgrade. Currently owning: ${ownedCount}`);
   }
 }
 
