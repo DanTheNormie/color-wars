@@ -56,16 +56,16 @@ export class GameEngine {
       player.hasSabotagedThisRound = false;
     }
     //debug
-    const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
-    const tIDs = MAPS['INDIA'].map.territories.map(t => t.id)
+    // const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
+    // const tIDs = MAPS['INDIA'].map.territories.map(t => t.id)
 
-    for (const tID of tIDs) {
-      this.state.game.territoryOwnership.set(tID, new TerritoryState(testPlayer.id))
-      this.state.queueAction('BUY_TERRITORY', { playerId: testPlayer.id, territoryID: tID, amount: 10000 })
-      const territoryState = this.state.game.territoryOwnership.get(tID)!;
-      territoryState.buildingType = 'CITY';
-      this.state.queueAction('UPGRADE_TERRITORY', { playerId: testPlayer.id, territoryID: tID, buildingType: 'CITY', amount: 10000 });
-    }
+    // for (const tID of tIDs) {
+    //   this.state.game.territoryOwnership.set(tID, new TerritoryState(testPlayer.id))
+    //   this.state.queueAction('BUY_TERRITORY', { playerId: testPlayer.id, territoryID: tID, amount: 10000 })
+    //   const territoryState = this.state.game.territoryOwnership.get(tID)!;
+    //   territoryState.buildingType = 'CITY';
+    //   this.state.queueAction('UPGRADE_TERRITORY', { playerId: testPlayer.id, territoryID: tID, buildingType: 'CITY', amount: 10000 });
+    // }
     //debug
     
     this.state.game.diceTrack.clear();

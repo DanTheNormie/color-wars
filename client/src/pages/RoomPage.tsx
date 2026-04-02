@@ -183,15 +183,19 @@ const RoomPage = () => {
           <UserAssets />
           
           <ActionArea>
-            {roomPhase === "active" && <TurnControls />}
-            {roomPhase === "lobby" && <LobbyActions />}
+            <Suspense fallback={null}>
+              {roomPhase === "active" && <TurnControls />}
+              {roomPhase === "lobby" && <LobbyActions />}
+            </Suspense>
           </ActionArea>
-          
-          <CardSelectionOverlay />
-          <GameOverOverlay />
-          {/* <VictoryOverlay /> */}
-          <VFXLayer />
-          <TerritoryTooltip />
+
+          <Suspense fallback={null}>
+            <CardSelectionOverlay />
+            <GameOverOverlay />
+            {/* <VictoryOverlay /> */}
+            <VFXLayer />
+            <TerritoryTooltip />
+          </Suspense>
         </div>
       </div>
     </Suspense>
