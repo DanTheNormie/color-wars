@@ -8,6 +8,9 @@ import { OutlineLayer } from "./layers/OutlineLayer";
 import { DiceTrackLayer } from "./layers/DiceTrackLayer";
 import { useMapStore } from "@/stores/mapStateStore"; // For subscription
 import { pixiTargetLocator } from "@/animation/target-locator";
+import { useStore } from "@/stores/sessionStore";
+import { GameOverLayer } from "./layers/GameOverLayer";
+import gsap from "gsap";
 
 export const MAP_BACKGROUND_COLOR = 0x09090b;
 export const MAP_SECONDARY_COLOR = 0x555555;
@@ -38,6 +41,7 @@ export class PIXIGameBoard {
   private diceTrack: DiceTrackLayer | null = null;
   private uiLayer: PIXI.Container | null = null;
   private debugLayer: PIXI.Container | null = null;
+  private gameOverLayer: GameOverLayer | null = null;
 
   // Assets
   private hexTexture: PIXI.Texture | null = null;
@@ -171,6 +175,10 @@ export class PIXIGameBoard {
       this.uiLayer.addChild(this.diceTrack);
       this.diceTrack.init(this.app);
 
+      this.gameOverLayer = new GameOverLayer();
+      this.app.stage.addChild(this.gameOverLayer);
+      this.gameOverLayer.init(this.app);
+
       // this.tokenLayer = new TokenLayer();
       // this.diceTrack.getTrackLayer().addChild(this.tokenLayer);
 
@@ -215,6 +223,12 @@ export class PIXIGameBoard {
       this.handleResize();
 
       pixiTargetLocator.register("game-board-engine", this);
+
+      // Check for existing winner on join/refresh
+      const winnerId = useStore.getState().winnerId;
+      if (winnerId) {
+        setTimeout(() => this.showGameOver(winnerId), 500);
+      }
     })();
 
     return this.initPromise;
@@ -261,6 +275,7 @@ export class PIXIGameBoard {
     const h = parent.clientHeight;
     this.app.renderer.resize(w, h);
     this.diceTrack?.resize(w, h);
+    this.gameOverLayer?.resize(w, h);
 
     // Resize viewport but keep world dimensions intact
     // this.viewport.resize(w, h, this.viewport.worldWidth, this.viewport.worldHeight);
@@ -470,6 +485,7 @@ export class PIXIGameBoard {
     this.initToken++;
 
     window.removeEventListener("resize", this.handleResize);
+    gsap.killTweensOf(this);
 
     this.hoverStateUnsub?.();
     this.selectedStateUnsub?.();
@@ -478,16 +494,35 @@ export class PIXIGameBoard {
     this.viewport?.off("zoomed", this.handleZoom);
 
     pixiTargetLocator.clear();
-    //this.app = null;
     this.viewport = null;
     this.worldLayer = null;
     this.terrain = null;
 
+    if (this.diceTrack) {
+        this.diceTrack.destroy();
+        this.diceTrack = null as any;
+    }
+    if (this.gameOverLayer) {
+        this.gameOverLayer.destroy();
+        this.gameOverLayer = null as any;
+    }
+
     try {
-      this.app?.destroy(true, true);
+      this.app?.destroy(true, { children: true, texture: true });
     } catch (error) {
       console.log(error)
     }
+  }
 
+  public async showGameOver(winnerId: string) {
+    if (!this.gameOverLayer || !this.diceTrack) return;
+    const tokenLayer = this.diceTrack.getTokenLayer();
+    if (!tokenLayer) return;
+
+    const winnerSprite = tokenLayer.getUnits().get(winnerId);
+    if (winnerSprite) {
+      winnerSprite.isAnimating = true; // Prevent TokenLayer from moving it back
+      await this.gameOverLayer.show(winnerId, winnerSprite);
+    }
   }
 }

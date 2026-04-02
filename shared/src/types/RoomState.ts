@@ -170,6 +170,7 @@ export class GameAction extends Schema {
 export class GameState extends Schema {
   @type("string") activePlayerId: string = "";
   @type("string") turnPhase: TurnPhase = "awaiting-roll";
+  @type("string") winnerId: string = "";
 
   //Map <tradeID, trade>
   @type({ map: Trade }) activeTrades = new MapSchema<Trade>();

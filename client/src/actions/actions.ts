@@ -238,7 +238,6 @@ export class ResolveSelectionAction extends BaseAction<"SELECT_CARD"> {
         (phase) => {
           if (phase === "idle") {
             unsubscribe();
-            console.log("Card exit animation complete");
             resolve();
           }
         },
@@ -316,7 +315,6 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
     const app = engine.getApp();
     if (!app) throw new Error("Pixi App not ready");
 
-    this.logAction("");
     //TODO: find out side effects of upsertToken
     return new ActionHandle(
       (async () => {
@@ -392,9 +390,33 @@ export class UpdatePlayerMoneyAction extends BaseAction<"UPDATE_PLAYER_MONEY"> {
 export class GameOverAction extends BaseAction<"GAME_OVER"> {
   execute(): ActionHandle {
     const { winnerId } = this.payload;
-    useStore.getState().setWinnerId(winnerId);
     this.logAction(winnerId);
-    return new ActionHandle(Promise.resolve(), () => { }, () => { });
+
+    const promise = (async () => {
+      // 1. Wait for engine
+      let engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+      for (let i = 0; i < 20 && !engine; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+        engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
+      }
+
+      if (engine) {
+        // 2. Trigger PIXI visual transition FIRST or concurrently
+        const animPromise = engine.showGameOver(winnerId);
+        
+        // 3. Update store AFTER PIXI has captured the winner sprite
+        // Wait a small bit for PIXI to start its show sequence before triggering React re-render
+        await new Promise(r => requestAnimationFrame(r));
+        useStore.getState().setWinnerId(winnerId);
+        
+        await animPromise;
+      } else {
+        // Fallback for UI if engine never appears
+        useStore.getState().setWinnerId(winnerId);
+      }
+    })();
+
+    return new ActionHandle(promise, () => {}, () => {});
   }
 }
 

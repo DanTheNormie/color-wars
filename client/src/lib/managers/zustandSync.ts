@@ -10,7 +10,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useGameLogStore } from "@/stores/gameLogStore";
 import { pixiTargetLocator } from "@/animation/target-locator";
 import type { PIXIGameBoard } from "@/components/NewGameBoard/pixi/engine";
-import type { TerritoryState } from "../../../../shared/dist/types/RoomState";
+import type { TerritoryState } from "@color-wars/shared";
 
 class ZustandSyncManager {
   private unsubs: (() => void)[] = [];
@@ -49,6 +49,9 @@ class ZustandSyncManager {
           useStore.setState({ state: state.toJSON()});
         }else{
           useStore.setState({ state: state.toJSON()});
+        }
+        if (state.game.winnerId) {
+          useStore.getState().setWinnerId(state.game.winnerId);
         }
         state.game.players.forEach((player) => {
           if(player.id == state.game.activePlayerId){

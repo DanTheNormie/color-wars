@@ -297,10 +297,12 @@ export class PlayerSprite extends PIXI.Container {
     }
   }
 
-  destroy(_?: PIXI.DestroyOptions): void {
+  destroy(options?: PIXI.DestroyOptions): void {
     this.pulseTl?.kill()
     this.pulseTl = undefined
     this.victoryLapTl?.kill()
     this.victoryLapTl = undefined
+    gsap.killTweensOf(this);
+    super.destroy(options);
   }
 }

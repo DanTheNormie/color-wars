@@ -243,12 +243,13 @@ export class TokenLayer extends PIXI.Container {
   destroy(options?: PIXI.DestroyOptions) {
     this.units.forEach((unit) => {
       pixiTargetLocator.unregister(unit.id);
+      gsap.killTweensOf(unit);
       unit.destroy({ children: true });
     }); 
     this.unsub();
     this.unsubActive();
     this.units.clear();
-    super.destroy(options)
+    super.destroy(options);
   }
 }
 

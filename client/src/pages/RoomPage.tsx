@@ -21,7 +21,7 @@ const NowPlayingHeader = lazy(() => import("@/components/NowPlayingHeader"));
 const GameActions = lazy(() => import("@/components/gameActions"));
 const UserAssets = lazy(() => import("@/components/UserAssets"));
 const TradesList = lazy(() => import("@/components/TradesList"));
-const GameOverOverlay = lazy(() => import("@/components/GameOverOverlay"));
+// const GameOverOverlay = lazy(() => import("@/components/GameOverOverlay"));
 // const VictoryOverlay = lazy(() => import("@/components/VictoryOverlay"));
 
 export interface RoomInfo {
@@ -43,6 +43,8 @@ const RoomPage = () => {
   const storedRoomId = useStore((z) => z.room.roomId);
   const { remainingSeconds } = useCountdown(autoReconnect.nextRetryAt);
   const rehydrated = useStore((z) => z.rehydrated);
+  const winnerId = useStore((z) => z.winnerId);
+  const isGameOver = !!winnerId;
 
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [infoError, setInfoError] = useState<string | null>(null);
@@ -174,28 +176,36 @@ const RoomPage = () => {
     >
       <div className="flex w-full flex-col items-center justify-center">
         <div id='game-container' className="w-full max-w-180 pb-[100vh] px-2 relative">
-          
-          <NowPlayingHeader />
-          <PixiCanvas />
-          <PlayersStatus />
-          <GameActions />
-          <TradesList />
-          <UserAssets />
-          
+          <div style={{ display: isGameOver ? 'none' : 'block' }}>
+            <NowPlayingHeader />
+          </div>
+          <PixiCanvas key="stable-pixi-canvas" />
+            <PlayersStatus />
+          <div className={isGameOver ? "hidden" : "contents"}>
+            <GameActions />
+            <TradesList />
+            <UserAssets />
+            <Suspense fallback={null}>
+              <CardSelectionOverlay />
+              <VFXLayer />
+              <TerritoryTooltip />
+            </Suspense>
+          </div>
+
           <ActionArea>
             <Suspense fallback={null}>
-              {roomPhase === "active" && <TurnControls />}
-              {roomPhase === "lobby" && <LobbyActions />}
+              {isGameOver ? (
+                <Button onClick={() => navigate("/")} className="w-full h-12 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white">
+                  Return to Lobby
+                </Button>
+              ) : (
+                <>
+                  {roomPhase === "active" && <TurnControls />}
+                  {roomPhase === "lobby" && <LobbyActions />}
+                </>
+              )}
             </Suspense>
           </ActionArea>
-
-          <Suspense fallback={null}>
-            <CardSelectionOverlay />
-            <GameOverOverlay />
-            {/* <VictoryOverlay /> */}
-            <VFXLayer />
-            <TerritoryTooltip />
-          </Suspense>
         </div>
       </div>
     </Suspense>

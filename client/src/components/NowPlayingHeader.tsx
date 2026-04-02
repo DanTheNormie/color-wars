@@ -14,7 +14,7 @@ export default function NowPlayingHeader() {
   const textColor = getTextColor(bgColor);
 
   return (
-    <div className="sticky top-0 z-50 flex w-full justify-center">
+    <div className="fixed top-0 z-50 flex w-full justify-center">
       <div 
         className="flex items-center gap-2 px-4 py-1.5 rounded-b-xl shadow-md transition-colors duration-300"
         style={{ backgroundColor: `${bgColor}`, color: textColor }}

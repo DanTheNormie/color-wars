@@ -57,16 +57,16 @@ export class GameEngine {
       player.hasLaunchedMissileThisRound = false;
     }
     //debug
-    // const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
-    // const tIDs = MAPS['INDIA'].map.territories.map(t => t.id)
+    const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
+    const tIDs = MAPS['INDIA'].map.territories.map(t => t.id)
 
-    // for (const tID of tIDs) {
-    //   this.state.game.territoryOwnership.set(tID, new TerritoryState(testPlayer.id))
-    //   this.state.queueAction('BUY_TERRITORY', { playerId: testPlayer.id, territoryID: tID, amount: 10000 })
-    //   const territoryState = this.state.game.territoryOwnership.get(tID)!;
-    //   territoryState.buildingType = 'CITY';
-    //   this.state.queueAction('UPGRADE_TERRITORY', { playerId: testPlayer.id, territoryID: tID, buildingType: 'CITY', amount: 10000 });
-    // }
+    for (const tID of tIDs) {
+      this.state.game.territoryOwnership.set(tID, new TerritoryState(testPlayer.id))
+      this.state.queueAction('BUY_TERRITORY', { playerId: testPlayer.id, territoryID: tID, amount: 10000 })
+      const territoryState = this.state.game.territoryOwnership.get(tID)!;
+      territoryState.buildingType = 'CITY';
+      this.state.queueAction('UPGRADE_TERRITORY', { playerId: testPlayer.id, territoryID: tID, buildingType: 'CITY', amount: 10000 });
+    }
     //debug
     
     this.state.game.diceTrack.clear();
@@ -81,8 +81,8 @@ export class GameEngine {
   }
 
   handleRoll(client: Client) {
-    const die1 = Math.floor(Math.random() * 6) + 1;
-    const die2 = Math.floor(Math.random() * 6) + 1;
+    const die1 = 6//Math.floor(Math.random() * 6) + 1;
+    const die2 = 6//Math.floor(Math.random() * 6) + 1;
     const roll = die1 + die2;
     this.state.game.diceState.rollTo.clear();
     this.state.game.diceState.rollTo.push(die1, die2);
@@ -102,6 +102,7 @@ export class GameEngine {
     // Victory Lap win detection — first player to cross Start wins
     if (player.isVictoryLap && (fromTile + roll >= this.state.game.diceTrack.length)) {
       this.state.game.turnPhase = 'game-over';
+      this.state.game.winnerId = client.sessionId;
       this.state.queueAction('GAME_OVER', { winnerId: client.sessionId });
       return;
     }
@@ -354,6 +355,7 @@ export class GameEngine {
     if (activePlayers.length === 1) {
       const winner = activePlayers[0];
       this.state.game.turnPhase = "game-over";
+      this.state.game.winnerId = winner.id;
       this.state.queueAction('GAME_OVER', { winnerId: winner.id })
       // this.state.pushAction("GAME_OVER", winner.id, { winnerId: winner.id });
     }
@@ -461,6 +463,7 @@ export class GameEngine {
         this.financialConsolidation(player.id)
         if (player.isVictoryLap) {
           this.state.game.turnPhase = 'game-over';
+          this.state.game.winnerId = player.id;
           this.state.queueAction('GAME_OVER', { winnerId: player.id });
           return;
         }
