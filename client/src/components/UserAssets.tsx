@@ -43,7 +43,7 @@ const UserAssets = () => {
     <div className="mt-4 flex w-full flex-col bg-secondary rounded-lg p-4 gap-4">
       {/* Territories Section */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center pb-4 gap-2 border-b border-white/10 pb-1">
+        <div className="flex items-center w-full justify-center gap-2 pb-1">
           <MapPinCheckInside className="h-4 w-4" />
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Territories ({ownedTerritories.length})</h3>
         </div>
@@ -69,12 +69,12 @@ const UserAssets = () => {
 
       {/* Cards Section */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 pb-4 border-b border-white/10">
+        <div className="flex items-center w-full justify-center gap-2 pb-1">
           <Spade className="h-4 w-4"/>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Inventory Cards ({cards.length})</h3>
         </div>
         
-        {cards.length > 0 ? (
+        {/* {cards.length > 0 ? (
           <div className="flex flex-col gap-2">
             {cards.map((card, idx) => (
               <div 
@@ -93,7 +93,7 @@ const UserAssets = () => {
           </div>
         ) : (
           <p className="py-2 text-center text-xs italic text-zinc-600">You don't have any cards yet.</p>
-        )}
+        )} */}
       </div>
     </div>
   );

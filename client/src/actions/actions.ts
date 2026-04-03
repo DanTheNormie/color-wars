@@ -169,7 +169,7 @@ export class AddCard extends BaseAction<"ADD_CARD"> {
     if (!tileID) throw new Error("PlayerSprite has no currentTileId for AddCard animation");
     const tile = pixiTargetLocator.get<PIXI.Container>(tileID)!;
 
-    const ele = document.getElementById(`player-cards-${playerId}`);
+    const ele = document.getElementById(`player-name-${playerId}`);
     if (!ele) throw new Error("Target DOM element for card counter not found");
 
     const vfxLayer = pixiTargetLocator.get("vfx-engine") as PIXIVFXLayer;

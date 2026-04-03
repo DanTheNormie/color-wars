@@ -11,10 +11,10 @@ export interface LOCAL_EVENT {
   UPDATE_PLAYER_PING: { id: string; ping: number };
   UPDATE_PLAYER: { id: string; player: PlayerState };
   UPDATE_PLAYER_MONEY: { id: string; amount: number };
-  UPDATE_PLAYER_ROLLED_DICE: {id: string; hasRolledDice: boolean};
+  UPDATE_PLAYER_ROLLED_DICE: { id: string; hasRolledDice: boolean };
   UPDATE_CURRENT_PLAYER: { player: PlayerState };
   REMOVE_PLAYER: { id: string };
-  UPDATE_TURN_PHASE: {turnPhase: TurnPhase};
+  UPDATE_TURN_PHASE: { turnPhase: TurnPhase };
   UPDATE_ROOM_LEADER: { id: string };
   UPDATE_NETWORK_STATE: { state: NetworkState };
   UPDATE_ANIMATION_SPEED: { speedMultiplier: number };
@@ -25,21 +25,21 @@ export interface LOCAL_EVENT {
   RELAY_MESSAGE: Message
   ACCELERATE_DICE: {};
   RAGDOLL_DICE: {};
-  ROLL_DICE_TO: {die1: number, die2: number};
-  UPDATE_ACTIVE_PLAYER: {playerId: string}
-  UPDATE_ROOM_PHASE: {phase: RoomPhase}
-  TOAST: {content:string, type:'success'|'error'|'warning'|'info', duration?: number}
-  UPDATE_ACTION_STATE: {state: 'resolving_action' | 'idle' | 'awaiting_action_result'}
-  SET_TERRITORY_INFO_DRAWER: {open: boolean}
-  CHANGE_MAP_ID: {mapID: MapID}
-  UPDATE_DICE_TRACK: {diceTrack: TileState[]}
+  ROLL_DICE_TO: { die1: number, die2: number };
+  UPDATE_ACTIVE_PLAYER: { playerId: string }
+  UPDATE_ROOM_PHASE: { phase: RoomPhase }
+  TOAST: { content: string, type: 'success' | 'error' | 'warning' | 'info', duration?: number }
+  UPDATE_ACTION_STATE: { state: 'resolving_action' | 'idle' | 'awaiting_action_result' }
+  SET_TERRITORY_INFO_DRAWER: { open: boolean }
+  CHANGE_MAP_ID: { mapID: MapID }
+  UPDATE_DICE_TRACK: { diceTrack: TileState[] }
   ADD_TRADE: { id: string; trade: any };
   UPDATE_TRADE: { id: string; trade: any };
   REMOVE_TRADE: { id: string };
-  UPDATE_PLAYER_HAS_BOUGHT_TERRITORY_THIS_ROUND: {id: string, hasBoughtTerritoryThisRound: boolean}
-  UPDATE_PLAYER_HAS_SABOTAGED_THIS_ROUND: {id: string, hasSabotagedThisRound: boolean}
-  UPDATE_PLAYER_HAS_LAUNCHED_MISSILE_THIS_ROUND: {id: string, hasLaunchedMissileThisRound: boolean}
-  VICTORY_LAP_STARTED: {playerId: string}
+  UPDATE_PLAYER_HAS_BOUGHT_TERRITORY_THIS_ROUND: { id: string, hasBoughtTerritoryThisRound: boolean }
+  UPDATE_PLAYER_HAS_SABOTAGED_THIS_ROUND: { id: string, hasSabotagedThisRound: boolean }
+  UPDATE_PLAYER_HAS_LAUNCHED_MISSILE_THIS_ROUND: { id: string, hasLaunchedMissileThisRound: boolean }
+  VICTORY_LAP_STARTED: { playerId: string }
 }
 
 export type LocalEventType = Extract<keyof LOCAL_EVENT, string>;

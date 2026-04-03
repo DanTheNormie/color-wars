@@ -23,7 +23,11 @@ class ToastManager {
         //toast.success(reason, {toasterId: 'center'})
       }),
       GameEventBus.on('TOAST', ({content, type, duration}) => {
-        toast[type](content, { toasterId: "center", duration: duration ?? 1000 })
+        if(type == 'error'){
+          toast.error(content, { toasterId: "center", duration: duration ?? 4000 })
+        }else{
+          toast[type](content, { toasterId: "center", duration: duration ?? 1000 })
+        }
       })
     );
   }

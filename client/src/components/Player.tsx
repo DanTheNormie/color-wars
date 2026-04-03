@@ -43,7 +43,7 @@ const Player = ({ player }: { player: PlainStateOf<PlayerState> }) => {
         <img className="h-[6vw] w-[6vw] sm:h-[8vw] sm:w-[8vw] sm:m-1 max-w-[52px] max-h-[52px]" src={AvatarColorMap[player.color]} alt="" />
         {/* Name */}
         <div className="flex h-full flex-col justify-around">
-          <span className={`${textSizeClass} text-[${player.color}]`}>
+          <span id={`player-name-${player.id}`} className={`${textSizeClass} text-[${player.color}]`}>
             {player.name}
             {isYou && " (You)"}
             {!player.connected && " [Disconnected]"}

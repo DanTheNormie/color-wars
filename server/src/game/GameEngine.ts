@@ -57,18 +57,18 @@ export class GameEngine {
       player.hasLaunchedMissileThisRound = false;
     }
     //debug
-    const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
-    const tIDs = MAPS['INDIA'].map.territories.map(t => t.id)
+    // const testPlayer = this.state.game.players.get(this.state.game.playerOrder[0])!
+    // const tIDs = MAPS['INDIA'].map.territories.map(t => t.id)
 
-    for (const tID of tIDs) {
-      this.state.game.territoryOwnership.set(tID, new TerritoryState(testPlayer.id))
-      this.state.queueAction('BUY_TERRITORY', { playerId: testPlayer.id, territoryID: tID, amount: 10000 })
-      const territoryState = this.state.game.territoryOwnership.get(tID)!;
-      territoryState.buildingType = 'CITY';
-      this.state.queueAction('UPGRADE_TERRITORY', { playerId: testPlayer.id, territoryID: tID, buildingType: 'CITY', amount: 10000 });
-    }
+    // for (const tID of tIDs) {
+    //   this.state.game.territoryOwnership.set(tID, new TerritoryState(testPlayer.id))
+    //   this.state.queueAction('BUY_TERRITORY', { playerId: testPlayer.id, territoryID: tID, amount: 10000 })
+    //   const territoryState = this.state.game.territoryOwnership.get(tID)!;
+    //   territoryState.buildingType = 'CITY';
+    //   this.state.queueAction('UPGRADE_TERRITORY', { playerId: testPlayer.id, territoryID: tID, buildingType: 'CITY', amount: 10000 });
+    // }
     //debug
-    
+
     this.state.game.diceTrack.clear();
     for (const tileConfig of DICE_TRACK) {
       this.state.game.diceTrack.push(new TileState(tileConfig.type, tileConfig.amount, tileConfig.label));
@@ -81,8 +81,8 @@ export class GameEngine {
   }
 
   handleRoll(client: Client) {
-    const die1 = 6//Math.floor(Math.random() * 6) + 1;
-    const die2 = 6//Math.floor(Math.random() * 6) + 1;
+    const die1 = Math.floor(Math.random() * 6) + 1;
+    const die2 = Math.floor(Math.random() * 6) + 1;
     const roll = die1 + die2;
     this.state.game.diceState.rollTo.clear();
     this.state.game.diceState.rollTo.push(die1, die2);
@@ -107,7 +107,7 @@ export class GameEngine {
       return;
     }
 
-    if(fromTile + roll >= this.state.game.diceTrack.length) {
+    if (fromTile + roll >= this.state.game.diceTrack.length) {
       this.financialConsolidation(client.sessionId)
     }
 
@@ -213,7 +213,7 @@ export class GameEngine {
     if (this.state.game.activePlayerId !== client.sessionId) return;
     const player = this.state.game.players.get(client.sessionId)!
     if (player.hasBoughtTerritoryThisRound) return;
-    
+
     const territorySize = MAPS[this.state.mapID].map.territories.find((t) => t.id === territoryID)!.hexes.length
 
     const economy = MAPS[this.state.mapID].getTerritoryEconomy(territorySize)
@@ -431,7 +431,7 @@ export class GameEngine {
       } else {
         this.state.game.diceTrack.pop();
         this.state.game.diceTrack.unshift(new TileState(newTileConfig.type, newTileConfig.amount, newTileConfig.label));
-        this.state.game.diceTrack.move((cards)=>{
+        this.state.game.diceTrack.move((cards) => {
           [cards[0], cards[1]] = [cards[1], cards[0]]
         })
       }
@@ -451,7 +451,7 @@ export class GameEngine {
             player.position = newPosition;
           }
         }
-      }else{
+      } else {
         ignorePlayerIds.add(player.id);
       }
     }
@@ -459,7 +459,7 @@ export class GameEngine {
     this.state.queueAction('SHIFT_TRACK', { newTiles, shiftDirection: direction, diceTrack: Array.from(this.state.game.diceTrack) })
 
     for (const [, player] of this.state.game.players) {
-      if(player.position === 0 && !ignorePlayerIds.has(player.id)) {
+      if (player.position === 0 && !ignorePlayerIds.has(player.id)) {
         this.financialConsolidation(player.id)
         if (player.isVictoryLap) {
           this.state.game.turnPhase = 'game-over';
@@ -505,7 +505,7 @@ export class GameEngine {
           player.hasLaunchedMissileThisRound = false;
         }
       }
-      this.shiftTrack('backward', Math.min(10,this.state.game.currentRound));
+      this.shiftTrack('backward', Math.min(10, this.state.game.currentRound));
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }
@@ -582,7 +582,7 @@ export class GameEngine {
     const playerAId = client.sessionId;
     const playerBId = targetPlayerId;
     const tradeId = Math.random().toString(36).substring(2, 9);
-    
+
     const tradeOffer = new TradeOffer(
       offer.playerAGivesCash || 0,
       offer.playerBGivesCash || 0,
@@ -591,17 +591,17 @@ export class GameEngine {
       new ArraySchema<string>(...(offer.playerAGivesTerritories || [])),
       new ArraySchema<string>(...(offer.playerBGivesTerritories || []))
     );
-    
+
     const trade = new Trade(tradeId, playerAId, playerBId, tradeOffer);
     this.state.game.activeTrades.set(tradeId, trade);
-    
+
     this.state.queueAction('PROPOSE_TRADE', { tradeId, targetPlayerId, offer, senderId: playerAId });
   }
 
   acceptTrade(client: Client, tradeId: string) {
     const trade = this.state.game.activeTrades.get(tradeId);
     if (!trade) return;
-    
+
     const playerA = this.state.game.players.get(trade.playerAId)!;
     const playerB = this.state.game.players.get(trade.playerBId)!;
 
@@ -612,12 +612,12 @@ export class GameEngine {
 
     trade.offer.playerAGivesCards.forEach(card => {
       const idx = playerA.cards.indexOf(card);
-      if(idx !== -1) playerA.cards.splice(idx, 1);
+      if (idx !== -1) playerA.cards.splice(idx, 1);
       playerB.cards.push(card);
     });
     trade.offer.playerBGivesCards.forEach(card => {
       const idx = playerB.cards.indexOf(card);
-      if(idx !== -1) playerB.cards.splice(idx, 1);
+      if (idx !== -1) playerB.cards.splice(idx, 1);
       playerA.cards.push(card);
     });
 
@@ -641,7 +641,7 @@ export class GameEngine {
   declineTrade(client: Client, tradeId: string) {
     const trade = this.state.game.activeTrades.get(tradeId);
     if (!trade) return;
-    
+
     this.state.game.activeTrades.delete(tradeId);
     this.state.queueAction('DECLINE_TRADE', { tradeId, senderId: client.sessionId });
   }

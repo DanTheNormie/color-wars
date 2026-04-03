@@ -78,18 +78,25 @@ export default function ChatInterface() {
 
       <DrawerContent className="z-999 fixed bottom-0 left-0 right-0 flex h-[45dvh] flex-col rounded-[10px] outline-none">
         <div className="mx-auto flex h-full w-full max-w-2xl flex-col overflow-hidden">
-          <DrawerHeader className="border-b">
+          <DrawerHeader className="">
             <DrawerTitle>Live Chat</DrawerTitle>
           </DrawerHeader>
 
           {/* Messages List */}
           <div className="min-h-0 flex-1 overflow-y-scroll p-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex flex-col gap-4 pb-4">
-              {messages.map((msg, index) => 
-                // Determine if the message is from the current user (optional logic if you have currentUserId)
-                // For now, we just list them.
-                <MessageItem message={msg} key={`${msg.timeStamp}-${index}`}/>
-              )}
+              {messages.map((msg, index) => {
+                const prevMsg = index > 0 ? messages[index - 1] : null;
+                const showSender = !prevMsg || prevMsg.senderId !== msg.senderId;
+
+                return (
+                  <MessageItem 
+                    message={msg} 
+                    key={`${msg.timeStamp}-${index}`}
+                    showSender={showSender}
+                  />
+                );
+              })}
               {/* Invisible element to scroll to */}
               <div ref={messagesEndRef} />
             </div>

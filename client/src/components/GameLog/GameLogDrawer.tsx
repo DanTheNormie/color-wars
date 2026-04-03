@@ -3,10 +3,13 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useGameLogStore } from "@/stores/gameLogStore";
 import { useStore } from "@/stores/sessionStore";
 import { gsap } from "gsap";
+import MarqueeImport from "react-fast-marquee";
 import { cn } from "@/lib/utils";
 import { AvatarColorMap } from "../Player";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import type { GameLogEntry } from "@/stores/gameLogStore";
+
+const Marquee = (MarqueeImport as any).default || MarqueeImport;
 
 // --- Subcomponents ---
 
@@ -34,9 +37,9 @@ const PlayerInline = memo(({ playerId }: { playerId: string }) => {
 });
 PlayerInline.displayName = "PlayerInline";
 
-const LogMessageItem = memo(({ entry }: { entry: GameLogEntry }) => {
+const LogMessageItem = memo(({ entry, className }: { entry: GameLogEntry; className?: string }) => {
   const payload = entry.payload;
-  const logMessageStyle = "flex justify-center w-full gap-2 items-center text-white";
+  const logMessageStyle = cn("flex justify-center w-full gap-2 items-center text-white", className);
   switch (entry.type) {
     case "ROLL_DICE":
       return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> rolled {payload.die1 + payload.die2} 🎲 ({payload.die1} + {payload.die2})</div>;
@@ -185,18 +188,53 @@ export function LogTicker({ entry, isOpen }: { entry: GameLogEntry | null; isOpe
     <div ref={containerRef} className="relative h-[24px] w-full overflow-hidden pointer-events-none text-black">
       {prevEntry && (
         <div className="prev-msg absolute top-0 left-0 w-full h-full">
-          <LogMessageItem entry={prevEntry} />
+          <MarqueeWrapper entry={prevEntry} isOpen={isOpen} play={false} />
         </div>
       )}
 
       {activeEntry && (
         <div className="active-msg absolute top-0 left-0 w-full h-full">
-          <LogMessageItem entry={activeEntry} />
+          <MarqueeWrapper entry={activeEntry} isOpen={isOpen} />
         </div>
       )}
     </div>
   );
 }
+
+const MarqueeWrapper = ({ entry, isOpen, play = true }: { entry: GameLogEntry; isOpen: boolean; play?: boolean }) => {
+  const [shouldMarquee, setShouldMarquee] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current && contentRef.current) {
+      const containerWidth = containerRef.current.offsetWidth;
+      const contentWidth = contentRef.current.scrollWidth;
+      setShouldMarquee(contentWidth+20 > containerWidth);
+    }
+  }, [entry]);
+
+  return (
+    <div ref={containerRef} className="w-full h-full flex items-center overflow-hidden">
+      <div className="invisible absolute whitespace-nowrap pointer-events-none" ref={contentRef}>
+         <LogMessageItem entry={entry} className="w-fit" />
+      </div>
+      
+      {shouldMarquee ? (
+        <Marquee 
+          play={!isOpen && play} 
+          gradient={false} 
+          speed={40}
+          delay={1}
+        >
+          <LogMessageItem entry={entry} className="w-fit px-8 whitespace-nowrap" />
+        </Marquee>
+      ) : (
+        <LogMessageItem entry={entry} />
+      )}
+    </div>
+  );
+};
 
 // --- Main Component ---
 

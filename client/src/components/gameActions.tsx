@@ -11,10 +11,14 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useStore } from "@/stores/sessionStore";
+import { useNavigate } from "react-router-dom";
 const GameActions = () => {
-    const declareBackruptcy = useStore((z) => z.declareBackruptcy)
-    const onDeclareBankruptcy = () => {
-        declareBackruptcy()
+    const navigate = useNavigate()
+    const leaveGame = useStore((z) => z.leaveGame)
+    const onLeaveGame = () => {
+        leaveGame()
+        navigate("/")
+        window.location.reload()
     }
     const roomPhase = useStore((z) => z.state.room?.phase)
     if (roomPhase !== "active") return null;
@@ -22,13 +26,13 @@ const GameActions = () => {
         <div className="flex w-full justify-end mt-4 px-2">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant={"outline"} className="bg-[#82181AAA]!">🏳️ Declare Bankruptcy</Button>
+                    <Button variant={"outline"} className="bg-[#82181AAA]!">🏳️ Leave Game</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>File for Bankruptcy</AlertDialogTitle>
+                        <AlertDialogTitle>Leave Game ?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            <span>Are you sure you want to file for bankruptcy?</span>
+                            <span>Are you sure you want to leave the game?</span>
                             <br />
                             <span>You will lose all your territories and money.</span>
                             <br /> <br />
@@ -37,7 +41,7 @@ const GameActions = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={onDeclareBankruptcy}>Continue</AlertDialogAction>
+                        <AlertDialogAction onClick={onLeaveGame}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

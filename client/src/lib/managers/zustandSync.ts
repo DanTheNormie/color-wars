@@ -44,25 +44,25 @@ class ZustandSyncManager {
       }),
 
       GameEventBus.on("FULL_SEND", (state) => {
-        if(state.turnCheckpoint){
+        if (state.turnCheckpoint) {
           state.game = state.turnCheckpoint
-          useStore.setState({ state: state.toJSON()});
-        }else{
-          useStore.setState({ state: state.toJSON()});
+          useStore.setState({ state: state.toJSON() });
+        } else {
+          useStore.setState({ state: state.toJSON() });
         }
         if (state.game.winnerId) {
           useStore.getState().setWinnerId(state.game.winnerId);
         }
         state.game.players.forEach((player) => {
-          if(player.id == state.game.activePlayerId){
+          if (player.id == state.game.activePlayerId) {
             useDiceTrackStore.getState().setActiveToken(player.id)
           }
           useDiceTrackStore.getState().upsertToken({ id: player.id, tileId: `track-tile-${player.position}`, color: hexStringToHexNumber(player.color), isVictoryLap: player.isVictoryLap });
-          state.game.territoryOwnership.forEach((territory:TerritoryState, territoryId:string) => {
-            if(territory.ownerId == player.id){
+          state.game.territoryOwnership.forEach((territory: TerritoryState, territoryId: string) => {
+            if (territory.ownerId == player.id) {
               useMapStore.getState().setTerritoryColor(territoryId, player.color)
               useStore.getState().updateTerritoryOwnership(territoryId, player.id)
-              if(territory.buildingType != 'BASE'){
+              if (territory.buildingType != 'BASE') {
                 useStore.getState().upgradeTerritory(territoryId, territory.buildingType)
               }
             }
@@ -103,7 +103,7 @@ class ZustandSyncManager {
         useStore.getState().setRoomLeader(id);
       }),
 
-      GameEventBus.on('RESET_STATE', ()=>{
+      GameEventBus.on('RESET_STATE', () => {
         useStore.getState().reset()
         useNetworkStore.getState().reset()
         useMapStore.getState().reset()
@@ -114,40 +114,40 @@ class ZustandSyncManager {
         pixiTargetLocator.clear()
       }),
 
-      GameEventBus.on('RELAY_MESSAGE', (message)=>{
+      GameEventBus.on('RELAY_MESSAGE', (message) => {
         useChatStore.getState().addMessage(message)
       }),
 
-      GameEventBus.on('ACCELERATE_DICE', ()=>{
+      GameEventBus.on('ACCELERATE_DICE', () => {
         useStore.getState().accelerateDice()
       }),
 
-      GameEventBus.on('RAGDOLL_DICE', ()=>{
+      GameEventBus.on('RAGDOLL_DICE', () => {
         useStore.getState().ragdollDice()
       }),
 
-      GameEventBus.on('UPDATE_ACTIVE_PLAYER', ({playerId})=>{
+      GameEventBus.on('UPDATE_ACTIVE_PLAYER', ({ playerId }) => {
         useDiceTrackStore.getState().setActiveToken(playerId)
         useStore.getState().setActivePlayer(playerId)
       }),
 
-      GameEventBus.on('UPDATE_ROOM_PHASE', ({phase})=>{
+      GameEventBus.on('UPDATE_ROOM_PHASE', ({ phase }) => {
         useStore.getState().updateRoomPhase(phase)
       }),
 
-      GameEventBus.on('UPDATE_ACTION_STATE', ({state})=>{
+      GameEventBus.on('UPDATE_ACTION_STATE', ({ state }) => {
         useStore.getState().setActionState(state)
       }),
 
-      GameEventBus.on('UPDATE_TURN_PHASE', ({turnPhase})=>{
+      GameEventBus.on('UPDATE_TURN_PHASE', ({ turnPhase }) => {
         useStore.getState().updateTurnPhase(turnPhase)
       }),
 
-      GameEventBus.on('CHANGE_MAP_ID', ({mapID}) => {
+      GameEventBus.on('CHANGE_MAP_ID', ({ mapID }) => {
         useMapStore.getState().setMapID(mapID)
       }),
 
-      GameEventBus.on('UPDATE_DICE_TRACK', ({diceTrack}) => {
+      GameEventBus.on('UPDATE_DICE_TRACK', ({ diceTrack }) => {
         useStore.getState().setDiceTrack(diceTrack)
       }),
 

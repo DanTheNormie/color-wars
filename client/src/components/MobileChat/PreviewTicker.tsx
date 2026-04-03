@@ -1,33 +1,45 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { CircleUserRound } from "lucide-react";
-import { useStore } from "@/stores/sessionStore"; // Adjust path to your session store
+import { useStore } from "@/stores/sessionStore";
 import type { Message } from "@color-wars/shared";
-import { getTextColor } from "@/lib/utils";
+import { AvatarColorMap } from "../Player";
+import MarqueeImport from "react-fast-marquee";
+const Marquee = (MarqueeImport as any).default || MarqueeImport;
 
-const TickerItem = ({ message }: { message: Message }) => {
+const TickerItem = ({ message, isOpen }: { message: Message, isOpen: boolean }) => {
     const player = useStore((z) =>
       z.state.game.players ? z.state.game.players[message.senderId] : null,
     );
   
     const color = player?.color || "#64748b";
     const name = player?.name || message.senderId;
+
+    const [shouldMarquee, setShouldMarquee] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+  
+    useEffect(() => {
+      if (containerRef.current && contentRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const contentWidth = contentRef.current.scrollWidth;
+        // Check if content (name + separator + message) exceeds space
+        setShouldMarquee(contentWidth > containerWidth);
+      }
+    }, [message, name]);
   
     return (
-      <div className="flex w-full h-full items-center gap-2 px-2">
+      <div ref={containerRef} className="flex w-full h-full items-center gap-2 px-2 overflow-hidden">
         {/* Avatar */}
         <div className="shrink-0">
-          <CircleUserRound className="h-6 w-6 rounded-full" style={{ color: getTextColor(color), background: color }} />
+           <img 
+            className="h-6 w-6 rounded-full object-cover" 
+            src={AvatarColorMap[color as keyof typeof AvatarColorMap] || AvatarColorMap["#64748b"]} 
+            alt="" 
+          />
         </div>
   
-        {/* 
-           Text Wrapper: 
-           1. flex-1: Takes up remaining width 
-           2. min-w-0: CRITICAL. Allows the child text to truncate properly. 
-        */}
-        <div className="flex flex-1 items-center min-w-0 gap-1">
-          
-          {/* Name: prevents wrapping so it stays solid */}
+        <div className="flex flex-1 items-center min-w-0 gap-1 overflow-hidden h-full">
+          {/* Name Label - always visible */}
           <span 
               className="text-sm font-bold whitespace-nowrap shrink-0" 
               style={{ color: color }}
@@ -35,13 +47,32 @@ const TickerItem = ({ message }: { message: Message }) => {
               {name}
           </span>
   
-          <span className=" text-xs shrink-0 mr-2">:</span>
-  
-          {/* Message: truncate will now work because parent has min-w-0 */}
-          <span className="text-sm truncate w-full text-foreground">
-              {message.content}
-          </span>
-          
+          <span className="text-xs shrink-0 mr-1">:</span>
+
+          {/* Marquee or Static Content */}
+          <div className="flex-1 min-w-0 h-full flex items-center">
+             {/* Hidden measure element */}
+             <div className="invisible absolute whitespace-nowrap pointer-events-none" ref={contentRef}>
+                {message.content}
+             </div>
+
+             {shouldMarquee ? (
+                <Marquee 
+                    play={!isOpen} 
+                    gradient={false} 
+                    speed={40}
+                    delay={1}
+                >
+                    <span className="text-sm pr-8 whitespace-nowrap text-foreground">
+                        {message.content}
+                    </span>
+                </Marquee>
+             ) : (
+                <span className="text-sm truncate text-foreground">
+                    {message.content}
+                </span>
+             )}
+          </div>
         </div>
       </div>
     );
@@ -118,13 +149,13 @@ export function PreviewTicker({ message, isOpen }: PreviewTickerProps) {
 
       {prevMsg && (
         <div className="prev-msg absolute top-0 left-0 w-full h-full">
-          <TickerItem message={prevMsg} />
+          <TickerItem message={prevMsg} isOpen={isOpen} />
         </div>
       )}
 
       {activeMsg && (
         <div className="active-msg absolute top-0 left-0 w-full h-full">
-          <TickerItem message={activeMsg} />
+          <TickerItem message={activeMsg} isOpen={isOpen} />
         </div>
       )}
     </div>

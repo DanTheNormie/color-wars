@@ -135,7 +135,7 @@ const RoomPage = () => {
         <div className="flex h-screen w-full items-center justify-center">
           <div className="flex h-full w-full flex-col items-center justify-center text-center">
             <h1 className="text-4xl mb-4 text-white">{infoError}</h1>
-            <Button className="mt-4" onClick={() => navigate("/")}>
+            <Button className="mt-4" onClick={() =>{ navigate("/"); window.location.reload()}}>
               Return to Lobby
             </Button>
           </div>
@@ -149,7 +149,7 @@ const RoomPage = () => {
           <div className="flex h-screen w-full items-center justify-center">
             <div className="flex h-full w-full flex-col items-center justify-center text-center">
               <h1 className="text-4xl mb-4 text-white">Game has already started</h1>
-              <Button className="mt-4" onClick={() => navigate("/")}>
+              <Button className="mt-4" onClick={() => { navigate("/"); window.location.reload()}}>
                 Go to Lobby
               </Button>
             </div>
@@ -182,7 +182,7 @@ const RoomPage = () => {
       <div className="flex h-screen w-full items-center justify-center">
         <div className="flex h-full w-full flex-col items-center justify-center text-center">
           <h1 className="text-4xl text-white">Connection Lost</h1>
-          <Button className="mt-4" onClick={() => navigate("/")}>
+          <Button className="mt-4" onClick={() => { navigate("/"); window.location.reload()}}>
             Return to Lobby
           </Button>
         </div>
@@ -198,9 +198,9 @@ const RoomPage = () => {
         </div>
       }
     >
-      <div className="flex w-full flex-col items-center justify-center">
+      <div className="flex w-full mt-4 flex-col items-center justify-center">
         <div id='game-container' className="w-full max-w-180 pb-[100vh] px-2 relative">
-          <div style={{ display: isGameOver ? 'none' : 'block' }}>
+          <div className="flex justify-center w-full relative" style={{ display: isGameOver ? 'none' : '' }}>
             <NowPlayingHeader />
           </div>
           <PixiCanvas key="stable-pixi-canvas" />
@@ -219,7 +219,7 @@ const RoomPage = () => {
           <ActionArea>
             <Suspense fallback={null}>
               {isGameOver ? (
-                <Button onClick={() => navigate("/")} className="w-full h-12 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white">
+                <Button onClick={() => { navigate("/"); window.location.reload()}} className=" w-20 h-12 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white">
                   Return to Lobby
                 </Button>
               ) : (

@@ -78,11 +78,11 @@ class Network {
       GameEventBus.emit("RELAY_MESSAGE", message);
     });
 
-    this.onMessage("ACCELERATE_DICE", ({}) => {
+    this.onMessage("ACCELERATE_DICE", ({ }) => {
       GameEventBus.emit("ACCELERATE_DICE", {});
     });
 
-    this.onMessage("RAGDOLL_DICE", ({}) => {
+    this.onMessage("RAGDOLL_DICE", ({ }) => {
       GameEventBus.emit("RAGDOLL_DICE", {});
     });
 
@@ -122,7 +122,7 @@ class Network {
             }),
           );
         }),
-        $(this.room.state.game).players.onRemove((_:any, playerId: string) => {
+        $(this.room.state.game).players.onRemove((_: any, playerId: string) => {
           GameEventBus.emit("REMOVE_PLAYER", { id: playerId });
         }),
         $(this.room.state.game).activeTrades.onAdd((trade: any, tradeId: string) => {
@@ -152,10 +152,10 @@ class Network {
           GameEventBus.emit("UPDATE_ROOM_LEADER", { id: newValue });
         }),
         $(this.room.state.game).listen('turnPhase', (newValue: TurnPhase) => {
-          GameEventBus.emit('UPDATE_TURN_PHASE', {turnPhase: newValue})
+          GameEventBus.emit('UPDATE_TURN_PHASE', { turnPhase: newValue })
         }),
         $(this.room.state).listen('mapID', (newValue: MapID) => {
-          GameEventBus.emit("CHANGE_MAP_ID", {mapID: newValue})
+          GameEventBus.emit("CHANGE_MAP_ID", { mapID: newValue })
         })
       );
     });
@@ -181,13 +181,13 @@ class Network {
     const senderId = this.room.sessionId;
     const ctx = { senderId, ...payload } as ActionContext<K>;
     const state = this.room.state.toJSON();
-    try{
+    try {
       validateOrThrow(type, state, ctx);
-    }catch(err: any){
-      GameEventBus.emit("TOAST", {content: err.message, type: "error"})
+    } catch (err: any) {
+      GameEventBus.emit("TOAST", { content: err.message, type: "error" })
       return;
     }
-    
+
     this.room.send(type, payload);
   }
 
