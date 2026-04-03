@@ -65,7 +65,7 @@ const LogMessageItem = memo(({ entry, className }: { entry: GameLogEntry; classN
       if (!diceTrack || diceTrack.length === 0) return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on a tile.</div>;
       const tile = diceTrack[payload.toTile % diceTrack.length];
       const tileName = tile.type.toLowerCase()
-      return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> arrived at {tileName === "start" ? `the` : `a`} <span className="font-bold underline">{tileName}</span> 📍</div>
+      return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on {tileName === "start" ? `the` : `a`} <span className="font-bold">{tileName}</span> tile📍</div>
     }
     case "SHIFT_TRACK":{
       const direction = payload.shiftDirection === "forward" ? "counter-clockwise" : "clockwise";

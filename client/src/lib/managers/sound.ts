@@ -83,7 +83,7 @@ class SoundManager implements IAudioService {
     this.progress = p;
     if (this.onProgressCb) this.onProgressCb(p);
     // Also emit via GameEventBus for non-React consumers
-    GameEventBus.emit("TOAST" as any, { content: `Loading audio: ${Math.round(p)}%`, type: "info" });
+    //GameEventBus.emit("TOAST" as any, { content: `Loading audio: ${Math.round(p)}%`, type: "info" });
   }
 
   public onProgress(cb: (progress: number) => void) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useStore } from "@/stores/sessionStore";
 import TradeModal from "./TradeModal";
 import { PlusCircle } from "lucide-react";
@@ -9,9 +9,30 @@ const TradesList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewTradeId, setViewTradeId] = useState<string | null>(null);
   
-  const activeTrades = useStore((s) => s.state.game?.activeTrades) || {};
+  const activeTradesRaw = useStore((s) => s.state.game?.activeTrades);
+  const activeTrades = useMemo(() => activeTradesRaw || {}, [activeTradesRaw]);
   const players = useStore((s) => s.state.game?.players) || {};
   const roomPhase = useStore((s) => s.state.room?.phase);
+  const currentPlayerId = useStore((s) => s.currentPlayer?.id);
+  const [autoShownTradeIds, setAutoShownTradeIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (roomPhase !== "active" || !currentPlayerId) return;
+
+    const pendingIncomingTrades = Object.values(activeTrades).filter(
+      (t) => t.status === "pending" && t.playerBId === currentPlayerId
+    );
+
+    const nextNewTrade = pendingIncomingTrades.find(t => !autoShownTradeIds.has(t.id));
+
+    if (nextNewTrade && !isModalOpen && !viewTradeId) {
+      setTimeout(() => {
+        setViewTradeId(nextNewTrade.id);
+        setIsModalOpen(true);
+        setAutoShownTradeIds(prev => new Set(prev).add(nextNewTrade.id));
+      }, 0);
+    }
+  }, [activeTrades, currentPlayerId, roomPhase, isModalOpen, viewTradeId, autoShownTradeIds]);
 
   if (roomPhase !== "active") return null;
 
@@ -29,7 +50,7 @@ const TradesList = () => {
         {/* {tradesList.length === 0 && (
           <p className="text-center text-[11px] text-zinc-500 py-2 italic">No active trades</p>
         )} */}
-        {tradesList.length !== 0 && tradesList.map((trade: any) => {
+        {tradesList.length !== 0 && tradesList.map((trade) => {
           const playerA = players[trade.playerAId];
           const playerB = players[trade.playerBId];
           if (!playerA || !playerB) return null;

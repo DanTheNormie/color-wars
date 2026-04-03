@@ -186,10 +186,16 @@ export class GameState extends Schema {
   @type("number") currentRound: number = 0;
   @type(["string"]) trackOrder = new ArraySchema<string>();
   @type(["string"]) generatedCardIDs = new ArraySchema<string>();
+  @type({ map: "string" }) votes = new MapSchema<string>();
+  @type("string") lastShiftDirection: "clockwise" | "anticlockwise" | "none" = "none";
+  @type("number") currentShiftMagnitude: number = 0;
   @type([TileState]) diceTrack: ArraySchema<TileState>;
 
   constructor() {
     super();
+    this.votes = new MapSchema<string>();
+    this.lastShiftDirection = "none";
+    this.currentShiftMagnitude = 0;
     this.diceTrack = new ArraySchema<TileState>();
     DICE_TRACK.forEach((tileConfig) => {
       this.diceTrack.push(new TileState(tileConfig.type, tileConfig.amount, tileConfig.label));

@@ -334,9 +334,9 @@ export const useStore = create(
                   console.error("[rollDice] Error sending rollDice message:", error);
                 }
               },
-              endTurn: () => {
+              endTurn: (vote: "clockwise" | "anticlockwise") => {
                 try {
-                  network.send("END_TURN", {});
+                  network.send("END_TURN", { vote });
                 } catch (error) {
                   console.warn("Unable to end turn", error);
                 }

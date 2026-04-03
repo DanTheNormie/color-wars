@@ -217,9 +217,9 @@ export class GameRoom extends Room<{state: RoomState}> {
       this.gameEngine.startGame()
     })
 
-    this.onAction('END_TURN', (client) => {
-      logger.info('received end turn');
-      this.gameEngine.endTurn();
+    this.onAction('END_TURN', (client, { vote }) => {
+      logger.info('received end turn with vote:', vote);
+      this.gameEngine.endTurn(vote);
     })
 
     this.onAction('CHANGE_MAP', (client, {mapID}) => {

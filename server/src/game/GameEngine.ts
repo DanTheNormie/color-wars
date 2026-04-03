@@ -343,7 +343,7 @@ export class GameEngine {
 
     // 4. Pass turn if it's their turn
     if (this.state.game.activePlayerId === player.id && this.state.game.players.size > 2) {
-      this.endTurn();
+      this.endTurn("clockwise");
     } else {
       this.checkGameOver();
     }
@@ -474,7 +474,10 @@ export class GameEngine {
     this.state.game.turnPhase = 'resolving-shift';
   }
 
-  endTurn() {
+  endTurn(vote: "clockwise" | "anticlockwise") {
+    // Record vote
+    this.state.game.votes.set(this.state.game.activePlayerId, vote);
+
     const currentIdx = this.state.game.playerOrder.indexOf(this.state.game.activePlayerId);
     let nextIdx = (currentIdx + 1) % this.state.game.playerOrder.length;
 
@@ -506,7 +509,32 @@ export class GameEngine {
           player.hasLaunchedMissileThisRound = false;
         }
       }
-      this.shiftTrack('backward', Math.min(10, this.state.game.currentRound));
+
+      // Tally votes
+      let clockwiseVotes = 0;
+      let anticlockwiseVotes = 0;
+      this.state.game.votes.forEach((v: string) => {
+        if (v === "clockwise") clockwiseVotes++;
+        else anticlockwiseVotes++;
+      });
+
+      const winnerDirection = clockwiseVotes >= anticlockwiseVotes ? "clockwise" : "anticlockwise";
+      
+      // Momentum logic
+      if (this.state.game.lastShiftDirection === winnerDirection) {
+        this.state.game.currentShiftMagnitude = Math.min(10, this.state.game.currentShiftMagnitude + 1);
+      } else {
+        this.state.game.currentShiftMagnitude = 1;
+      }
+      this.state.game.lastShiftDirection = winnerDirection;
+
+      // Map winnerDirection to shiftTrack direction
+      // Clockwise -> forward, Anticlockwise -> backward
+      const shiftDir = winnerDirection === "clockwise" ? "forward" : "backward";
+      
+      this.shiftTrack(shiftDir, this.state.game.currentShiftMagnitude);
+      
+      this.state.game.votes.clear();
     } else {
       this.state.game.turnPhase = "awaiting-roll";
     }
@@ -519,7 +547,6 @@ export class GameEngine {
     const victim = this.state.game.players.get(victimId)!;
 
     const amount = Math.floor(victim.money * 0.5);
-    const fromTile = victim.position;
     const toTile = 0; // Reset to start
 
     // Update state

@@ -73,8 +73,9 @@ const GameOverOverlay: React.FC = () => {
 
         <Button 
           size="lg" 
-          variant="secondary"
-          className="mt-4 w-full h-14 bg-white text-black hover:bg-neutral-200 font-black text-lg gap-2 rounded-xl transition-all active:scale-95 shadow-lg"
+          variant="pop"
+          color="blue"
+          className="mt-4 w-full h-14 font-black text-lg gap-2 rounded-xl transition-all"
           onClick={() => leaveGame()}
         >
           <Home className="w-5 h-5" />

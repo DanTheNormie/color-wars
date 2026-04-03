@@ -12,13 +12,14 @@ import {
 import { GameEventBus } from "@/lib/managers/GameEventBus";
 import SabotageModal from "./SabotageModal";
 import MissileLaunchModal from "./MissileLaunchModal";
-import { Sword, Rocket } from "lucide-react";
+import { Sword, Rocket, ChevronsLeft, ChevronsRight } from "lucide-react";
 
+/**
+ * TurnControls Component
+ * Manages the dice rolling, end turn voting, sabotage, and missile launch actions.
+ */
 const TurnControls = () => {
   const sendDiceMode = useStore((z) => z.sendDiceMode);
-  // -----------------------------------------------------
-  // DICE STATE
-  // -----------------------------------------------------
   const diceMode = useStore((z) => z.state.game.diceState.mode);
   const rollTo = useStore((z) => z.state.game.diceState.rollTo);
   const currentPlayerID = useStore((z) => z.currentPlayer.id);
@@ -38,29 +39,29 @@ const TurnControls = () => {
   const [isMissileModalOpen, setIsMissileModalOpen] = useState(false);
 
   const holdStartRef = useRef<number | null>(null);
-
   const diceCount = 2;
-
   const diceRefs = useRef<(DiceController | null)[]>([]);
 
-  const endTurnHandler = () => {
-    if(currentPlayerStatus === "in-debt") {
-     GameEventBus.emit("TOAST", {
-      content: "You can't end your turn with a negative balance.",
-      type: "error",
-      duration: 5000
-     }) 
-     return
+  /**
+   * Handles ending the turn with a directional vote.
+   */
+  const endTurnHandler = (vote: "clockwise" | "anticlockwise") => {
+    if (currentPlayerStatus === "in-debt") {
+      GameEventBus.emit("TOAST", {
+        content: "You can't end your turn with a negative balance.",
+        type: "error",
+        duration: 5000
+      }); 
+      return;
     }
-    endTurn()
-  }
+    endTurn(vote);
+  };
 
   useEffect(() => {
     if (diceMode == "ROLLINGTOFACE") {
       diceRefs.current.forEach((dice, i) => {
         if (!dice) return;
         if (!dice.isRunning()) dice.startPhysicsLoop(nanoid());
-        // Default to a fallback face if rollTo array is shorter than expected
         const face = rollTo[i] ?? 1;
         dice.setMode("spin-to-target", { face });
         dice.setOnSettle(() => setShowDiceRollMessage(true));
@@ -76,7 +77,7 @@ const TurnControls = () => {
         if (!dice) return;
         dice.setMode("ragdoll");
       });
-    } else if(diceMode == "IDLE" && rollTo && rollTo.length > 0) {
+    } else if (diceMode == "IDLE" && rollTo && rollTo.length > 0) {
       diceRefs.current.forEach((dice, i) => {
         if (!dice) return;
         dice.rotateToFace(rollTo[i]);
@@ -100,9 +101,7 @@ const TurnControls = () => {
     if (holdStartRef.current == null) return;
     const elapsed = performance.now() - holdStartRef.current!;
     holdStartRef.current = null;
-    if (elapsed > 10000) {
-      return; // Handled defensively if hold is unreasonably long
-    }
+    if (elapsed > 10000) return;
     if (elapsed < 1000) {
       diceRefs.current.forEach((dice) => {
         if (!dice) return;
@@ -130,51 +129,69 @@ const TurnControls = () => {
         {Array.from({ length: diceCount }).map((_, i) => (
           <BetterDice 
              key={i} 
-             ref={(el) => {
-               diceRefs.current[i] = el;
-             }} 
+             ref={(el) => { diceRefs.current[i] = el; }} 
           />
         ))}
       </div>
       <div className={`${(actionState == 'idle') ? '' : 'hidden'} flex w-full h-full flex-1 justify-center items-center flex-col gap-2 ${isNOTActivePlayer ? 'hidden' : ''}`}>
         <DiceHoldButton hasRolled={hasRolledDice} onHoldStart={holdStart} onHoldEnd={holdEnd} />
         <div className={`${!hasRolledDice ? 'hidden' : ''} w-full flex flex-col gap-2 justify-center`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="w-full flex justify-center flex-col items-center gap-2">
-                <Button
-                  className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""}`}
-                  onClick={endTurnHandler}>
-                  End Turn {currentPlayerStatus == 'in-debt' ? '⚠️' : ''}
-                </Button>
-                {/* Sabotage Button logic */}
-                {canSabotage &&
-                  <Button 
-                    variant={"destructive"}
-                    onClick={() => setIsSabotageModalOpen(true)}
-                  >
-                    <Sword className="w-4 h-4 mr-2" />
-                    Sabotage
+          <div className="w-full flex justify-center flex-col items-center gap-2">
+            <div className="flex gap-4 items-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="pop"
+                    color="blue"
+                    size="icon"
+                    className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""} w-12 h-12 rounded-xl transition-all`}
+                    onClick={() => endTurnHandler("clockwise")}>
+                    <ChevronsLeft className="w-8 h-8" />
                   </Button>
-                }
-                {hasMissileSilo &&
-                  <Button 
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
-                    onClick={() => setIsMissileModalOpen(true)}
-                  >
-                    <Rocket className="w-4 h-4 mr-2" />
-                    Launch Missile
-                  </Button>
-                }
-              </span>
-            </TooltipTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  Vote Anticlockwise
+                </TooltipContent>
+              </Tooltip>
 
-            {currentPlayerStatus === "in-debt" && (
-              <TooltipContent className="z-99999">
-                You can't end your turn with a negative balance.
-              </TooltipContent>
-            )}
-          </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="pop"
+                    color="green"
+                    size="icon"
+                    className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""} w-12 h-12 rounded-xl transition-all`}
+                    onClick={() => endTurnHandler("anticlockwise")}>
+                    <ChevronsRight className="w-8 h-8" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  Vote Clockwise
+                </TooltipContent>
+              </Tooltip>
+            </div>
+
+            {canSabotage &&
+              <Button 
+                variant="pop"
+                color="red"
+                onClick={() => setIsSabotageModalOpen(true)}
+              >
+                <Sword className="w-4 h-4 mr-2" />
+                Sabotage
+              </Button>
+            }
+            {hasMissileSilo &&
+              <Button 
+                variant="pop"
+                color="rose"
+                onClick={() => setIsMissileModalOpen(true)}
+              >
+                <Rocket className="w-4 h-4 mr-2" />
+                Launch Missile
+              </Button>
+            }
+          </div>
         </div>
       </div>
       <SabotageModal isOpen={isSabotageModalOpen} onClose={() => setIsSabotageModalOpen(false)} />

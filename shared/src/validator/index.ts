@@ -50,6 +50,7 @@ const ACTION_RULES: {
     rules.requirePlayerExists,
     rules.requirePlayersTurn,
     rules.requireHasRolledDice,
+    rules.requireValidVote,
   ],
 
   CHANGE_MAP: [

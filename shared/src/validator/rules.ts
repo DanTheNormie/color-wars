@@ -38,6 +38,15 @@ interface WithMissileLaunch extends WithPlayer {
   fromTerritoryID: string;
   targetTerritoryID: string;
 }
+interface WithVote extends WithPlayer {
+  vote: "clockwise" | "anticlockwise";
+}
+
+export const requireValidVote = (s: PlainStateOf<RoomState>, ctx: WithVote) => {
+  if (ctx.vote !== "clockwise" && ctx.vote !== "anticlockwise") {
+    throw new Error("Invalid vote direction");
+  }
+};
 
 export const requireOwnsFromTerritory = (s: PlainStateOf<RoomState>, ctx: WithMissileLaunch) => {
   const territoryState = s.game.territoryOwnership[ctx.fromTerritoryID];
