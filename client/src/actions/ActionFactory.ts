@@ -22,7 +22,8 @@ import {
   SabotageAction,
   VictoryLapStartedAction,
   MissileLaunchedAction,
-  AcceptTradeAction
+  AcceptTradeAction,
+  VoteTrackRotationAction
 } from "./actions";
 
 export class ActionFactory {
@@ -90,6 +91,9 @@ export class ActionFactory {
 
       case "ACCEPT_TRADE":
         return new AcceptTradeAction(data);
+
+      case "VOTE_TRACK_ROTATION":
+        return new VoteTrackRotationAction(data);
 
       default:
         throw new Error(`Unknown Action Type, unable to create action: ${JSON.stringify(data)}`);

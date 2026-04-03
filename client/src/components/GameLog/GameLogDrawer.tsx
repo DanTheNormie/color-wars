@@ -162,6 +162,12 @@ const LogMessageItem = memo(({ entry, className }: { entry: GameLogEntry; classN
         <PlayerInline playerId={entry.playerId} /> accepted a trade 🤝 created by <PlayerInline playerId={proposerId} />
       </div>;
     }
+    case 'VOTE_TRACK_ROTATION': {
+      const { vote } = payload;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={entry.playerId} /> voted for <span className="font-bold text-yellow-400">{vote}</span> rotation 🔄
+      </div>;
+    }
     default:
       return <div className={logMessageStyle}>{`<!-- log for action type: "${entry.type}" not implemented -->`}</div>;
   }

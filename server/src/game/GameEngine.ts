@@ -477,6 +477,7 @@ export class GameEngine {
   endTurn(vote: "clockwise" | "anticlockwise") {
     // Record vote
     this.state.game.votes.set(this.state.game.activePlayerId, vote);
+    this.state.queueAction('VOTE_TRACK_ROTATION', { playerId: this.state.game.activePlayerId, vote });
 
     const currentIdx = this.state.game.playerOrder.indexOf(this.state.game.activePlayerId);
     let nextIdx = (currentIdx + 1) % this.state.game.playerOrder.length;

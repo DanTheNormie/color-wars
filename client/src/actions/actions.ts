@@ -666,3 +666,10 @@ export class AcceptTradeAction extends BaseAction<"ACCEPT_TRADE"> {
     return new ActionHandle(Promise.resolve(), () => {}, () => {});
   }
 }
+
+export class VoteTrackRotationAction extends BaseAction<"VOTE_TRACK_ROTATION"> {
+  execute(): ActionHandle {
+    this.logAction(this.payload.playerId);
+    return new ActionHandle(Promise.resolve(), () => {}, () => {});
+  }
+}

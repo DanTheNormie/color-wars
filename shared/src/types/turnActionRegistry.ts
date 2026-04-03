@@ -25,6 +25,7 @@ export const TURN_ACTION_REGISTRY = {
   FINANCIAL_CONSOLIDATION: {} as {playerId: string, collections:{[territoryID: string]: number}},
   VICTORY_LAP_STARTED: {} as { playerId: string },
   MISSILE_LAUNCHED: {} as { attackerId: string; fromTerritoryID: string; targetTerritoryID: string; evictedPlayerId: string },
+  VOTE_TRACK_ROTATION: {} as { playerId: string, vote: "clockwise" | "anticlockwise" },
   ACCEPT_TRADE: {} as { 
     tradeId: string, 
     senderId: string,
