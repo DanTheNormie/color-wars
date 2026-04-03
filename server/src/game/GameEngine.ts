@@ -140,7 +140,7 @@ export class GameEngine {
     this.state.queueAction('FINANCIAL_CONSOLIDATION', { playerId: player.id, collections: collections })
   }
 
-
+  
   updateFinancialStatus(playerId: string) {
     const player = this.state.game.players.get(playerId)!;
     if ((player.money >= 0) && player.status !== "healthy") {
@@ -236,11 +236,11 @@ export class GameEngine {
 
     const cost = economy.BASE.capEx / 2
 
-    this.state.queueAction('SELL_TERRITORY', { playerId: player.id, territoryID, amount: cost })
     // this.state.pushAction('SELL_TERRITORY', player.id, { playerId: player.id, territoryID, amount: cost })
-    this.updateFinancialStatus(player.id)
     player.money += cost;
     this.state.game.territoryOwnership.delete(territoryID)
+    this.state.queueAction('SELL_TERRITORY', { playerId: player.id, territoryID, amount: cost })
+    this.updateFinancialStatus(player.id)
   }
 
   upgradeTerritory(client: Client, territoryID: string, buildingType: DevelopmentType) {
@@ -292,6 +292,7 @@ export class GameEngine {
     territoryState.buildingType = "BASE";
 
     this.state.queueAction('DOWNGRADE_TERRITORY', { playerId: player.id, territoryID, amount: refund });
+    this.updateFinancialStatus(player.id)
   }
 
   selectCard(client: Client, encodedConfig: string) {
