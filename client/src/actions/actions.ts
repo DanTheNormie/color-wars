@@ -315,6 +315,7 @@ export class ShiftTrackAction extends BaseAction<"SHIFT_TRACK"> {
     const app = engine.getApp();
     if (!app) throw new Error("Pixi App not ready");
 
+    this.logAction("");
     //TODO: find out side effects of upsertToken
     return new ActionHandle(
       (async () => {
@@ -358,6 +359,7 @@ export class UpdatePlayerStatusAction extends BaseAction<"UPDATE_PLAYER_STATUS">
   execute(): ActionHandle {
     const { playerId, status } = this.payload;
     const store = useStore.getState();
+    this.logAction(playerId);
     store.updatePlayerStatus(playerId, status);
 
     if (status === 'bankrupt') {
@@ -382,6 +384,7 @@ export class UpdatePlayerStatusAction extends BaseAction<"UPDATE_PLAYER_STATUS">
 export class UpdatePlayerMoneyAction extends BaseAction<"UPDATE_PLAYER_MONEY"> {
   execute(): ActionHandle {
     const { playerId, amount } = this.payload;
+    this.logAction(playerId);
     useStore.getState().updatePlayerMoney(playerId, amount);
     return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }

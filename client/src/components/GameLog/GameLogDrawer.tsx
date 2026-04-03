@@ -38,19 +38,21 @@ const PlayerInline = memo(({ playerId }: { playerId: string }) => {
 PlayerInline.displayName = "PlayerInline";
 
 const LogMessageItem = memo(({ entry, className }: { entry: GameLogEntry; className?: string }) => {
+  const currentId = useStore((s) => s.currentPlayer?.id);
+  const diceTrack = useStore((s) => s.state.game.diceTrack);
   const payload = entry.payload;
   const logMessageStyle = cn("flex justify-center w-full gap-2 items-center text-white", className);
   switch (entry.type) {
     case "ROLL_DICE":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> rolled {payload.die1 + payload.die2} 🎲 ({payload.die1} + {payload.die2})</div>;
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> rolled <span className="font-bold text-blue-400">{payload.die1 + payload.die2}</span> 🎲 ({payload.die1} + {payload.die2})</div>;
     case "INCR_MONEY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received <span className="text-green-600">${payload.amount?.toLocaleString()}</span></div>;
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received <span className="text-green-500 font-bold">+${payload.amount?.toLocaleString()}</span> 💰</div>;
     case "DECR_MONEY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> paid <span className="text-red-600">${payload.amount?.toLocaleString()}</span></div>;
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> paid <span className="text-red-500 font-bold">-${payload.amount?.toLocaleString()}</span> 💸</div>;
     case "BUY_TERRITORY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> bought <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()}</div>;
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> bought <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()} 🏠</div>;
     case "SELL_TERRITORY":
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> sold <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()}</div>;
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> sold <TerritoryInline territoryId={payload.territoryID} /> for ${payload.amount?.toLocaleString()} 💸</div>;
     case "DRAW_3_REWARD_CARDS":
       return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> drew 3 reward cards.</div>;
     case "SELECT_CARD":{
@@ -60,32 +62,31 @@ const LogMessageItem = memo(({ entry, className }: { entry: GameLogEntry; classN
     case "ADD_CARD":
       return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> received a card.</div>;
     case "MOVE_PLAYER":{
-      const diceTrack = useStore.getState().state.game.diceTrack;
       if (!diceTrack || diceTrack.length === 0) return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on a tile.</div>;
       const tile = diceTrack[payload.toTile % diceTrack.length];
       const tileName = tile.type.toLowerCase()
-      return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> landed on {tileName === "start" ? `the` : `a`} {tileName} tile.</div>
+      return <div className={logMessageStyle}> <PlayerInline playerId={entry.playerId} /> arrived at {tileName === "start" ? `the` : `a`} <span className="font-bold underline">{tileName}</span> 📍</div>
     }
     case "SHIFT_TRACK":{
       const direction = payload.shiftDirection === "forward" ? "counter-clockwise" : "clockwise";
       const count = payload.newTiles?.length || 0;
       let message = ""
       if(count > 1){
-        message = `The track shifted ${direction}. ${count} new tiles have been added`
+        message = `The track shifted ${direction} 🌀. ${count} new tiles added `
       }else{
-        message = `The track shifted ${direction}. A new tile has been added`
+        message = `The track shifted ${direction} 🌀. New tile added `
       }
-      return <div className={`${logMessageStyle} text-sm`}> {message}</div>
+      return <div className={`${logMessageStyle} text-sm text-cyan-400 font-medium`}> {message}</div>
     }
     case "UPDATE_PLAYER_STATUS": {
       const status = payload.status;
       if (status === "bankrupt") {
-        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> has declared bankruptcy.</div>;
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> has declared <span className="text-red-600 font-bold underline">bankruptcy</span>! ☠️</div>;
       }
       else if (status === "in-debt") {
-        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is in debt.</div>;
+        return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is in <span className="text-orange-500 font-bold">debt</span>. ⚠️</div>;
       }
-      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is now solvent.</div>;
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} /> is now <span className="text-green-500 font-bold">solvent</span>. ✅</div>;
     }
     case 'FINANCIAL_CONSOLIDATION': {
       const collections = payload.collections as { [territoryID: string]: number };
@@ -107,19 +108,19 @@ const LogMessageItem = memo(({ entry, className }: { entry: GameLogEntry; classN
     }
     case 'GAME_OVER': {
       const winnerId = payload.winnerId;
-      const isYou = winnerId === useStore.getState().currentPlayer?.id;
+      const isYou = winnerId === currentId;
       return <div className={logMessageStyle}>
         <PlayerInline playerId={winnerId} /> {isYou ? "have" : "has"} won the game!
       </div>;
     }
     case 'VICTORY_LAP_STARTED': {
-      const isYou = entry.playerId === useStore.getState().currentPlayer?.id;
+      const isYou = entry.playerId === currentId;
       return <div className={logMessageStyle}>
         <PlayerInline playerId={entry.playerId} /> {isYou ? "have" : "has"} started {isYou ? "your" : "their"} <span className="text-yellow-400">victory lap</span>!
       </div>;
     }
     case 'UPGRADE_TERRITORY': {
-      const isYou = entry.playerId === useStore.getState().currentPlayer?.id;
+      const isYou = entry.playerId === currentId;
       const territoryID = payload.territoryID;
       const buildingType = payload.buildingType;
       const amount = payload.amount;
@@ -128,12 +129,37 @@ const LogMessageItem = memo(({ entry, className }: { entry: GameLogEntry; classN
       </div>;
     }
     case 'DOWNGRADE_TERRITORY': {
-      const isYou = entry.playerId === useStore.getState().currentPlayer?.id;
+      const isYou = entry.playerId === currentId;
       const territoryID = payload.territoryID;
       const buildingType = payload.buildingType;
       const amount = payload.amount;
       return <div className={logMessageStyle}>
         <PlayerInline playerId={entry.playerId} /> {isYou ? "have" : "has"} downgraded <TerritoryInline territoryId={territoryID} /> to a {buildingType} for <span className="text-green-600">${amount.toLocaleString()}</span>.
+      </div>;
+    }
+    case 'UPDATE_ACTIVE_PLAYER': {
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} />'s turn 🏁</div>;
+    }
+    case 'UPDATE_PLAYER_MONEY': {
+      return <div className={logMessageStyle}><PlayerInline playerId={entry.playerId} />'s balance set to <span className="text-blue-400 font-bold">${payload.amount?.toLocaleString()}</span> 💰</div>;
+    }
+    case 'SABOTAGE': {
+      const { victimId, amount } = payload;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={entry.playerId} /> ⚡ sabotaged <PlayerInline playerId={victimId} /> for <span className="text-red-500">${amount.toLocaleString()}</span>!
+      </div>;
+    }
+    case 'MISSILE_LAUNCHED': {
+      const { targetTerritoryID } = payload;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={entry.playerId} /> 🚀 nuked <TerritoryInline territoryId={targetTerritoryID} />!
+      </div>;
+    }
+    case 'ACCEPT_TRADE': {
+      const { playerAId, playerBId } = payload;
+      const proposerId = playerAId === entry.playerId ? playerBId : playerAId;
+      return <div className={logMessageStyle}>
+        <PlayerInline playerId={entry.playerId} /> accepted a trade 🤝 created by <PlayerInline playerId={proposerId} />
       </div>;
     }
     default:
