@@ -24,7 +24,19 @@ export const TURN_ACTION_REGISTRY = {
   REMOVE_STATUS_EFFECT: {} as { playerId: string, statusEffect: StatusEffect },
   FINANCIAL_CONSOLIDATION: {} as {playerId: string, collections:{[territoryID: string]: number}},
   VICTORY_LAP_STARTED: {} as { playerId: string },
-  MISSILE_LAUNCHED: {} as { attackerId: string; fromTerritoryID: string; targetTerritoryID: string; evictedPlayerId: string }
+  MISSILE_LAUNCHED: {} as { attackerId: string; fromTerritoryID: string; targetTerritoryID: string; evictedPlayerId: string },
+  ACCEPT_TRADE: {} as { 
+    tradeId: string, 
+    senderId: string,
+    playerAId: string,
+    playerBId: string,
+    playerAMoney: number,
+    playerBMoney: number,
+    playerACards: string[],
+    playerBCards: string[],
+    playerATerritories: string[],
+    playerBTerritories: string[]
+  }
 } as const;
 
 export type ActionType = keyof typeof TURN_ACTION_REGISTRY;

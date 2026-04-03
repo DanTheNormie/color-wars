@@ -622,3 +622,44 @@ export class MissileLaunchedAction extends BaseAction<"MISSILE_LAUNCHED"> {
     );
   }
 }
+
+export class AcceptTradeAction extends BaseAction<"ACCEPT_TRADE"> {
+  execute(): ActionHandle {
+    const { 
+      playerAId, playerBId, 
+      playerAMoney, playerBMoney, 
+      playerACards, playerBCards, 
+      playerATerritories, playerBTerritories,
+      tradeId
+    } = this.payload;
+
+    this.logAction(this.payload.senderId);
+
+    // Update money
+    useStore.getState().updatePlayerMoney(playerAId, playerAMoney);
+    useStore.getState().updatePlayerMoney(playerBId, playerBMoney);
+
+    // Update cards
+    useStore.getState().setPlayerCards(playerAId, playerACards);
+    useStore.getState().setPlayerCards(playerBId, playerBCards);
+
+    // Update territories
+    const playerAColor = useStore.getState().state.game.players[playerAId].color;
+    const playerBColor = useStore.getState().state.game.players[playerBId].color;
+
+    playerATerritories.forEach(tid => {
+       useStore.getState().setTerritoryOwner(tid, playerAId);
+       useMapStore.getState().setTerritoryColor(tid, playerAColor);
+    });
+
+    playerBTerritories.forEach(tid => {
+       useStore.getState().setTerritoryOwner(tid, playerBId);
+       useMapStore.getState().setTerritoryColor(tid, playerBColor);
+    });
+    
+    // Clear the trade from local store
+    useStore.getState().removeTrade(tradeId);
+
+    return new ActionHandle(Promise.resolve(), () => {}, () => {});
+  }
+}

@@ -631,11 +631,29 @@ export class GameEngine {
     });
 
     this.state.game.activeTrades.delete(tradeId);
-
     this.updateFinancialStatus(playerA.id);
     this.updateFinancialStatus(playerB.id);
 
-    this.state.queueAction('ACCEPT_TRADE', { tradeId, senderId: client.sessionId });
+    // Collect all territories for both players to sync
+    const playerATerritories: string[] = [];
+    const playerBTerritories: string[] = [];
+    this.state.game.territoryOwnership.forEach((ts, tid) => {
+      if (ts.ownerId === playerA.id) playerATerritories.push(tid);
+      if (ts.ownerId === playerB.id) playerBTerritories.push(tid);
+    });
+
+    this.state.queueAction('ACCEPT_TRADE', {
+      tradeId,
+      senderId: client.sessionId,
+      playerAId: playerA.id,
+      playerBId: playerB.id,
+      playerAMoney: playerA.money,
+      playerBMoney: playerB.money,
+      playerACards: Array.from(playerA.cards),
+      playerBCards: Array.from(playerB.cards),
+      playerATerritories,
+      playerBTerritories
+    });
   }
 
   declineTrade(client: Client, tradeId: string) {

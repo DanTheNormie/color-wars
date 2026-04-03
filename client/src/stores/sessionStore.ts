@@ -273,6 +273,14 @@ export const useStore = create(
                   }
                 });
               },
+              setPlayerCards: (playerId: string, cards: string[]) => {
+                set((z) => {
+                  const player = z.state?.game?.players?.[playerId];
+                  if (player) {
+                    player.cards = cards;
+                  }
+                });
+              },
               updateTerritoryOwnership: (territoryId: string, ownerId: string | null, buildingType: DevelopmentType = "BASE") => {
                 set((z) => {
                   z.state.game.territoryOwnership ??= {};
@@ -283,6 +291,13 @@ export const useStore = create(
                     };
                   } else {
                     delete z.state.game.territoryOwnership[territoryId];
+                  }
+                })
+              },
+              setTerritoryOwner: (territoryId: string, ownerId: string) => {
+                set((z) => {
+                  if (z.state.game.territoryOwnership[territoryId]) {
+                    z.state.game.territoryOwnership[territoryId].ownerId = ownerId;
                   }
                 })
               },
