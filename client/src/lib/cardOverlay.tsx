@@ -81,21 +81,21 @@ const Card = memo(({ id }: { id: string }) => {
       >
         <div className={`flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-xl bg-gradient-to-br ${gradient} shadow-2xl p-8 border-2 border-white/20 backdrop-blur-sm`}>
           <div className="flex flex-col items-center gap-4 text-center">
-             <div className="bg-white/10 p-4 rounded-full backdrop-blur-md border border-white/20">
-                {config.type === 'INSTANT_CASH' ? '💰' : '🃏'}
-             </div>
-             <h2 className="text-4xl font-extrabold text-white drop-shadow-lg tracking-tight uppercase">
-                {title}
-             </h2>
-             <p className="text-white/80 text-lg font-medium max-w-[250px]">
-                {subtitle}
-             </p>
+            <div className="bg-white/10 p-4 rounded-full backdrop-blur-md border border-white/20">
+              {config.type === 'INSTANT_CASH' ? '💰' : '🃏'}
+            </div>
+            <h2 className="text-4xl font-extrabold text-white drop-shadow-lg tracking-tight uppercase">
+              {title}
+            </h2>
+            <p className="text-white/80 text-lg font-medium max-w-[250px]">
+              {subtitle}
+            </p>
           </div>
-          
+
           <div className="w-full flex justify-center mt-8 opacity-40">
-             <div className="text-xs font-mono text-white/50 tracking-widest uppercase">
-                {config.type}
-             </div>
+            <div className="text-xs font-mono text-white/50 tracking-widest uppercase">
+              {config.type}
+            </div>
           </div>
         </div>
       </hover-tilt>
@@ -126,19 +126,19 @@ export const CardSelectionOverlay = memo(() => {
   const swiperRef = useRef<SwiperClass | null>(null);
   const setPhase = useCardStore((s) => s.setPhase);
   const reset = useCardStore((s) => s.reset);
-  const isActivePlayer = useStore((z)=>z.currentPlayer?.id == z.state?.game?.activePlayerId)
-  console.log('isActivePlayer', isActivePlayer)
+  const isActivePlayer = useStore((z) => z.currentPlayer?.id == z.state?.game?.activePlayerId)
+  //console.log('isActivePlayer', isActivePlayer)
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleCardSelect = () => {
-    if (!selectedCardId){
-      GameEventBus.emit('TOAST',{
-        content:'please select a card !!!',
-        type:'error'
+    if (!selectedCardId) {
+      GameEventBus.emit('TOAST', {
+        content: 'please select a card !!!',
+        type: 'error'
       })
       return
     };
-    console.log("action created", selectedCardId);
+    //console.log("action created", selectedCardId);
     selectCard(selectedCardId)
     //new ResolveSelectionAction({ selectedCardId }).execute();
     // Example: sendSelectCardOp(id);
@@ -180,9 +180,9 @@ export const CardSelectionOverlay = memo(() => {
   // 2. Exit Animation
   useEffect(() => {
     let tl: gsap.core.Timeline | undefined;
-    console.log(phase === "resolving", containerRef.current, selectedCardId);
+    //console.log(phase === "resolving", containerRef.current, selectedCardId);
     if (phase === "resolving" && containerRef.current && selectedCardId) {
-      console.log("Starting exit animation for selected card:", selectedCardId);
+      //console.log("Starting exit animation for selected card:", selectedCardId);
       const wrappers = Array.from(containerRef.current.querySelectorAll(".card-wrapper")).reverse() as HTMLElement[];
       const selectedWrapper = wrappers.find((el) => el.id === `${selectedCardId}`);
       const others = wrappers.filter((el) => el !== selectedWrapper);
@@ -223,7 +223,7 @@ export const CardSelectionOverlay = memo(() => {
     <div ref={containerRef} className="fixed inset-0 z-100 flex h-full w-full flex-col items-center justify-center gap-12 bg-black/80 backdrop-blur-sm perspective-[2000px]">
       <div className="flex h-full w-full max-w-120 flex-col items-center justify-center gap-12">
         <style>
-        {`
+          {`
           .swiper.first {
             width: 60vw;
             max-width: 480px;
@@ -247,37 +247,37 @@ export const CardSelectionOverlay = memo(() => {
             color: #fff;
           }
       `}
-      </style>
+        </style>
 
-      <Swiper
-        className="first"
-        effect="cards"
-        modules={[EffectCards, Thumbs]}
-        onSwiper={(s) => (swiperRef.current = s)}
-        grabCursor={true}
-        allowTouchMove={false}
-        simulateTouch={false}
-        cardsEffect={{
-          slideShadows: false,
-        }}
-      >
-        {cardIds.map((id) => (
-          <SwiperSlide key={id}>
-            <Card id={id} />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+        <Swiper
+          className="first"
+          effect="cards"
+          modules={[EffectCards, Thumbs]}
+          onSwiper={(s) => (swiperRef.current = s)}
+          grabCursor={true}
+          allowTouchMove={false}
+          simulateTouch={false}
+          cardsEffect={{
+            slideShadows: false,
+          }}
+        >
+          {cardIds.map((id) => (
+            <SwiperSlide key={id}>
+              <Card id={id} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-      <Swiper allowTouchMove={false} slidesPerView={3} watchSlidesProgress spaceBetween={12} className="mt-4 w-72">
-        {cardIds.map((id, idx) => (
-          <SwiperSlide key={`thumb-${id}`}>
-            <Thumb id={id} idx={idx} isSelected={selectedCardId === id} onClick={setSelectedCardId} />
-          </SwiperSlide>
-        ))}
-      </Swiper>
-      <Button className={`${!isActivePlayer?'hidden':''} cursor-pointer relative transition-none`} onClick={handleCardSelect} size="lg" variant="outline">
-        Confirm Selection
-      </Button>
+        <Swiper allowTouchMove={false} slidesPerView={3} watchSlidesProgress spaceBetween={12} className="mt-4 w-72">
+          {cardIds.map((id, idx) => (
+            <SwiperSlide key={`thumb-${id}`}>
+              <Thumb id={id} idx={idx} isSelected={selectedCardId === id} onClick={setSelectedCardId} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        <Button className={`${!isActivePlayer ? 'hidden' : ''} cursor-pointer relative transition-none`} onClick={handleCardSelect} size="lg" variant="outline">
+          Confirm Selection
+        </Button>
       </div>
     </div>
   );

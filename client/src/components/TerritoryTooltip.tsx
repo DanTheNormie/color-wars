@@ -69,9 +69,9 @@ export default function TerritoryTooltip() {
   const canBuy = isMyTurn && !hasBoughtThisRound;
   const currentPlayerMoney = useStore((s) => currentPlayerId ? s.state.game?.players[currentPlayerId]?.money ?? 0 : 0);
   const phase = useStore((s) => s.state.room.phase);
-  console.log("hasBoughtThisRound", hasBoughtThisRound)
-  console.log("canBuy", canBuy)
-  console.log("isMyTurn", isMyTurn)
+  //console.log("hasBoughtThisRound", hasBoughtThisRound)
+  //console.log("canBuy", canBuy)
+  //console.log("isMyTurn", isMyTurn)
 
   const adjacentTerritories = getAdjacent(territoryId, currentMap);
   const adjacentOwnedByPlayer = getAdjacentOwnedByPlayer(currentPlayerId, territoryId, currentMap, territoryOwnership);
@@ -178,7 +178,7 @@ export default function TerritoryTooltip() {
     ? fmt.format((capExObj as any).capEx / 2)
     : "";
 
-  if(phase !== 'active') {return null}
+  if (phase !== 'active') { return null }
   return (
     <FloatingPortal>
       <div
@@ -289,16 +289,16 @@ export default function TerritoryTooltip() {
               </button>
               {!(canBuy && hasEnoughForPurchase) && (
                 <span className="text-[10px] text-red-400 text-center px-2">
-                  {!isMyTurn 
-                    ? "You can only buy on your turn." 
-                    : !hasEnoughForPurchase 
-                      ? "Not enough funds." 
+                  {!isMyTurn
+                    ? "You can only buy on your turn."
+                    : !hasEnoughForPurchase
+                      ? "Not enough funds."
                       : "You can only buy 1 territory per round."}
                 </span>
               )}
             </div>
           ) : isOwnedByCurrentPlayer ? (
-             (adjacentOwnedByPlayer.length < Math.min(2, adjacentTerritories.length)) ? (
+            (adjacentOwnedByPlayer.length < Math.min(2, adjacentTerritories.length)) ? (
               (adjacentOwnedByPlayer.length === 0) ? (
                 <div className="flex gap-2 justify-center text-[10px] text-[#f87171] text-center w-full">
                   {adjacentTerritories.length === 1
@@ -330,11 +330,10 @@ export default function TerritoryTooltip() {
                     return (
                       <button
                         key={type}
-                        className={`py-[6px] px-2 rounded text-[10px] font-semibold text-white transition-all duration-150 ${
-                          canUpgrade
+                        className={`py-[6px] px-2 rounded text-[10px] font-semibold text-white transition-all duration-150 ${canUpgrade
                             ? "cursor-pointer hover:bg-[#22c55e] active:scale-[0.97] bg-[#16a34a]"
                             : "bg-gray-500 cursor-not-allowed opacity-50"
-                        }`}
+                          }`}
                         onClick={canUpgrade ? () => handleUpgrade(type as DevelopmentType) : undefined}
                         disabled={!canUpgrade}
                         title={!isMyTurn ? "You can only upgrade on your turn" : !canAfford ? "Not enough funds" : ""}
@@ -356,11 +355,10 @@ export default function TerritoryTooltip() {
 
                   return meetsMinHexes ? (
                     <button
-                      className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-white transition-all duration-150 ${
-                        canBuildCapital
+                      className={`w-[80%] mx-auto block py-[8px] rounded-[4px] text-[11px] font-semibold text-white transition-all duration-150 ${canBuildCapital
                           ? "cursor-pointer hover:bg-[#a855f7] active:scale-[0.97] bg-[#ca8a04]"
                           : "bg-gray-500 cursor-not-allowed opacity-50"
-                      }`}
+                        }`}
                       onClick={canBuildCapital ? () => handleUpgrade("CAPITAL" as DevelopmentType) : undefined}
                       disabled={!canBuildCapital}
                       title={!isMyTurn ? "You can only build on your turn" : !canAffordCapital ? `Not enough funds (need ${fmt.format(capitalCost)})` : ""}

@@ -39,7 +39,7 @@ class Network {
       return this.registerRoom(room);
     } catch (error) {
       this.setState("disconnected");
-      console.error(error);
+      //console.log(error);
       throw new Error("failed to connect");
     }
   }
@@ -53,7 +53,7 @@ class Network {
       return this.registerRoom(room);
     } catch (error) {
       this.setState("disconnected");
-      console.error(error);
+      //console.log(error);
       throw new Error("failed to connect");
     }
   }
@@ -67,7 +67,7 @@ class Network {
   }
 
   private attachRoomListeners() {
-    console.log("Attaching room listeners");
+    //console.log("Attaching room listeners");
     if (!this.room) throw new Error("Not connected");
 
     // this.onMessage("PING", ({ serverT1 }) => {
@@ -159,11 +159,11 @@ class Network {
         })
       );
     });
-    this.room.onError((code, message) => {
-      console.log("[network] error ", { code, message });
+    this.room.onError(() => {
+      //console.log("[network] error ", { code, message });
     });
     this.room.onLeave((code, message) => {
-      console.log("[network] leave", { code, message });
+      //console.log("[network] leave", { code, message });
 
       this.leave();
       if (code == 1006) {
@@ -203,12 +203,12 @@ class Network {
     this.stateChangeCallbacks.forEach((fn) => fn());
     this.stateChangeCallbacks = [];
   }
-  async leave(reason: "auto" | "manual" | "kicked" | "disconnect" = "auto") {
+  async leave() {
     if (!this.room) return;
     this.setState("closing");
     const room = this.room;
 
-    console.log("[network] leaving room:", room.roomId, "reason:", reason);
+    //console.log("[network] leaving room:", room.roomId, "reason:", reason);
 
     try {
       // 1. Stop all incoming events immediately
@@ -230,7 +230,7 @@ class Network {
     this.setState("disconnected");
     GameEventBus.emit("RESET_STATE", {});
 
-    console.log("[network] leave cleanup complete");
+    //console.log("[network] leave cleanup complete");
   }
   private setState(state: NetworkState) {
     if (this.state === state) return;
@@ -260,7 +260,7 @@ class Network {
     // Decode and create action
     const parsed = this.decodeQueuedAction(queuedAction);
     if (!parsed) {
-      console.error("Failed to parse queued action for playback:", queuedAction);
+      //console.log("Failed to parse queued action for playback:", queuedAction);
       return;
     }
 
@@ -285,10 +285,10 @@ class Network {
 
     // Request a full state update by triggering a reconnection
     // This will cause the server to send the full state again via FULL_SEND
-    console.log("Triggering reconnection for full state recovery");
+    //console.log("Triggering reconnection for full state recovery");
 
     // Leave current room to trigger reconnection
-    this.leave("manual");
+    this.leave();
 
     // Emit event to show reconnecting status
     GameEventBus.emit("UPDATE_NETWORK_STATE", { state: "reconnecting" });

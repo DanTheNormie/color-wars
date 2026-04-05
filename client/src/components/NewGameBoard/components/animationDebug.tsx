@@ -33,7 +33,7 @@ const AddPlayerSection = () => {
   //     if (targetSprite) {
   //       network.actionQueue.enqueue(new HexHop({ fromTile: 0, toTile: 17 }));
   //     } else {
-  //       console.error("Sprite not found in registry");
+  //       //console.log("Sprite not found in registry");
   //     }
   //   }
 
@@ -248,7 +248,7 @@ const AnimateMoney = () => {
   //     if (targetSprite) {
   //       network.actionQueue.enqueue(new HexHop({ fromTile: 0, toTile: 17 }));
   //     } else {
-  //       console.error("Sprite not found in registry");
+  //       //console.log("Sprite not found in registry");
   //     }
   //   }
 

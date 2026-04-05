@@ -13,7 +13,7 @@ import {
   PlayerJoinPayload,
 } from "@color-wars/shared";
 
-export class GameRoom extends Room<{state: RoomState}> {
+export class GameRoom extends Room<{ state: RoomState }> {
   private gameEngine!: GameEngine;
   private pinger: Delayed | null = null;
   private actionSequence = 0;
@@ -45,7 +45,7 @@ export class GameRoom extends Room<{state: RoomState}> {
           this.state._pendingActions = [];
         }
       } catch (err) {
-        console.error(`Error handling action ${action}:`, err);
+        //console.log(`Error handling action ${action}:`, err);
       }
     });
   }
@@ -113,52 +113,52 @@ export class GameRoom extends Room<{state: RoomState}> {
     logger.debug('player disconnected: ', client.sessionId)
     const player = players.get(client.sessionId);
     if (!player) return;
-  
+
     player.connected = false;
-  
+
     const playerId = player.id;
     const isLeader = room.leaderId === playerId;
     const isActive = game.activePlayerId === playerId;
-  
+
     const removePlayer = (idx: number) => {
       playerOrder.splice(idx, 1);
-  
+
       const next =
         playerOrder.length > 0
           ? playerOrder[idx % playerOrder.length]
           : "null";
-  
+
       if (isActive) {
         game.activePlayerId = next;
         this.state.queueAction('UPDATE_ACTIVE_PLAYER', { playerId: next })
         // this.state.pushAction('UPDATE_ACTIVE_PLAYER', this.state.game.activePlayerId, { playerId: next });
       }
-      if (isLeader){ 
-        console.log('isLeader: true', room.leaderId, next)
+      if (isLeader) {
+        //console.log('isLeader: true', room.leaderId, next)
         room.leaderId = next;
         logger.debug('player removed: ', client.sessionId)
       }
-  
+
       this.gameEngine.cancelAllTradesForPlayer(playerId);
 
       players.delete(client.sessionId);
       this.state.playersPings.delete(client.sessionId);
-      if(this.state.room.phase == 'active') {
+      if (this.state.room.phase == 'active') {
         this.gameEngine.checkGameOver();
       }
     };
-  
+
     const idx = playerOrder.indexOf(client.sessionId);
-  
+
     try {
       if (code === CloseCode.CONSENTED) {
         if (idx !== -1) removePlayer(idx);
         return;
       }
-  
+
       // allow reconnect
       await this.allowReconnection(client, 60);
-  
+
       // client returned
       player.connected = true;
     } catch {
@@ -166,7 +166,7 @@ export class GameRoom extends Room<{state: RoomState}> {
       if (idx !== -1) removePlayer(idx);
     }
   }
-  
+
   async onDispose() {
     //RoomManager.unregisterRoom(this);
     this.pinger?.clear();
@@ -195,7 +195,7 @@ export class GameRoom extends Room<{state: RoomState}> {
       this.dispatch('RELAY_MESSAGE', message)
     })
 
-    this.onAction("PONG", (client, { serverT1, clientT2}) => {
+    this.onAction("PONG", (client, { serverT1, clientT2 }) => {
       const serverT3 = Date.now();
       const rawRTT = serverT3 - serverT1;
 
@@ -204,8 +204,8 @@ export class GameRoom extends Room<{state: RoomState}> {
       //this.dispatch("PING_PONG", { serverT1, clientT2, serverT3 });
     });
 
-    this.onAction("KICK_PLAYER", (client, {playerId})=>{
-      this.clients.getById(playerId)?.leave(1000,'kicked from lobby')
+    this.onAction("KICK_PLAYER", (client, { playerId }) => {
+      this.clients.getById(playerId)?.leave(1000, 'kicked from lobby')
       logger.debug('Kicked player: ', playerId)
     })
 
@@ -222,47 +222,47 @@ export class GameRoom extends Room<{state: RoomState}> {
       this.gameEngine.endTurn(vote);
     })
 
-    this.onAction('CHANGE_MAP', (client, {mapID}) => {
+    this.onAction('CHANGE_MAP', (client, { mapID }) => {
       this.state.mapID = mapID
     })
 
-    this.onAction('BUY_TERRITORY', (client, {territoryID}) => {
+    this.onAction('BUY_TERRITORY', (client, { territoryID }) => {
       this.gameEngine.buyTerritory(client, territoryID)
     })
 
-    this.onAction('SELL_TERRITORY', (client, {territoryID})=>{
+    this.onAction('SELL_TERRITORY', (client, { territoryID }) => {
       this.gameEngine.sellTerritory(client, territoryID)
     })
 
-    this.onAction('SELECT_CARD', (client, {cardID})=>{
+    this.onAction('SELECT_CARD', (client, { cardID }) => {
       this.gameEngine.selectCard(client, cardID)
     })
 
 
 
-    this.onAction('DECLARE_BANKRUPTCY', (client)=>{
+    this.onAction('DECLARE_BANKRUPTCY', (client) => {
       this.gameEngine.declareBankruptcy(client)
     })
 
-    this.onAction('UPGRADE_TERRITORY', (client, {territoryID, buildingType}) => {
+    this.onAction('UPGRADE_TERRITORY', (client, { territoryID, buildingType }) => {
       this.gameEngine.upgradeTerritory(client, territoryID, buildingType)
     })
 
-    this.onAction('DOWNGRADE_TERRITORY', (client, {territoryID}) => {
+    this.onAction('DOWNGRADE_TERRITORY', (client, { territoryID }) => {
       this.gameEngine.downgradeTerritory(client, territoryID)
     })
 
-    this.onAction('SHIFT_TRACK', (client, {direction}) => {
+    this.onAction('SHIFT_TRACK', (client, { direction }) => {
       logger.info('received shift track');
       this.gameEngine.shiftTrack(direction)
     })
 
-    this.onAction('SABOTAGE', (client, {victimId}) => {
+    this.onAction('SABOTAGE', (client, { victimId }) => {
       logger.info("received sabotage from", client.sessionId, "on", victimId);
       this.gameEngine.sabotage(client, victimId);
     });
 
-    this.onAction('LAUNCH_MISSILE', (client, {fromTerritoryID, targetTerritoryID}) => {
+    this.onAction('LAUNCH_MISSILE', (client, { fromTerritoryID, targetTerritoryID }) => {
       logger.info("received launch missile from", client.sessionId, "from", fromTerritoryID, "to", targetTerritoryID);
       this.gameEngine.launchMissile(client, fromTerritoryID, targetTerritoryID);
     });

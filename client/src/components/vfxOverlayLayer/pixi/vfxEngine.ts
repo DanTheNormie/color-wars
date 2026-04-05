@@ -36,7 +36,7 @@ export class PIXIVFXLayer {
 
   private async loadAssets() {
     if (this.spritesheet) return;
-    
+
     const cached = PIXI.Assets.get("/spritesheet_data.json");
 
     if (cached) {
@@ -79,10 +79,10 @@ export class PIXIVFXLayer {
 
       if (this.destroyed || myToken !== this.initToken) {
         try {
-          console.log("PixiEngine init aborted, cleaning up");
+          //console.log("PixiEngine init aborted, cleaning up");
           localApp.destroy(true);
         } catch (error) {
-          console.error(error);
+          //console.log(error);
         }
         return;
       }
@@ -388,20 +388,20 @@ export class PIXIVFXLayer {
     const TOTAL_DURATION = 2;
 
     // Phase durations as fractions of total
-    const fadeInDuration  = 0.2;
-    const moveDuration    = 0.4;
+    const fadeInDuration = 0.2;
+    const moveDuration = 0.4;
     const fadeOutDuration = TOTAL_DURATION - fadeInDuration - moveDuration; // 1.4s remaining
 
     // Total time for a staggered phase = duration + stagger * (count - 1)
     // Solve for stagger given a fixed phase time budget:
     //   budget = duration + stagger * (count - 1)
     //   stagger = (budget - duration) / (count - 1)
-    const MOVE_BUDGET      = moveDuration + 0.2;   // allow a little stagger overlap
-    const FADE_OUT_BUDGET  = fadeOutDuration;
+    const MOVE_BUDGET = moveDuration + 0.2;   // allow a little stagger overlap
+    const FADE_OUT_BUDGET = fadeOutDuration;
 
-    const moveStagger     = count > 1 ? (MOVE_BUDGET - moveDuration) / (count - 1) : 0;
-    const fadeOutStagger  = count > 1 ? (FADE_OUT_BUDGET - (FADE_OUT_BUDGET * 0.5)) / (count - 1) : 0;
-    const fadeOutDur      = FADE_OUT_BUDGET * 0.5;
+    const moveStagger = count > 1 ? (MOVE_BUDGET - moveDuration) / (count - 1) : 0;
+    const fadeOutStagger = count > 1 ? (FADE_OUT_BUDGET - (FADE_OUT_BUDGET * 0.5)) / (count - 1) : 0;
+    const fadeOutDur = FADE_OUT_BUDGET * 0.5;
 
     const timeline = gsap.timeline()
       .from(sprites, {

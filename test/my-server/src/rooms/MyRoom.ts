@@ -10,35 +10,35 @@ export class MyRoom extends Room {
       /**
        * Handle "yourMessageType" message.
        */
-      console.log(client.sessionId, "sent a message:", message);
+      //console.log(client.sessionId, "sent a message:", message);
     }
   }
 
-  onCreate (options: any) {
+  onCreate(options: any) {
     /**
      * Called when a new room is created.
      */
   }
 
-  onJoin (client: Client, options: any) {
+  onJoin(client: Client, options: any) {
     /**
      * Called when a client joins the room.
      */
-    console.log(client.sessionId, "joined!");
+    //console.log(client.sessionId, "joined!");
   }
 
-  onLeave (client: Client, code: CloseCode) {
+  onLeave(client: Client, code: CloseCode) {
     /**
      * Called when a client leaves the room.
      */
-    console.log(client.sessionId, "left!", code);
+    //console.log(client.sessionId, "left!", code);
   }
 
   onDispose() {
     /**
      * Called when the room is disposed.
      */
-    console.log("room", this.roomId, "disposing...");
+    //console.log("room", this.roomId, "disposing...");
   }
 
 }

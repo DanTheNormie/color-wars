@@ -11,7 +11,7 @@ const UserAssets = () => {
 
   const ownedTerritories = useMemo(() => {
     if (!territoryOwnership || !currentMap || !playerId) return [];
-    
+
     return currentMap.territories
       .filter((t) => territoryOwnership[t.id]?.ownerId === playerId)
       .map((t) => ({
@@ -23,12 +23,12 @@ const UserAssets = () => {
 
   // const cards = useMemo(() => {
   //   if (!playerCards) return [];
-    
+
   //   return playerCards.map((cardJson) => {
   //     try {
   //       return JSON.parse(cardJson) as RewardConfig;
   //     } catch (e) {
-  //       console.error("Failed to parse card JSON", e);
+  //       //console.log("Failed to parse card JSON", e);
   //       return null;
   //     }
   //   }).filter(Boolean) as RewardConfig[];
@@ -45,12 +45,12 @@ const UserAssets = () => {
           <MapPinCheckInside className="h-4 w-4" />
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Territories ({ownedTerritories.length})</h3>
         </div>
-        
+
         {ownedTerritories.length > 0 ? (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {ownedTerritories.map((t) => (
-              <div 
-                key={t.id} 
+              <div
+                key={t.id}
                 className="group flex flex-col rounded-lg border border-white/5 bg-white/5 p-2 transition-all hover:bg-white/10 hover:border-white/20"
               >
                 <span className="truncate text-sm font-medium text-zinc-200">{t.name}</span>

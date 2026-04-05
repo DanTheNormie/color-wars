@@ -10,37 +10,37 @@ import { useStore } from "@/stores/sessionStore";
 export default function AssetManager() {
   const [hasBase, setHasBase] = useState(false);
   const [property, setProperty] = useState<string | null>(null);
-  const buyTerritory = useStore((z)=> z.buyTerritory)
-  const sellTerritory = useStore((z)=> z.sellTerritory)
-  const territoryID = useMapStore((z)=>z.selectedTerritoryId)
-  const getTerritoryEconomy = useMapStore((z)=>z.getEconomyData)
-  
+  const buyTerritory = useStore((z) => z.buyTerritory)
+  const sellTerritory = useStore((z) => z.sellTerritory)
+  const territoryID = useMapStore((z) => z.selectedTerritoryId)
+  const getTerritoryEconomy = useMapStore((z) => z.getEconomyData)
+
   const activePlayerId = useStore((s) => s.state.game?.activePlayerId);
   const currentPlayerId = useStore((s) => s.currentPlayer?.id);
   const isMyTurn = currentPlayerId === activePlayerId;
   const hasBoughtThisRound = useStore((s) => s.currentPlayer?.hasBoughtTerritoryThisRound);
   const canBuy = isMyTurn && !hasBoughtThisRound;
 
-  if(territoryID == null) {return null}
-  const economy = Object.entries(getTerritoryEconomy()).map((d)=>{
-    return{
+  if (territoryID == null) { return null }
+  const economy = Object.entries(getTerritoryEconomy()).map((d) => {
+    return {
       type: d[0],
       ...d[1]
     }
   })
-  console.log(economy)
+  //console.log(economy)
 
 
   const buyBase = () => {
-    if(!canBuy) return;
+    if (!canBuy) return;
     buyTerritory(territoryID)
     setHasBase(true);
   }
   const sellBase = () => {
-    if(!property){
+    if (!property) {
       sellTerritory(territoryID)
       setHasBase(false)
-    } 
+    }
   };
   const buyProperty = (type: string) => setProperty(type);
   const sellProperty = () => setProperty(null);
@@ -65,27 +65,27 @@ export default function AssetManager() {
 
     if (!hasBase) {
       if (rowType === "BASE") {
-         return (
-           <div className="flex flex-col gap-1 items-center justify-center">
-             {baseBtn(`Buy Base for ${formatter.format(economy[0].capEx)}`, buyBase, false, !canBuy)}
-             {!canBuy && (
-                <span className="text-[10px] text-red-500 leading-tight">
-                  {!isMyTurn ? "Not your turn" : "Limit 1 per round"}
-                </span>
-             )}
-           </div>
-         );
+        return (
+          <div className="flex flex-col gap-1 items-center justify-center">
+            {baseBtn(`Buy Base for ${formatter.format(economy[0].capEx)}`, buyBase, false, !canBuy)}
+            {!canBuy && (
+              <span className="text-[10px] text-red-500 leading-tight">
+                {!isMyTurn ? "Not your turn" : "Limit 1 per round"}
+              </span>
+            )}
+          </div>
+        );
       }
       return null;
     }
 
     if (hasBase && !property) {
-      if (rowType === "BASE") return baseBtn(`Sell Base for ${formatter.format(economy[0].capEx/2)}`, sellBase, true);
+      if (rowType === "BASE") return baseBtn(`Sell Base for ${formatter.format(economy[0].capEx / 2)}`, sellBase, true);
       return baseBtn(`Buy ${rowType} for ${formatter.format(economy[idx].capEx)}`, () => buyProperty(rowType));
     }
 
     if (property) {
-      if (rowType === property) return baseBtn(`Sell ${property} for ${formatter.format(economy[idx].capEx/2)}`, sellProperty, true);
+      if (rowType === property) return baseBtn(`Sell ${property} for ${formatter.format(economy[idx].capEx / 2)}`, sellProperty, true);
       return null;
     }
 
@@ -99,9 +99,9 @@ export default function AssetManager() {
           <TableRow>
             <TableHead className="border-r border-b border-gray-600 pr-1"></TableHead>
             <TableHead className="border-b border-gray-600">Initial Cost</TableHead>
-            <TableHead className="border-b border-gray-600 wrap-break-word w-fit">Maintenance /<br/> round</TableHead>
-            <TableHead className="border-b border-gray-600 wrap-break-word w-fit">income /<br/> round</TableHead>
-            <TableHead className="border-b border-gray-600 wrap-break-word w-fit">TOC /<br/> round</TableHead>
+            <TableHead className="border-b border-gray-600 wrap-break-word w-fit">Maintenance /<br /> round</TableHead>
+            <TableHead className="border-b border-gray-600 wrap-break-word w-fit">income /<br /> round</TableHead>
+            <TableHead className="border-b border-gray-600 wrap-break-word w-fit">TOC /<br /> round</TableHead>
             <TableHead className="border-b border-gray-600 text-center">Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -109,7 +109,7 @@ export default function AssetManager() {
         <TableBody>
           {economy.map((row, idx) => {
             const toc = row.revenue - row.opEx;
-            console.log(row)
+            //console.log(row)
             return (
               <TableRow key={row.type}>
                 <TableCell className="border-r py-1 border-gray-600 pr-1">{row.type}</TableCell>
@@ -117,7 +117,7 @@ export default function AssetManager() {
                 <TableCell className="py-1">{row.opEx}</TableCell>
                 <TableCell className="py-1">{row.revenue}</TableCell>
                 <TableCell className={`${toc < 0 ? "text-red-500" : "text-green-600"} py-1`}>
-                  {(toc > 0) ? "+": ""}{toc}
+                  {(toc > 0) ? "+" : ""}{toc}
                 </TableCell>
 
                 {/* Action cell */}

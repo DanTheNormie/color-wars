@@ -52,9 +52,9 @@ export class OutlineLayer extends PIXI.Container {
     );
 
     const mapUnsub = (useMapStore).subscribe(
-      (state) => ({ 
-        source: state.missileSourceId, 
-        targets: state.missileTargetIds 
+      (state) => ({
+        source: state.missileSourceId,
+        targets: state.missileTargetIds
       }),
       ({ source, targets }) => {
         this.updateMissileHighlights(source, targets);
@@ -176,8 +176,8 @@ export class OutlineLayer extends PIXI.Container {
       this.territoryCenters.set(territoryID, { x: cx, y: cy, size: Math.max(distance * width, width * 0.6) });
       const ownership = useStore.getState().state?.game?.territoryOwnership[territoryID]
       const buildingType = ownership?.buildingType || 'BASE'
-      
-      // console.log('buildingType', buildingType)
+
+      // //console.log('buildingType', buildingType)
       // if(buildingType === 'CAPITAL') {
       //   this.setCapitalPulse(territoryID, true)
       // }
@@ -225,66 +225,66 @@ export class OutlineLayer extends PIXI.Container {
     useMapStore.getState().colorMap.forEach((color, territoryId) => {
       this.setTerritoryColor(territoryId, color);
     });
-}
-
-private findDeepestHex(hexes: Hex[]) {
-
-  const dirs = [
-    [1, 0], [1, -1], [0, -1],
-    [-1, 0], [-1, 1], [0, 1],
-  ];
-
-  function isBoundary(hex: Hex, set: Set<string>) {
-    return dirs.some(([dq, dr]) =>
-      !set.has(`${hex.q + dq},${hex.r + dr}`)
-    );
   }
-  const key = (q: number, r: number) => `${q},${r}`;
-  const set = new Set(hexes.map(h => key(h.q, h.r)));
 
-  const dist = new Map<string, number>();
-  const queue: Hex[] = [];
+  private findDeepestHex(hexes: Hex[]) {
 
-  // initialize boundary
-  for (const h of hexes) {
-    if (isBoundary(h, set)) {
-      dist.set(key(h.q, h.r), 0);
-      queue.push(h);
+    const dirs = [
+      [1, 0], [1, -1], [0, -1],
+      [-1, 0], [-1, 1], [0, 1],
+    ];
+
+    function isBoundary(hex: Hex, set: Set<string>) {
+      return dirs.some(([dq, dr]) =>
+        !set.has(`${hex.q + dq},${hex.r + dr}`)
+      );
     }
-  }
+    const key = (q: number, r: number) => `${q},${r}`;
+    const set = new Set(hexes.map(h => key(h.q, h.r)));
 
-  // BFS inward
-  while (queue.length) {
-    const h = queue.shift()!;
-    const d = dist.get(key(h.q, h.r))!;
+    const dist = new Map<string, number>();
+    const queue: Hex[] = [];
 
-    for (const [dq, dr] of dirs) {
-      const nq = h.q + dq;
-      const nr = h.r + dr;
-      const nk = key(nq, nr);
-
-      if (!set.has(nk)) continue;
-      if (dist.has(nk)) continue;
-
-      dist.set(nk, d + 1);
-      queue.push({ q: nq, r: nr, s: 0, territoryID: null });
+    // initialize boundary
+    for (const h of hexes) {
+      if (isBoundary(h, set)) {
+        dist.set(key(h.q, h.r), 0);
+        queue.push(h);
+      }
     }
-  }
 
-  // find max
-  let best = hexes[0];
-  let bestDist = -1;
+    // BFS inward
+    while (queue.length) {
+      const h = queue.shift()!;
+      const d = dist.get(key(h.q, h.r))!;
 
-  for (const h of hexes) {
-    const d = dist.get(key(h.q, h.r))!;
-    if (d > bestDist) {
-      bestDist = d;
-      best = h;
+      for (const [dq, dr] of dirs) {
+        const nq = h.q + dq;
+        const nr = h.r + dr;
+        const nk = key(nq, nr);
+
+        if (!set.has(nk)) continue;
+        if (dist.has(nk)) continue;
+
+        dist.set(nk, d + 1);
+        queue.push({ q: nq, r: nr, s: 0, territoryID: null });
+      }
     }
-  }
 
-  return { hex: best, distance: bestDist };
-}
+    // find max
+    let best = hexes[0];
+    let bestDist = -1;
+
+    for (const h of hexes) {
+      const d = dist.get(key(h.q, h.r))!;
+      if (d > bestDist) {
+        bestDist = d;
+        best = h;
+      }
+    }
+
+    return { hex: best, distance: bestDist };
+  }
 
   /**
    * LOD Switcher
@@ -326,8 +326,8 @@ private findDeepestHex(hexes: Hex[]) {
 
   private updateMissileHighlights(sourceId: string | null, targetIds: string[]) {
     // Clear previous if they were there
-    this.stopAllPulses(); 
-    
+    this.stopAllPulses();
+
     // In missile mode, we might want to keep the select/hover borders or clear them
     // Let's clear them for clarity
     if (this.activeHoverId) this.toggleBorder(this.activeHoverId, false);
@@ -464,7 +464,7 @@ private findDeepestHex(hexes: Hex[]) {
     }
 
     // --- Handle Capital Glow ---
-    if(buildingType === "CAPITAL") {
+    if (buildingType === "CAPITAL") {
       this.setCapitalPulse(territoryId, true);
     }
 
@@ -480,9 +480,9 @@ private findDeepestHex(hexes: Hex[]) {
     sprite.x = center.x;
     sprite.y = center.y;
     sprite.width = center.size; // Adjust size as needed
-    sprite.height = center.size ;
+    sprite.height = center.size;
     sprite.tint = 0xFFFFFF;
-    
+
     this.iconsContainer.addChild(sprite);
     this.buildingIcons.set(territoryId, sprite);
   }
@@ -518,7 +518,7 @@ private findDeepestHex(hexes: Hex[]) {
     glow_fill.tint = 0xFFD700; // Gold glow
     //glow_border.blendMode = 'add';
     //glow_fill.blendMode = 'add';
-    
+
     // Apply a blur filter for soft glow aesthetics
     const blur = new PIXI.BlurFilter();
     blur.strength = 2;
@@ -527,14 +527,14 @@ private findDeepestHex(hexes: Hex[]) {
     glow_fill.alpha = 0.5;
     glow_border.zIndex = 1; // Stay behind the main sharp border
     glow_fill.zIndex = -2; // Stay behind the border glow
-    
-    this.bordersContainer.addChild(glow_fill); 
-    this.bordersContainer.addChild(glow_border); 
+
+    this.bordersContainer.addChild(glow_fill);
+    this.bordersContainer.addChild(glow_border);
     this.capitalGlows.set(territoryId, glow_border);
     this.capitalGlowsFill.set(territoryId, glow_fill);
 
     // Premium pulse animation
-    gsap.fromTo([glow_border, glow_fill], 
+    gsap.fromTo([glow_border, glow_fill],
       { alpha: 0 },
       {
         alpha: 1,
@@ -576,19 +576,19 @@ private findDeepestHex(hexes: Hex[]) {
       });
 
       const text = new PIXI.Text({
-        text: isPositive ? `+${amount}` : `-${amount}`, 
+        text: isPositive ? `+${amount}` : `-${amount}`,
         style: textStyle
       });
-      
+
       text.anchor.set(0.5);
       text.x = center.x;
       text.y = center.y;
-      
+
       this.iconsContainer.addChild(text);
 
       const animPromise = new Promise<void>((resolve) => {
         const startY = text.y;
-        
+
         gsap.timeline({
           onComplete: () => {
             text.destroy();

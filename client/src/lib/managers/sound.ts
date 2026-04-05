@@ -19,15 +19,15 @@ class SoundManager implements IAudioService {
   private onProgressCb?: (progress: number) => void;
 
   init() {
-    console.log("[SoundManager] Initializing...");
+    //console.log("[SoundManager] Initializing...");
     // We no longer load assets automatically during init to support lazy loading
     this.setupEventListeners();
   }
 
   public async prepare(): Promise<void> {
     if (this.isLoaded) return Promise.resolve();
-    
-    console.log("[SoundManager] Preparing assets...");
+
+    //console.log("[SoundManager] Preparing assets...");
     const total = SOUND_ASSETS.length;
     let loaded = 0;
 
@@ -44,8 +44,8 @@ class SoundManager implements IAudioService {
           loaded++;
           this.updateProgress((loaded / total) * 100);
           if (loaded === total) {
-             this.isLoaded = true;
-             resolve();
+            this.isLoaded = true;
+            resolve();
           }
           return;
         }
@@ -107,7 +107,7 @@ class SoundManager implements IAudioService {
 
   private handleTrigger(trigger: AudioTrigger, _payload: any) {
     const options: PlaybackOptions = { ...trigger.config };
-    
+
     if (trigger.type === "random_pitch" && trigger.config?.pitchRange) {
       const [min, max] = trigger.config.pitchRange;
       options.pitch = Math.random() * (max - min) + min;
@@ -130,9 +130,9 @@ class SoundManager implements IAudioService {
     if (categoryConfig.muted) return;
 
     const volume = (options?.volume ?? 1.0) * categoryConfig.volume;
-    
+
     sound.volume(volume);
-    
+
     if (options?.pitch) {
       sound.rate(options.pitch);
     }
@@ -158,7 +158,7 @@ class SoundManager implements IAudioService {
     SOUND_ASSETS.filter(a => a.category === category).forEach(asset => {
       const sound = this.sounds.get(asset.id);
       if (sound && sound.playing()) {
-         sound.volume(volume);
+        sound.volume(volume);
       }
     });
   }
@@ -173,7 +173,7 @@ class SoundManager implements IAudioService {
   }
 
   destroy() {
-    console.log("[SoundManager] Destroying...");
+    //console.log("[SoundManager] Destroying...");
     this.stopAll();
     this.unsubs.forEach((fn) => fn());
     this.unsubs = [];

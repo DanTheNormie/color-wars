@@ -38,7 +38,7 @@ export function animateUnitHop(unit: PlayerSprite, pathTiles: PIXI.Container[]) 
       },
       onComplete: () => {
         // Snap explicitly to ensure precision at end of step
-        console.log("completed hop to tile: ", endTile.label);
+        //console.log("completed hop to tile: ", endTile.label);
         unit.position.copyFrom(endTile.position);
         unit.currentTileId = endTile.label; // Update logical position step-by-step
       },
@@ -54,7 +54,7 @@ export function ToXY(target: PIXI.Container, endPos: { x: number; y: number }) {
     y: endPos.y,
     duration: 0.5,
     onUpdate: () => {
-      console.log("updating,", target.x);
+      //console.log("updating,", target.x);
     },
   });
 }
@@ -125,17 +125,17 @@ export function animateCoinConfettiToDom(sprite: PIXI.Container, targetEl: HTMLE
     });
 }
 
-function getCanvasContext (){
+function getCanvasContext() {
   const canvas = document.getElementById("vfx-layer") as HTMLCanvasElement;
   if (!canvas) throw new Error('canvas not ready yet');
   const dpr = Math.max(1, window.devicePixelRatio || 1);
 
-  
+
   const canavasRect = canvas.getBoundingClientRect();
-  
+
   canvas.width = Math.round(canavasRect.width * dpr);
   canvas.height = Math.round(canavasRect.height * dpr);
-  
+
   const ctx = canvas.getContext("2d")!;
   // IMPORTANT: reset transform before scaling
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -145,7 +145,7 @@ function getCanvasContext (){
 }
 
 export function animateCoinConfettiToCanvas(sprite: PIXI.Container, targetEl: HTMLElement, app: PIXI.Application, count = 12) {
-  const ctx = getCanvasContext() 
+  const ctx = getCanvasContext()
 
   const coins: {
     x: number;
@@ -231,85 +231,85 @@ export function testAnimation(x1: number, y1: number, x2: number, y2: number) {
   if (!canvas) return;
   const dpr = Math.max(1, window.devicePixelRatio || 1);
 
-  
+
   const rect = canvas.getBoundingClientRect();
-  
+
   canvas.width = Math.round(rect.width * dpr);
   canvas.height = Math.round(rect.height * dpr);
-  
+
   const ctx = canvas.getContext("2d")!;
   // IMPORTANT: reset transform before scaling
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
 
-  console.log({
-    dpr: window.devicePixelRatio,
-    canvasCSS: canvas.getBoundingClientRect(),
-    canvasActual: { w: canvas.width, h: canvas.height },
-    ctxActual: { w: ctx.canvas.width, h: ctx.canvas.height },
-  });
+  //console.log({
+//   dpr: window.devicePixelRatio,
+//     canvasCSS: canvas.getBoundingClientRect(),
+//       canvasActual: { w: canvas.width, h: canvas.height },
+//   ctxActual: { w: ctx.canvas.width, h: ctx.canvas.height },
+// });
 
 
-  const startX = x1
-  const startY = y1
+const startX = x1
+const startY = y1
 
-      const coins: {
-    x: number;
-    y: number;
-    r: number;
-    opacity: number;
-  }[] = [];
+const coins: {
+  x: number;
+  y: number;
+  r: number;
+  opacity: number;
+}[] = [];
 
-  for(let i=1; i<=1; i++){
-    coins.push({
-      x: startX,
-      y: startY,
-      r: 100,
-      opacity: 1
-    })
+for (let i = 1; i <= 1; i++) {
+  coins.push({
+    x: startX,
+    y: startY,
+    r: 100,
+    opacity: 1
+  })
+}
+
+
+function render() {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  for (const c of coins) {
+    if (c.opacity <= 0) continue;
+
+    ctx.globalAlpha = c.opacity;
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#31d652";
+    ctx.fill();
+    ctx.strokeStyle = "#262626";
+    ctx.stroke();
   }
 
+  ctx.globalAlpha = 1;
+}
 
-  function render() {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    for (const c of coins) {
-      if (c.opacity <= 0) continue;
-
-      ctx.globalAlpha = c.opacity;
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-      ctx.fillStyle = "#31d652";
-      ctx.fill();
-      ctx.strokeStyle = "#262626";
-      ctx.stroke();
-    }
-
-    ctx.globalAlpha = 1;
-  }
-
-  return gsap
-    .timeline({
-      onUpdate: render,
-      onComplete: () => {
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      },
-    })
-    .to(coins, {
-      x: x2,
-      y: y2,
-      stagger: 0.002,
-      duration: 2,
-      ease: "power2.out",
-    })
-    .to(coins, {
-      x: x1,
-      y: y1,
-      stagger: 0.002,
-      duration: 2,
-      ease: "power2.out",
-    })
-    .repeat(20)
+return gsap
+  .timeline({
+    onUpdate: render,
+    onComplete: () => {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    },
+  })
+  .to(coins, {
+    x: x2,
+    y: y2,
+    stagger: 0.002,
+    duration: 2,
+    ease: "power2.out",
+  })
+  .to(coins, {
+    x: x1,
+    y: y1,
+    stagger: 0.002,
+    duration: 2,
+    ease: "power2.out",
+  })
+  .repeat(20)
 }
 
 export function animateCoinConfetti(sprite: PIXI.Container, app: PIXI.Application, count = 12) {
@@ -400,14 +400,14 @@ export function createFloatingDiff(container: HTMLElement, diff: number) {
       opacity: 0,
     },
     {
-      y: statTextElHeight*-1,
+      y: statTextElHeight * -1,
       opacity: 1,
       duration: 0.4,
     },
   )
     .to(diffEl, { duration: 1 }) // <— wait 1 second
     .to(diffEl, {
-      y: statTextElHeight*-2,
+      y: statTextElHeight * -2,
       opacity: 0,
       duration: 0.4,
       ease: "power1.out",
@@ -428,53 +428,53 @@ export function animateCounter(el: HTMLSpanElement, animatedValue: { val: number
 }
 
 function getTargetStepIndex(
-  currentIndex: number, 
-  step: number, 
-  maxIndex: number, 
+  currentIndex: number,
+  step: number,
+  maxIndex: number,
   direction: 'forward' | 'backward'
 ): number {
   if (direction === 'forward') {
-      return Math.max(0, currentIndex - step);
+    return Math.max(0, currentIndex - step);
   } else {
-      const target = currentIndex + step;
-      return target > maxIndex ? 0 : target;
+    const target = currentIndex + step;
+    return target > maxIndex ? 0 : target;
   }
 }
 
-function getNewSpriteForwardKeyframes(idx: number, count: number, maxIdx: number, targetCoords: {x: number, y: number}[]) {
+function getNewSpriteForwardKeyframes(idx: number, count: number, maxIdx: number, targetCoords: { x: number, y: number }[]) {
   const keys = [];
   const startCoord = targetCoords[0];
   for (let step = 1; step <= count; step++) {
-      const activeSteps = step - idx;
-      if (activeSteps <= 0) {
-          keys.push({ pixi: { x: startCoord.x, y: startCoord.y, alpha: 0 } });
-      } else {
-          const stepIdx = maxIdx + 1 - activeSteps;
-          keys.push({ pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y, alpha: 1 } });
-      }
+    const activeSteps = step - idx;
+    if (activeSteps <= 0) {
+      keys.push({ pixi: { x: startCoord.x, y: startCoord.y, alpha: 0 } });
+    } else {
+      const stepIdx = maxIdx + 1 - activeSteps;
+      keys.push({ pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y, alpha: 1 } });
+    }
   }
   return keys;
 }
 
-function getNewSpriteBackwardKeyframes(idx: number, count: number, maxIdx: number, targetCoords: {x: number, y: number}[]) {
+function getNewSpriteBackwardKeyframes(idx: number, count: number, maxIdx: number, targetCoords: { x: number, y: number }[]) {
   const keys = [];
   for (let step = 1; step <= count; step++) {
-      const activeSteps = step - (count - 1 - idx); 
-      if (activeSteps <= 0) {
-          keys.push({ pixi: { x: targetCoords[0].x, y: targetCoords[0].y, alpha: 0 } });
-      } else {
-          const stepIdx = Math.min(maxIdx, activeSteps);
-          keys.push({ pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y, alpha: 1 } });
-      }
+    const activeSteps = step - (count - 1 - idx);
+    if (activeSteps <= 0) {
+      keys.push({ pixi: { x: targetCoords[0].x, y: targetCoords[0].y, alpha: 0 } });
+    } else {
+      const stepIdx = Math.min(maxIdx, activeSteps);
+      keys.push({ pixi: { x: targetCoords[stepIdx].x, y: targetCoords[stepIdx].y, alpha: 1 } });
+    }
   }
   return keys;
 }
 
 export function buildTrackShiftAnimation(
-  trackLayer: DiceTrackLayer, 
-  tokenLayer: TokenLayer, 
-  newTiles: TileConfig[], 
-  shiftDirection: 'forward' | 'backward', 
+  trackLayer: DiceTrackLayer,
+  tokenLayer: TokenLayer,
+  newTiles: TileConfig[],
+  shiftDirection: 'forward' | 'backward',
   app: PIXI.Application
 ) {
   const tl = gsap.timeline({ paused: true });
@@ -482,8 +482,8 @@ export function buildTrackShiftAnimation(
   const maxIdx = sprites.length - 1;
   const targetCoords = sprites.map(s => ({ x: s.position.x, y: s.position.y }));
 
-  const processedNewTiles = newTiles.length > sprites.length 
-    ? newTiles.slice(-(sprites.length - 1)) 
+  const processedNewTiles = newTiles.length > sprites.length
+    ? newTiles.slice(-(sprites.length - 1))
     : newTiles;
 
   const newSprites = processedNewTiles.map(nt => trackLayer.prepareNewTileSprite(nt, app));
@@ -491,8 +491,8 @@ export function buildTrackShiftAnimation(
   const stateUpdates: (() => void)[] = [];
 
   tl.eventCallback("onComplete", () => {
-     trackLayer.commitTrackShift(count, shiftDirection, newSprites);
-     stateUpdates.forEach(update => update());
+    trackLayer.commitTrackShift(count, shiftDirection, newSprites);
+    stateUpdates.forEach(update => update());
   });
 
   sprites[0].zIndex = 10;
@@ -500,39 +500,39 @@ export function buildTrackShiftAnimation(
 
   // 1. Existing Track Sprites
   for (let i = 1; i < sprites.length; i++) {
-      const keys = [];
-      const isVanishing = shiftDirection === 'forward' ? (i <= count) : (i >= sprites.length - count);
-      
-      for (let step = 1; step <= count; step++) {
-          const stepIdx = getTargetStepIndex(i, step, maxIdx, shiftDirection);
-          keys.push({ 
-            pixi: { 
-              x: targetCoords[stepIdx].x, 
-              y: targetCoords[stepIdx].y,
-              ...(isVanishing && stepIdx === 0 ? { alpha: 0 } : {})
-            } 
-          });
-      }
-      
-      tl.to(sprites[i], { keyframes: keys, duration: 2, ease: "power2.inOut" }, 0);
-      if (isVanishing) sprites[i].zIndex = 1;
+    const keys = [];
+    const isVanishing = shiftDirection === 'forward' ? (i <= count) : (i >= sprites.length - count);
+
+    for (let step = 1; step <= count; step++) {
+      const stepIdx = getTargetStepIndex(i, step, maxIdx, shiftDirection);
+      keys.push({
+        pixi: {
+          x: targetCoords[stepIdx].x,
+          y: targetCoords[stepIdx].y,
+          ...(isVanishing && stepIdx === 0 ? { alpha: 0 } : {})
+        }
+      });
+    }
+
+    tl.to(sprites[i], { keyframes: keys, duration: 2, ease: "power2.inOut" }, 0);
+    if (isVanishing) sprites[i].zIndex = 1;
   }
 
   // 2. New Sprites
   newSprites.forEach((ns, idx) => {
-      const isForward = shiftDirection === 'forward';
-      const startCoord = targetCoords[0];
-      
-      ns.position.set(startCoord.x, startCoord.y);
-      ns.scale.copyFrom(sprites[0].scale);
-      ns.alpha = 0;
-      ns.zIndex = 0;
-      
-      const keys = isForward 
-        ? getNewSpriteForwardKeyframes(idx, count, maxIdx, targetCoords)
-        : getNewSpriteBackwardKeyframes(idx, count, maxIdx, targetCoords);
+    const isForward = shiftDirection === 'forward';
+    const startCoord = targetCoords[0];
 
-      tl.to(ns, { keyframes: keys, duration: 2, ease: "power2.inOut" }, 0);
+    ns.position.set(startCoord.x, startCoord.y);
+    ns.scale.copyFrom(sprites[0].scale);
+    ns.alpha = 0;
+    ns.zIndex = 0;
+
+    const keys = isForward
+      ? getNewSpriteForwardKeyframes(idx, count, maxIdx, targetCoords)
+      : getNewSpriteBackwardKeyframes(idx, count, maxIdx, targetCoords);
+
+    tl.to(ns, { keyframes: keys, duration: 2, ease: "power2.inOut" }, 0);
   });
 
   // 3. Tokens
@@ -543,21 +543,21 @@ export function buildTrackShiftAnimation(
       if (idx > 0) {
         const targetIdx = getTargetStepIndex(idx, count, maxIdx, shiftDirection);
         const targetTileId = `track-tile-${targetIdx}`;
-        
+
         const unitKeys = [];
         for (let step = 1; step <= count; step++) {
-           const stepIdx = getTargetStepIndex(idx, step, maxIdx, shiftDirection);
-           const tileCoord = targetCoords[stepIdx];
-           const originalTileCoord = targetCoords[idx];
-           const dx = tileCoord.x - originalTileCoord.x;
-           const dy = tileCoord.y - originalTileCoord.y;
-           unitKeys.push({ pixi: { x: unit.x + dx, y: unit.y + dy } });
+          const stepIdx = getTargetStepIndex(idx, step, maxIdx, shiftDirection);
+          const tileCoord = targetCoords[stepIdx];
+          const originalTileCoord = targetCoords[idx];
+          const dx = tileCoord.x - originalTileCoord.x;
+          const dy = tileCoord.y - originalTileCoord.y;
+          unitKeys.push({ pixi: { x: unit.x + dx, y: unit.y + dy } });
         }
 
         if (unitKeys.length > 0) {
           tl.to(unit, { keyframes: unitKeys, duration: 2, ease: "power2.inOut" }, 0);
         }
-        
+
         stateUpdates.push(() => {
           unit.currentTileId = targetTileId;
         });
@@ -570,7 +570,7 @@ export function buildTrackShiftAnimation(
 
 export function animatePlayerTeleportToStart(unit: PlayerSprite, startTile: PIXI.Container) {
   const tl = gsap.timeline();
-  
+
   const origScaleX = unit.scale.x;
   const origScaleY = unit.scale.y;
 
@@ -583,17 +583,17 @@ export function animatePlayerTeleportToStart(unit: PlayerSprite, startTile: PIXI
       unit.isAnimating = true;
     }
   })
-  .set(unit, { pixi: { x: startTile.x, y: startTile.y } })
-  .to(unit, {
-    pixi: { scaleX: origScaleX, scaleY: origScaleY, rotation: 0, alpha: 1 },
-    duration: 0.5,
-    ease: "back.out(1.7)",
-    onComplete: () => {
-      unit.isAnimating = false;
-      unit.currentTileId = startTile.label;
-      console.log("Completed teleport to start tile");
-    }
-  });
+    .set(unit, { pixi: { x: startTile.x, y: startTile.y } })
+    .to(unit, {
+      pixi: { scaleX: origScaleX, scaleY: origScaleY, rotation: 0, alpha: 1 },
+      duration: 0.5,
+      ease: "back.out(1.7)",
+      onComplete: () => {
+        unit.isAnimating = false;
+        unit.currentTileId = startTile.label;
+        //console.log("Completed teleport to start tile");
+      }
+    });
 
   return tl;
 }

@@ -57,7 +57,7 @@ const RoomPage = () => {
   useEffect(() => {
     soundManager.onProgress((p) => setAudioProgress(p));
   }, []);
-  
+
   const playerName = useStore((z) => z.room.playerName) || "";
   const setPlayerName = useStore((z) => z.setPlayerName);
   const joinRoom = useStore((z) => z.joinRoom);
@@ -67,8 +67,8 @@ const RoomPage = () => {
       await tryAutoReconnect();
     };
     if (networkState === "disconnected" && rehydrated) {
-      if (reconnectionToken && storedRoomId === roomId) { 
-        tryReconnect(); 
+      if (reconnectionToken && storedRoomId === roomId) {
+        tryReconnect();
       } else if (roomId) {
         fetch(`${httpEndpoint}/matchmaking/room/${roomId}/info`)
           .then(res => {
@@ -78,7 +78,7 @@ const RoomPage = () => {
           .then(data => setRoomInfo(data))
           .catch(err => setInfoError(err.message));
       } else {
-        console.log("navigating to lobby")
+        //console.log("navigating to lobby")
         //navigate("/");
       }
     }
@@ -101,7 +101,7 @@ const RoomPage = () => {
       // Step 2: Join Room
       await joinRoom(roomId);
     } catch (err) {
-      console.error(err);
+      //console.log(err);
       setInfoError("Failed to join room or load assets.");
     } finally {
       setIsJoining(false);
@@ -117,7 +117,7 @@ const RoomPage = () => {
         </p>
         {isPreparingAudio && (
           <div className="mt-8 h-2 w-64 overflow-hidden rounded-full">
-            <div 
+            <div
               className="h-full bg-cyan-500 transition-all duration-300"
               style={{ width: `${audioProgress}%` }}
             />
@@ -141,7 +141,7 @@ const RoomPage = () => {
         <div className="flex h-screen w-full items-center justify-center">
           <div className="flex h-full w-full flex-col items-center justify-center text-center">
             <h1 className="text-xl mb-4 text-white">{infoError}</h1>
-            <Button color="violet" className="text-white mt-4" onClick={() =>{ navigate("/"); window.location.reload()}}>
+            <Button color="violet" className="text-white mt-4" onClick={() => { navigate("/"); window.location.reload() }}>
               Return to Lobby
             </Button>
           </div>
@@ -155,7 +155,7 @@ const RoomPage = () => {
           <div className="flex h-screen w-full items-center justify-center">
             <div className="flex h-full w-full flex-col items-center justify-center text-center">
               <h1 className="text-xl mb-4 text-white">Game has already started</h1>
-              <Button color="violet" className="text-white mt-4" onClick={() => { navigate("/"); window.location.reload()}}>
+              <Button color="violet" className="text-white mt-4" onClick={() => { navigate("/"); window.location.reload() }}>
                 Go to Lobby
               </Button>
             </div>
@@ -193,7 +193,7 @@ const RoomPage = () => {
       <div className="flex h-screen w-full items-center justify-center">
         <div className="flex h-full w-full flex-col items-center justify-center text-center">
           <h1 className="text-xl text-white">Connection Lost</h1>
-          <Button className="mt-4" onClick={() => { navigate("/"); window.location.reload()}}>
+          <Button className="mt-4" onClick={() => { navigate("/"); window.location.reload() }}>
             Return to Lobby
           </Button>
         </div>
@@ -202,7 +202,7 @@ const RoomPage = () => {
   }
 
   return (
-    <Suspense 
+    <Suspense
       fallback={
         <div className="flex h-screen w-full items-center justify-center bg-background">
           <p className="text-xl text-white animate-pulse">Loading Game...</p>
@@ -216,8 +216,8 @@ const RoomPage = () => {
           </div>
           <PixiCanvas key="stable-pixi-canvas" />
           {roomPhase === 'lobby' && <CopyLinkButton />}
-            <PlayersStatus />
-            <GameActions />
+          <PlayersStatus />
+          <GameActions />
           <div className={isGameOver ? "hidden" : "contents"}>
             <TradesList />
             <UserAssets />
@@ -231,7 +231,7 @@ const RoomPage = () => {
           <ActionArea>
             <Suspense fallback={null}>
               {isGameOver ? (
-                <Button onClick={() => { navigate("/"); window.location.reload()}} className=" w-20 h-12 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white">
+                <Button onClick={() => { navigate("/"); window.location.reload() }} className=" w-20 h-12 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white">
                   Return to Lobby
                 </Button>
               ) : (
@@ -261,7 +261,7 @@ const CopyLinkButton = () => {
         <div className="flex-1 text-sm overflow-x-scroll text-center text-nowrap text-zinc-400 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {window.location.href}
         </div>
-        <Button 
+        <Button
           onClick={handleCopy}
           className="shrink-0 bg-secondary text-white hover:bg-secondary/80"
         >

@@ -96,7 +96,7 @@ export const useStore = create(
                 try {
                   network.send('DECLARE_BANKRUPTCY', {})
                 } catch (err) {
-                  console.log(err)
+                  //console.log(err)
                 }
               },
               setShowDiceRollMessage: (show: boolean) => {
@@ -146,7 +146,7 @@ export const useStore = create(
                 });
               },
               quickMatch: async () => {
-                console.log("[sessionStore] quickMatch started");
+                //console.log("[sessionStore] quickMatch started");
                 const { room: localRoom } = get();
                 try {
                   const payloadName = localRoom.playerName?.trim() ?? DEFAULT_PLAYER_NAME;
@@ -163,7 +163,7 @@ export const useStore = create(
                 }
               },
               joinRoom: async (roomId: string) => {
-                console.log("[sessionStore] joinRoom started");
+                //console.log("[sessionStore] joinRoom started");
                 const { room: localRoom } = get();
                 try {
                   const payloadName = localRoom.playerName?.trim() ?? DEFAULT_PLAYER_NAME;
@@ -200,7 +200,7 @@ export const useStore = create(
               },
               rollDiceTo: (die1: number, die2: number) => {
                 set((z) => {
-                  console.log('called rollDiceTo from: ', z.state.game.diceState.mode)
+                  //console.log('called rollDiceTo from: ', z.state.game.diceState.mode)
                   z.state.game.diceState.mode = 'ROLLINGTOFACE'
                   z.state.game.diceState.rollTo = [die1, die2]
                 })
@@ -219,7 +219,7 @@ export const useStore = create(
                 })
               },
               tryAutoReconnect: async () => {
-                console.log('calling reconnect')
+                //console.log('calling reconnect')
                 const { room } = get();
                 if (!room.roomId || !room.reconnectionToken) return false;
 
@@ -239,7 +239,7 @@ export const useStore = create(
                   return true;
                 } catch (error) {
                   if (error instanceof Error) {
-                    console.error(error);
+                    //console.log(error);
                     if (error?.message == "already connecting") return true;
                   }
                   set((z) => {
@@ -316,14 +316,14 @@ export const useStore = create(
               },
               leaveGame: async () => {
                 try {
-                  await network.leave("manual");
+                  await network.leave();
                 } catch (error) {
                   console.warn("Unable to leave game", error);
                 }
               },
               sendDiceMode: (mode: "acc" | "rag" | "roll") => {
                 try {
-                  console.log("sending ", mode);
+                  //console.log("sending ", mode);
                   if (mode == "acc") network.send("ACCELERATE_DICE", {});
                   else if (mode == "rag") network.send("RAGDOLL_DICE", {});
                   else if (mode == "roll") {
@@ -331,7 +331,7 @@ export const useStore = create(
                     GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'awaiting_action_result' })
                   }
                 } catch (error) {
-                  console.error("[rollDice] Error sending rollDice message:", error);
+                  //console.log("[rollDice] Error sending rollDice message:", error);
                 }
               },
               endTurn: (vote: "clockwise" | "anticlockwise") => {

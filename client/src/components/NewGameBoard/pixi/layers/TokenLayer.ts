@@ -16,14 +16,14 @@ export class TokenLayer extends PIXI.Container {
   private unsub: () => void;
   private unsubActive: () => void;
   public rearrangeTile = debounce((tileIds: string | string[], instant: boolean) => {
-     const ids = Array.isArray(tileIds) ? tileIds : [tileIds];
-     this._rearrangeTiles(ids, instant);
+    const ids = Array.isArray(tileIds) ? tileIds : [tileIds];
+    this._rearrangeTiles(ids, instant);
   }, 200)
   constructor() {
     super();
     // Use lodash debounce for reconcileTokens
     this._debouncedReconcileTokens = debounce(this.reconcileTokens, 200);
-    const {tokens} = useDiceTrackStore.getState()
+    const { tokens } = useDiceTrackStore.getState()
     this.reconcileTokens(tokens, true)
     this.unsub = useDiceTrackStore.subscribe(
       (s) => s.tokens,
@@ -99,7 +99,7 @@ export class TokenLayer extends PIXI.Container {
       }
     });
 
-    console.log("affectedTiles", affectedTiles);
+    //console.log("affectedTiles", affectedTiles);
 
     // 3. REARRANGE VISUALS
     if (!init && affectedTiles.size > 0) {
@@ -145,11 +145,11 @@ export class TokenLayer extends PIXI.Container {
 
   private _rearrangeTiles(tileIds: string[], animate: boolean) {
     const state = useDiceTrackStore.getState();
-    
+
     tileIds.forEach((tileId) => {
       const allTokenIds = getTokensOnTile(state, tileId);
-      
-      console.log('called for tile: ', tileId, ', tokens: ', allTokenIds)
+
+      //console.log('called for tile: ', tileId, ', tokens: ', allTokenIds)
       const presentTokens = allTokenIds.filter((tokenId) => {
         const unit = this.units.get(tokenId);
         return unit && !unit.isAnimating;
@@ -182,7 +182,7 @@ export class TokenLayer extends PIXI.Container {
     // If config.scale is 1.0 (Active), it renders full size.
     const finalScale = this.currentHexSize * this.BASE_TOKEN_RATIO * config.scale;
     unit.baseScale = finalScale;
-    
+
     const tl = gsap.timeline();
 
     if (animate) {
@@ -245,7 +245,7 @@ export class TokenLayer extends PIXI.Container {
       pixiTargetLocator.unregister(unit.id);
       gsap.killTweensOf(unit);
       unit.destroy({ children: true });
-    }); 
+    });
     this.unsub();
     this.unsubActive();
     this.units.clear();

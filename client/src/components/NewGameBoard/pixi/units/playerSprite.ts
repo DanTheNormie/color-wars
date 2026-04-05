@@ -4,7 +4,7 @@ import * as PIXI from "pixi.js";
 export class PlayerSprite extends PIXI.Container {
   public id: string;
   // Track where this unit logically belongs
-  public currentTileId: string | null = null; 
+  public currentTileId: string | null = null;
   public isAnimating: boolean = false; // Prevents resize from snapping mid-animation
   private pulseTl?: gsap.core.Timeline;
   private player_box: PIXI.Container;
@@ -15,13 +15,13 @@ export class PlayerSprite extends PIXI.Container {
   constructor(id: string, color: number) {
     super();
     this.id = id;
-    
+
 
     const body = new PIXI.Graphics();
-    body.circle(0,0,12).fill({color}).stroke({ width: 1, color: 0xffffff });
+    body.circle(0, 0, 12).fill({ color }).stroke({ width: 1, color: 0xffffff });
     this.player_box = new PIXI.Container();
     this.player_box.addChild(body);
-    
+
     this.addChild(this.player_box);
 
 
@@ -66,7 +66,7 @@ export class PlayerSprite extends PIXI.Container {
 
     // add to container (or to this.graphics if you prefer)
     this.player_box.addChild(leftEye, leftPupil, rightEye, rightPupil);
-    
+
     const gradient = new PIXI.FillGradient({
       type: 'radial',
       center: { x: 0.5, y: 0.5 },
@@ -77,7 +77,7 @@ export class PlayerSprite extends PIXI.Container {
     gradient.addColorStop(0, 'rgba(0,0,0,1)')
     gradient.addColorStop(1, 'rgba(0,0,0,0)')
     const shadow = new PIXI.Graphics();
-    shadow.roundPoly(0, 0, 18, 4, 4, this.degreeToRadian(45) ).fill({fill: gradient})
+    shadow.roundPoly(0, 0, 18, 4, 4, this.degreeToRadian(45)).fill({ fill: gradient })
     this.player_box.addChildAt(shadow, 0);
 
     // --- Victory Lap Visuals (Rays & Crown) ---
@@ -113,9 +113,9 @@ export class PlayerSprite extends PIXI.Container {
 
   //   for (let i = 0; i < rayCount; i++) {
   //     const ray = new PIXI.Graphics();
-      
+
   //     const angleOffset = rayAngle * i;
-      
+
   //     // Radiating ray: Triangle from center
   //     // Use a linear gradient for the ray
   //     const rayGradient = new PIXI.FillGradient({
@@ -142,12 +142,12 @@ export class PlayerSprite extends PIXI.Container {
     this.player_box.tint = selected ? 0xffff00 : 0xffffff;
   }
 
-  public startPulse(){
-    if(this.pulseTl) {
-      console.log('start pulse, killing existing')
+  public startPulse() {
+    if (this.pulseTl) {
+      //console.log('start pulse, killing existing')
       this.pulseTl.kill()
     }
-    
+
     this.pulseTl = gsap.timeline()
     this.zIndex = 100
     this.pulseTl.to(this.player_box, {
@@ -161,7 +161,7 @@ export class PlayerSprite extends PIXI.Container {
     });
   }
 
-  public stopPulse(){
+  public stopPulse() {
     this.pulseTl?.kill()
     this.pulseTl = undefined
     this.zIndex = 0
@@ -190,7 +190,7 @@ export class PlayerSprite extends PIXI.Container {
   public setGoldenAura(enabled: boolean) {
     if (enabled) {
       if (this.victoryLapTl) return; // Already active or animating
-      
+
       // Reset states for animation
       // if (this.rayContainer) {
       //   this.rayContainer.visible = true;
@@ -198,7 +198,7 @@ export class PlayerSprite extends PIXI.Container {
       //   this.rayContainer.scale.set(0.2);
       //   this.rayContainer.rotation = 0;
       // }
-      
+
       if (this.crownSprite) {
         this.crownSprite.visible = true;
         this.crownSprite.alpha = 0;
@@ -291,7 +291,7 @@ export class PlayerSprite extends PIXI.Container {
           ease: "power2.in"
         }, 0);
       }
-      
+
       this.victoryLapTl = fadeTl;
       this.player_box.tint = 0xffffff;
     }

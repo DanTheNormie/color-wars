@@ -11,7 +11,7 @@ export function bootstrapGame() {
   if (bootstrapped) return;
   enableMapSet();
   bootstrapped = true;
-  console.log("bootstrapping");
+  //console.log("bootstrapping");
   toastManager.init();
   soundManager.init();
   zustandSyncManager.init();

@@ -121,13 +121,13 @@ export class IncrMoney extends BaseAction<"INCR_MONEY"> {
 
     // const anim = animateCoinConfettiToDom(tile!, ele, app, 50);
     //const anim  = vfxLayer.animateCoinConfettiOverlay(tile, ele, boardApp, vfxApp, 10)
-    const anim2 = vfxLayer.animateSpritesheetConfettiOverlay(tile, ele, boardApp, vfxApp, (amount/100))
+    const anim2 = vfxLayer.animateSpritesheetConfettiOverlay(tile, ele, boardApp, vfxApp, (amount / 100))
 
     this.logAction(playerId);
 
     return ActionHandle.attachCallBack(anim2, async () => {
       useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money + amount);
-      console.log("IncrMoney animation complete");
+      //console.log("IncrMoney animation complete");
     });
   }
 }
@@ -153,7 +153,7 @@ export class DecrMoney extends BaseAction<"DECR_MONEY"> {
 
     return ActionHandle.attachCallBack(anim, async () => {
       useStore.getState().updatePlayerMoney(playerId, useStore.getState().state.game.players[playerId].money - amount);
-      console.log("DecrMoney animation complete");
+      //console.log("DecrMoney animation complete");
     });
   }
 }
@@ -186,7 +186,7 @@ export class AddCard extends BaseAction<"ADD_CARD"> {
 
     return ActionHandle.attachCallBack(anim, async () => {
       useStore.getState().addPlayerCard(playerId, cardId);
-      console.log("AddCard animation complete – card added to player:", cardId);
+      //console.log("AddCard animation complete – card added to player:", cardId);
     });
   }
 }
@@ -406,12 +406,12 @@ export class GameOverAction extends BaseAction<"GAME_OVER"> {
       if (engine) {
         // 2. Trigger PIXI visual transition FIRST or concurrently
         const animPromise = engine.showGameOver(winnerId);
-        
+
         // 3. Update store AFTER PIXI has captured the winner sprite
         // Wait a small bit for PIXI to start its show sequence before triggering React re-render
         await new Promise(r => requestAnimationFrame(r));
         useStore.getState().setWinnerId(winnerId);
-        
+
         await animPromise;
       } else {
         // Fallback for UI if engine never appears
@@ -419,7 +419,7 @@ export class GameOverAction extends BaseAction<"GAME_OVER"> {
       }
     })();
 
-    return new ActionHandle(promise, () => {}, () => {});
+    return new ActionHandle(promise, () => { }, () => { });
   }
 }
 
@@ -509,19 +509,19 @@ export class SabotageAction extends BaseAction<"SABOTAGE"> {
 
     const teleportAnimationTask = new Promise<void>((resolve) => {
       const teleportAnim = animatePlayerTeleportToStart(victimUnit, trackTile0);
-      
+
       // Setup the event to finish the animation promise when it stops
       teleportAnim.eventCallback("onComplete", () => {
-         GameEventBus.emit("TOAST", { content: "Sabotage successful!", type: "info", duration: 3000 });
-         
-         // Update state logic
-         useStore.getState().updatePlayerMoney(attackerId, useStore.getState().state.game.players[attackerId].money + amount);
-         useStore.getState().updatePlayerMoney(victimId, useStore.getState().state.game.players[victimId].money - amount);
-         
-         useDiceTrackStore.getState().upsertToken({ id: victimId, tileId: "track-tile-0", isVictoryLap: false });
-         victimUnit.setGoldenAura(false);
-         
-         resolve();
+        GameEventBus.emit("TOAST", { content: "Sabotage successful!", type: "info", duration: 3000 });
+
+        // Update state logic
+        useStore.getState().updatePlayerMoney(attackerId, useStore.getState().state.game.players[attackerId].money + amount);
+        useStore.getState().updatePlayerMoney(victimId, useStore.getState().state.game.players[victimId].money - amount);
+
+        useDiceTrackStore.getState().upsertToken({ id: victimId, tileId: "track-tile-0", isVictoryLap: false });
+        victimUnit.setGoldenAura(false);
+
+        resolve();
       });
     });
 
@@ -558,7 +558,7 @@ export class VictoryLapStartedAction extends BaseAction<"VICTORY_LAP_STARTED"> {
         teleportAnim.eventCallback("onComplete", () => {
           unit.setGoldenAura(true);
           useDiceTrackStore.getState().upsertToken({ id: playerId, tileId: "track-tile-0", isVictoryLap: true });
-          
+
           // Ensure the Capital Monument glow is active
           const engine = pixiTargetLocator.get("game-board-engine") as PIXIGameBoard;
           if (engine) {
@@ -566,7 +566,7 @@ export class VictoryLapStartedAction extends BaseAction<"VICTORY_LAP_STARTED"> {
             if (outlineLayer) {
               const ownership = useStore.getState().state?.game?.territoryOwnership;
               if (ownership) {
-                const capitalId = Object.keys(ownership).find(tid => 
+                const capitalId = Object.keys(ownership).find(tid =>
                   ownership[tid].ownerId === playerId && ownership[tid].buildingType === "CAPITAL"
                 );
                 if (capitalId) {
@@ -600,7 +600,7 @@ export class MissileLaunchedAction extends BaseAction<"MISSILE_LAUNCHED"> {
 
     if (!startPos || !endPos) {
       console.warn("Missile start/end position missing", { startPos, endPos });
-      return new ActionHandle(Promise.resolve(), () => {}, () => {});
+      return new ActionHandle(Promise.resolve(), () => { }, () => { });
     }
 
     if (!engine.getApp()) throw new Error("PIXI App not found");
@@ -613,25 +613,25 @@ export class MissileLaunchedAction extends BaseAction<"MISSILE_LAUNCHED"> {
           // 2. Update state: Evacuate territory
           useStore.getState().updateTerritoryOwnership(targetTerritoryID, null);
           useMapStore.getState().removeTerritoryColor(targetTerritoryID); // Reset to secondary/neutral color
-          
+
           outlineLayer.updateTerritoryIcon(targetTerritoryID, "BASE");
-          
+
           this.logAction(attackerId);
           resolve();
         });
       }),
-      () => {},
-      () => {}
+      () => { },
+      () => { }
     );
   }
 }
 
 export class AcceptTradeAction extends BaseAction<"ACCEPT_TRADE"> {
   execute(): ActionHandle {
-    const { 
-      playerAId, playerBId, 
-      playerAMoney, playerBMoney, 
-      playerACards, playerBCards, 
+    const {
+      playerAId, playerBId,
+      playerAMoney, playerBMoney,
+      playerACards, playerBCards,
       playerATerritories, playerBTerritories,
       tradeId
     } = this.payload;
@@ -651,25 +651,25 @@ export class AcceptTradeAction extends BaseAction<"ACCEPT_TRADE"> {
     const playerBColor = useStore.getState().state.game.players[playerBId].color;
 
     playerATerritories.forEach(tid => {
-       useStore.getState().setTerritoryOwner(tid, playerAId);
-       useMapStore.getState().setTerritoryColor(tid, playerAColor);
+      useStore.getState().setTerritoryOwner(tid, playerAId);
+      useMapStore.getState().setTerritoryColor(tid, playerAColor);
     });
 
     playerBTerritories.forEach(tid => {
-       useStore.getState().setTerritoryOwner(tid, playerBId);
-       useMapStore.getState().setTerritoryColor(tid, playerBColor);
+      useStore.getState().setTerritoryOwner(tid, playerBId);
+      useMapStore.getState().setTerritoryColor(tid, playerBColor);
     });
-    
+
     // Clear the trade from local store
     useStore.getState().removeTrade(tradeId);
 
-    return new ActionHandle(Promise.resolve(), () => {}, () => {});
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }
 
 export class VoteTrackRotationAction extends BaseAction<"VOTE_TRACK_ROTATION"> {
   execute(): ActionHandle {
     this.logAction(this.payload.playerId);
-    return new ActionHandle(Promise.resolve(), () => {}, () => {});
+    return new ActionHandle(Promise.resolve(), () => { }, () => { });
   }
 }

@@ -35,7 +35,7 @@ export class ActionQueue {
 
   public enqueue(action: IExecutable) {
     this.queue.push(action);
-    GameEventBus.emit('UPDATE_ACTION_STATE', {state:'resolving_action'})
+    GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'resolving_action' })
     this.process();
   }
 
@@ -61,9 +61,9 @@ export class ActionQueue {
 
   private async process() {
     if (this.isRunning) return;
-    if (this.queue.length == 0){ 
+    if (this.queue.length == 0) {
       GameEventBus.emit('UPDATE_ANIMATION_SPEED', { speedMultiplier: 1 });
-      GameEventBus.emit('UPDATE_ACTION_STATE', {state:'idle'})
+      GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'idle' })
       return;
     }
 
@@ -77,12 +77,12 @@ export class ActionQueue {
           this.currentAction = currentAction;
           await currentAction.finished;
         } catch (error) {
-          console.error("Action Failed: ", error);
+          //console.log("Action Failed: ", error);
         }
       }
     }
     GameEventBus.emit('UPDATE_ANIMATION_SPEED', { speedMultiplier: 1 });
-    GameEventBus.emit('UPDATE_ACTION_STATE', {state:'idle'})
+    GameEventBus.emit('UPDATE_ACTION_STATE', { state: 'idle' })
     this.isRunning = false;
   }
 }

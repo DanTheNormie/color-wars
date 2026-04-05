@@ -49,7 +49,7 @@ const App = () => {
       updateMapMetadata({ metadata: parsed });
       setMetadataError(null);
     } catch (error) {
-      console.error("Invalid metadata JSON", error);
+      //console.log("Invalid metadata JSON", error);
       setMetadataError("Invalid JSON. Please provide a valid JSON object or clear the field.");
     }
   };
@@ -66,13 +66,13 @@ const App = () => {
             .map((s) => s.trim())
             .map(Number);
           return {
-            q,r,
-            s:-q-r,
+            q, r,
+            s: -q - r,
             stateId: t.id
           };
         } catch (err) {
-          console.log(err);
-          console.log(h);
+          //console.log(err);
+          //console.log(h);
         }
       }),
     }));
@@ -113,7 +113,7 @@ const App = () => {
       const parsed = JSON.parse(text) as MapConfig;
       importMap(parsed);
     } catch (error) {
-      console.error("Failed to import map config", error);
+      //console.log("Failed to import map config", error);
     }
   };
 

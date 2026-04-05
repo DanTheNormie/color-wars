@@ -2,26 +2,26 @@ import { useRef, useState, useEffect } from "react";
 import { Quaternion, Vector3 } from "@/lib/diceMath";
 import { DiceRotationCalculator } from "../lib/rotationCalculator";
 import { getRandomVertexAxis } from "@/lib/diceMath";
-import { FACE_NORMALS } from "@/lib/diceConfig";
+// import { FACE_NORMALS } from "@/lib/diceConfig";
 
 // Helper to get which face is pointing up (closest to +Y axis)
-const getFaceFromQuaternion = (quat: Quaternion): number => {
-  const up = new Vector3(0, 1, 0);
-  const transformedUp = up.applyQuaternion(quat.clone().normalize());
+// const getFaceFromQuaternion = (quat: Quaternion): number => {
+//   const up = new Vector3(0, 1, 0);
+//   const transformedUp = up.applyQuaternion(quat.clone().normalize());
 
-  let maxDot = -2;
-  let bestFace = 1;
+//   let maxDot = -2;
+//   let bestFace = 1;
 
-  for (const [face, normal] of Object.entries(FACE_NORMALS)) {
-    const dot = transformedUp.dot(normal);
-    if (dot > maxDot) {
-      maxDot = dot;
-      bestFace = Number(face);
-    }
-  }
+//   for (const [face, normal] of Object.entries(FACE_NORMALS)) {
+//     const dot = transformedUp.dot(normal);
+//     if (dot > maxDot) {
+//       maxDot = dot;
+//       bestFace = Number(face);
+//     }
+//   }
 
-  return bestFace;
-};
+//   return bestFace;
+// };
 
 
 
@@ -123,7 +123,7 @@ export const useDicePhysics = () => {
       // Debug logging for loop lifecycle - Step 0.1
       if (typeof window !== 'undefined' && (window as any).DEV) {
         debugRef.current.loops++;
-        console.log({ mode, rollId: rollIdRef.current, hasRunningLoop: animationRef.current != null });
+        //console.log({ mode, rollId: rollIdRef.current, hasRunningLoop: animationRef.current != null });
         if (animationRef.current != null && debugRef.current.loops === 1) {
           // This would indicate a race condition - loop starting while animationRef already set
           console.warn('Race condition detected: new loop started while animationRef.current != null');
@@ -156,10 +156,10 @@ export const useDicePhysics = () => {
       else if (mode === "auto-spin") {
         SPEED = MAX_SPEED;
       }
-      
+
       // HANDOFF TO STEERING
       else if (mode === "spin-to-target") {
-        if(SPEED == 0) SPEED = MAX_SPEED;
+        if (SPEED == 0) SPEED = MAX_SPEED;
         const face = stateRef.current.targetFace!;
         shouldContinue = false;
         animationRef.current = null;
@@ -167,9 +167,9 @@ export const useDicePhysics = () => {
         // Face accuracy baseline logging - Step 0.2
         if (typeof window !== 'undefined' && (window as any).DEV) {
           // Compute actual face pointing up at the start of steering
-          const actualFace = getFaceFromQuaternion(currentQuat);
-          const hit = actualFace === face;
-          console.log({ expected: face, actual: actualFace, hit });
+          //const actualFace = getFaceFromQuaternion(currentQuat);
+          //const hit = actualFace === face;
+          //console.log({ expected: face, actual: actualFace, hit });
         }
 
         startSteering(face, SPEED, rotationAxis, currentQuat);
@@ -196,7 +196,7 @@ export const useDicePhysics = () => {
     startQuat: Quaternion,
   ) => {
     cancelLoop();
-    console.log("targetFace", targetFace);
+    //console.log("targetFace", targetFace);
 
     const axis = vertexAxis.normalize();
     let omega = initialSpeed;

@@ -7,18 +7,18 @@ export async function main(options: Options) {
         // your join options here...
     });
 
-    console.log("joined successfully!");
+    //console.log("joined successfully!");
 
     room.onMessage("message-type", (payload: any) => {
         // logic
     });
 
     room.onStateChange((state: any) => {
-        console.log("state change:", state);
+        //console.log("state change:", state);
     });
 
     room.onLeave((code: number) => {
-        console.log("left");
+        //console.log("left");
     });
 }
 

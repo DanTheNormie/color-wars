@@ -76,9 +76,6 @@ export class PIXIGameBoard {
         "/avatars/green.svg",
         "/avatars/purple.svg",
       ],
-      (progress) => {
-        console.log(`loading... ${progress * 100}`);
-      },
     );
   }
 
@@ -126,7 +123,7 @@ export class PIXIGameBoard {
 
       if (this.destroyed || myToken !== this.initToken) {
         try {
-          console.log("PixiEngine init aborted, cleaning up");
+          //console.log("PixiEngine init aborted, cleaning up");
           localApp.destroy(true);
           throw new Error("PixiEngine init aborted");
         } catch (error) {
@@ -499,18 +496,18 @@ export class PIXIGameBoard {
     this.terrain = null;
 
     if (this.diceTrack) {
-        this.diceTrack.destroy();
-        this.diceTrack = null as any;
+      this.diceTrack.destroy();
+      this.diceTrack = null as any;
     }
     if (this.gameOverLayer) {
-        this.gameOverLayer.destroy();
-        this.gameOverLayer = null as any;
+      this.gameOverLayer.destroy();
+      this.gameOverLayer = null as any;
     }
 
     try {
       this.app?.destroy(true, { children: true, texture: true });
     } catch (error) {
-      console.log(error)
+      //console.log(error)
     }
   }
 

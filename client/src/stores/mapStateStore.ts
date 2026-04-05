@@ -4,38 +4,38 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { devtools, combine } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { MAPS, type MapID } from "@color-wars/shared";
- 
+
 interface territoryEconomy {
-    BASE:{
-        capEx: number;
-        opEx: number;
-        revenue: number;
-        minHexes: number | undefined;
-    };
-    CITY: {
-        capEx: number;
-        opEx: number;
-        revenue: number;
-        minHexes: number | undefined;
-    };
-    FACTORY: {
-        capEx: number;
-        opEx: number;
-        revenue: number;
-        minHexes: number | undefined;
-    };
-    MISSILE_SILO: {
-        capEx: number;
-        opEx: number;
-        revenue: number;
-        minHexes: number | undefined;
-    };
-    CAPITAL: {
-        capEx: number;
-        opEx: number;
-        revenue: number;
-        minHexes: number | undefined;
-    }
+  BASE: {
+    capEx: number;
+    opEx: number;
+    revenue: number;
+    minHexes: number | undefined;
+  };
+  CITY: {
+    capEx: number;
+    opEx: number;
+    revenue: number;
+    minHexes: number | undefined;
+  };
+  FACTORY: {
+    capEx: number;
+    opEx: number;
+    revenue: number;
+    minHexes: number | undefined;
+  };
+  MISSILE_SILO: {
+    capEx: number;
+    opEx: number;
+    revenue: number;
+    minHexes: number | undefined;
+  };
+  CAPITAL: {
+    capEx: number;
+    opEx: number;
+    revenue: number;
+    minHexes: number | undefined;
+  }
 }
 
 
@@ -99,7 +99,7 @@ export const useMapStore = create<MapState>()(
                 });
                 return data;
               } catch (err) {
-                console.error(err);
+                //console.log(err);
                 set((state) => {
                   state.error = (err as Error).message;
                   state.isLoading = false;
@@ -150,18 +150,18 @@ export const useMapStore = create<MapState>()(
             },
             getEconomyData: () => {
               const mapID = get().current_mapID
-              
+
               const current_map = get().current_map
-              
+
               const territoryID = get().selectedTerritoryId
-              
-              const selectedTerritory = current_map.territories.find((t)=>t.id == territoryID)
-              if(!selectedTerritory) throw new Error(`territory ID invalid, map:${mapID}, territory:${territoryID}`)
+
+              const selectedTerritory = current_map.territories.find((t) => t.id == territoryID)
+              if (!selectedTerritory) throw new Error(`territory ID invalid, map:${mapID}, territory:${territoryID}`)
               const territorySize = selectedTerritory?.hexes.length
-              
+
               const economy = MAPS[mapID].getTerritoryEconomy(territorySize)
-              
-              return economy              
+
+              return economy
             },
           }),
         ),

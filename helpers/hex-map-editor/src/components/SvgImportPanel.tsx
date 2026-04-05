@@ -20,7 +20,7 @@ const SvgImportPanel = () => {
       loadSvgDocument(text);
       setError(null);
     } catch (err) {
-      console.error("Failed to parse SVG", err);
+      //console.log("Failed to parse SVG", err);
       setError("Failed to parse SVG file. Please ensure it contains valid <path> geometry.");
     }
   };
