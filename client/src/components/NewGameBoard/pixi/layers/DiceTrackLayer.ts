@@ -377,7 +377,7 @@ export class DiceTrackLayer extends PIXI.Container {
     const g = new PIXI.Graphics();
     // INNER STROKE PATH
     g.roundPoly(0, 0, FINAL_RADIUS, 6, 10, Math.PI / 6);
-    g.fill(textureCfg.baseHex?.fill ?? 0x262626);
+    g.fill(textureCfg.baseHex?.fill ?? 0x29203F);
     if (textureCfg.baseHex?.stroke) {
       //g.stroke({ width: STROKEWIDTH, color: textureCfg.baseHex?.stroke, alignment: 1 });
     }

@@ -1,25 +1,22 @@
 import { useStore } from "@/stores/sessionStore";
 /* import { useMapStore } from "@/stores/mapStateStore"; */
 import { Button } from "./ui/button";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Play } from "lucide-react";
 // import { pixiTargetLocator } from "@/animation/target-locator";
 // import { Sprite } from "pixi.js";
 // import { useRef } from "react";
 // import { PIXIVFXLayer } from "./vfxOverlayLayer/pixi/vfxEngine";
 
 const LobbyActions = () => {
-  const navigate = useNavigate();
   const isLeader = useStore((z) => z.state.room.leaderId === z.currentPlayer.id);
   const startGame = useStore((z) => z.startGame);
-  const leaveGame = useStore((z) => z.leaveGame);
-  const [copied, setCopied] = useState(false);
+  // const [copied, setCopied] = useState(false);
 
-  const handleCopyInvite = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  // const handleCopyInvite = () => {
+  //   navigator.clipboard.writeText(window.location.href);
+  //   setCopied(true);
+  //   setTimeout(() => setCopied(false), 2000);
+  // };
   // const ele = useRef<HTMLButtonElement>(null);
   /* const setTerritoryColor = useMapStore((z) => z.setTerritoryColor);
 
@@ -45,25 +42,25 @@ const LobbyActions = () => {
 
 
 
-  const handleLeaveGame = async () => {
-    await leaveGame();
-    navigate("/");
-  };
+  // const handleLeaveGame = async () => {
+  //   await leaveGame();
+  //   navigate("/");
+  // };
 
   /* const ff = () => {
     setTerritoryColor("intn", "#ff0000");
   }; */
   return (
-    <div className="flex flex-col gap-1 justify-center items-center">
-      {isLeader && <Button variant="pop" color="green" className="w-40" onClick={startGame}>Start Game</Button>}
+    <div className="flex flex-col gap-1 h-full justify-around items-center">
+      {isLeader && <Button color="violet" className="w-40 h-16 text-xl text-white" onClick={startGame}> <Play fill="white" /> Start Game</Button>}
       {!isLeader && <p className="mb-4 text-center text-lg">Please wait for the leader to start the game</p>}
       
-      <Button variant="pop" color="amber" className="w-40" onClick={handleCopyInvite}>
+      {/* <Button color="blue" className="w-40 text-white" onClick={handleCopyInvite}>
         {copied ? "Copied!" : "Copy Invite Link"}
-      </Button>
-      <Button variant="pop" color="rose" className="w-40" onClick={handleLeaveGame}>
+      </Button> */}
+      {/* <Button color="rose" className="bg-[#82181AAA]! w-40 text-white" onClick={handleLeaveGame}>
         Leave Game
-      </Button>
+      </Button> */}
       {/* <div className="flex gap-2 justify-center">
         <Button onClick={() => useStore.getState().shiftDiceTrack("forward")}>
           Shift Forward

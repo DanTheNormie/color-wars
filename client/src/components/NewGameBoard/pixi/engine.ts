@@ -12,7 +12,7 @@ import { useStore } from "@/stores/sessionStore";
 import { GameOverLayer } from "./layers/GameOverLayer";
 import gsap from "gsap";
 
-export const MAP_BACKGROUND_COLOR = 0x09090b;
+export const MAP_BACKGROUND_COLOR = 0x170F1C;
 export const MAP_SECONDARY_COLOR = 0x555555;
 
 /* ============================

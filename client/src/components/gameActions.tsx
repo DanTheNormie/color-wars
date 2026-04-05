@@ -21,12 +21,12 @@ const GameActions = () => {
         window.location.reload()
     }
     const roomPhase = useStore((z) => z.state.room?.phase)
-    if (roomPhase !== "active") return null;
+    if (roomPhase !== "active") return <div className="flex w-full justify-end mt-4 px-2"><Button onClick={onLeaveGame} className="bg-[#82181AAA]! text-white">🏳️ Leave Game</Button></div>;
     return (
         <div className="flex w-full justify-end mt-4 px-2">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant={"outline"} className="bg-[#82181AAA]!">🏳️ Leave Game</Button>
+                    <Button  className="bg-[#82181AAA]! text-white">🏳️ Leave Game</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>

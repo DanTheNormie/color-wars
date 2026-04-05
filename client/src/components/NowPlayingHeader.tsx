@@ -1,5 +1,4 @@
 import { useStore } from "@/stores/sessionStore";
-import { getTextColor } from "@/lib/utils";
 
 export default function NowPlayingHeader() {
   const activePlayerId = useStore((z) => z.state.game.activePlayerId);
@@ -11,7 +10,7 @@ export default function NowPlayingHeader() {
   }
 
   const bgColor = activePlayer.color || "#64748b";
-  const textColor = getTextColor(bgColor);
+  const textColor = '#ffffffaa';
 
   return (
     <div className="fixed top-0 z-50 flex w-full justify-center">

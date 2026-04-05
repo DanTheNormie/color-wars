@@ -76,7 +76,7 @@ export default function DiceHoldButton({ onHoldStart, onHoldEnd, hasRolled }: Di
 
   return (
     <div className="relative h-full w-full flex items-center justify-center select-none">
-      <div className="mb-2 text-center w-full top-0 absolute text-gray-300 text-[10px] sm:text-xs md:text-sm font-medium">{helperText}</div>
+      <div className=" text-center w-full top-0 absolute text-gray-300 text-[10px] sm:text-xs md:text-sm font-medium">{helperText}</div>
 
       <div className="relative h-[75%] aspect-square self-end">
         <button

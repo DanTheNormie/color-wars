@@ -42,7 +42,7 @@ const TradesList = () => {
     <div className="w-full mb-4 mt-4 bg-secondary rounded-lg">
       <div className="flex items-center justify-between bg-secondary p-4 rounded-lg relative max-h-[300px] overflow-y-auto scrollbar-slim">
         <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-widest text-center flex-1">Trades</h3>
-        <Button size="sm" onClick={() => { setViewTradeId(null); setIsModalOpen(true); }} className="bg-[#8254e8] hover:bg-[#7348e9] text-white flex items-center gap-1.5 rounded-md h-7 px-3 text-xs absolute right-3">
+        <Button size="sm" color="violet"  onClick={() => { setViewTradeId(null); setIsModalOpen(true); }} className="hover:bg-[#7348e9] text-white flex items-center gap-1.5 rounded-md px-3 text-xs absolute right-3">
           <PlusCircle className="h-3.5 w-3.5" /> Create
         </Button>
       </div>

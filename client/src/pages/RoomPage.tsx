@@ -6,7 +6,7 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { httpEndpoint } from "@/lib/serverConfig";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Zap } from "lucide-react";
+import { Gamepad2, Play, Copy, Check } from "lucide-react";
 import { soundManager } from "@/lib/managers/sound";
 
 // Lazy load components
@@ -49,6 +49,7 @@ const RoomPage = () => {
 
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [infoError, setInfoError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const [isPreparingAudio, setIsPreparingAudio] = useState(false);
@@ -85,6 +86,11 @@ const RoomPage = () => {
 
   const handleJoinRoom = async () => {
     if (!roomId) return;
+    if (!playerName || !playerName.trim()) {
+      setNameError("Please enter a player name");
+      return;
+    }
+    setNameError(null);
     setIsJoining(true);
     setIsPreparingAudio(true);
     try {
@@ -105,12 +111,12 @@ const RoomPage = () => {
 
   if (!rehydrated || networkState === "connecting" || networkState === "reconnecting" || isJoining) {
     return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-[#0a0a0c]">
-        <p className="text-4xl text-white">
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+        <p className="text-xl text-white">
           {isPreparingAudio ? `Preparing Audio Assets: ${Math.round(audioProgress)}%` : "Connecting..."}
         </p>
         {isPreparingAudio && (
-          <div className="mt-8 h-2 w-64 overflow-hidden rounded-full bg-zinc-800">
+          <div className="mt-8 h-2 w-64 overflow-hidden rounded-full">
             <div 
               className="h-full bg-cyan-500 transition-all duration-300"
               style={{ width: `${audioProgress}%` }}
@@ -124,7 +130,7 @@ const RoomPage = () => {
   if (autoReconnect.inprogress && autoReconnect.attempt < 3) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p className="text-4xl text-white">connection lost. retrying in {remainingSeconds}s...</p>
+        <p className="text-xl text-white">connection lost. retrying in {remainingSeconds}s...</p>
       </div>
     );
   }
@@ -134,8 +140,8 @@ const RoomPage = () => {
       return (
         <div className="flex h-screen w-full items-center justify-center">
           <div className="flex h-full w-full flex-col items-center justify-center text-center">
-            <h1 className="text-4xl mb-4 text-white">{infoError}</h1>
-            <Button className="mt-4" onClick={() =>{ navigate("/"); window.location.reload()}}>
+            <h1 className="text-xl mb-4 text-white">{infoError}</h1>
+            <Button color="violet" className="text-white mt-4" onClick={() =>{ navigate("/"); window.location.reload()}}>
               Return to Lobby
             </Button>
           </div>
@@ -148,8 +154,8 @@ const RoomPage = () => {
         return (
           <div className="flex h-screen w-full items-center justify-center">
             <div className="flex h-full w-full flex-col items-center justify-center text-center">
-              <h1 className="text-4xl mb-4 text-white">Game has already started</h1>
-              <Button className="mt-4" onClick={() => { navigate("/"); window.location.reload()}}>
+              <h1 className="text-xl mb-4 text-white">Game has already started</h1>
+              <Button color="violet" className="text-white mt-4" onClick={() => { navigate("/"); window.location.reload()}}>
                 Go to Lobby
               </Button>
             </div>
@@ -159,17 +165,22 @@ const RoomPage = () => {
         return (
           <div className="bg-background relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 font-sans text-white">
             <div className="z-10 w-full max-w-md space-y-8 md:space-y-10">
-              <div className="relative space-y-8">
-                <Gamepad2 className="absolute top-3.5 left-3 h-5 w-5 text-zinc-500 group-focus-within:text-cyan-500" />
-                <Input
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Player Name"
-                  className="bg-background h-12 border-zinc-800 pl-10 text-lg text-zinc-100 focus-visible:border-cyan-500 focus-visible:ring-0"
-                />
-                <Button className="h-12 w-full" onClick={handleJoinRoom}>
+              <div className="relative space-y-6">
+                <div className="flex flex-col gap-2">
+                  <div className="relative group">
+                    <Gamepad2 className="absolute top-3.5 left-3 h-5 w-5 text-zinc-500 group-focus-within:text-cyan-500" />
+                    <Input
+                      value={playerName}
+                      onChange={(e) => { setPlayerName(e.target.value); setNameError(null); }}
+                      placeholder="Player Name"
+                      className={`bg-background h-12 pl-10 text-lg text-zinc-100 focus-visible:ring-0 ${nameError ? 'border-red-500 focus-visible:border-red-500' : 'border-zinc-800 focus-visible:border-cyan-500'}`}
+                    />
+                  </div>
+                  {nameError && <p className="text-red-500 text-sm pl-1">{nameError}</p>}
+                </div>
+                <Button color="violet" className="h-12 text-white w-full group/btn" onClick={handleJoinRoom}>
+                  <Play className="h-4 w-4 fill-white transition-transform group-hover/btn:rotate-12 group-hover/btn:fill-white" />
                   JOIN ROOM
-                  <Zap className="h-4 w-4 fill-black transition-transform group-hover/btn:rotate-12 group-hover/btn:fill-white" />
                 </Button>
               </div>
             </div>
@@ -181,7 +192,7 @@ const RoomPage = () => {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="flex h-full w-full flex-col items-center justify-center text-center">
-          <h1 className="text-4xl text-white">Connection Lost</h1>
+          <h1 className="text-xl text-white">Connection Lost</h1>
           <Button className="mt-4" onClick={() => { navigate("/"); window.location.reload()}}>
             Return to Lobby
           </Button>
@@ -193,8 +204,8 @@ const RoomPage = () => {
   return (
     <Suspense 
       fallback={
-        <div className="flex h-screen w-full items-center justify-center bg-[#0a0a0c]">
-          <p className="text-4xl text-white animate-pulse">Loading Game...</p>
+        <div className="flex h-screen w-full items-center justify-center bg-background">
+          <p className="text-xl text-white animate-pulse">Loading Game...</p>
         </div>
       }
     >
@@ -204,9 +215,10 @@ const RoomPage = () => {
             <NowPlayingHeader />
           </div>
           <PixiCanvas key="stable-pixi-canvas" />
+          {roomPhase === 'lobby' && <CopyLinkButton />}
             <PlayersStatus />
-          <div className={isGameOver ? "hidden" : "contents"}>
             <GameActions />
+          <div className={isGameOver ? "hidden" : "contents"}>
             <TradesList />
             <UserAssets />
             <Suspense fallback={null}>
@@ -233,6 +245,31 @@ const RoomPage = () => {
         </div>
       </div>
     </Suspense>
+  );
+};
+
+const CopyLinkButton = () => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="flex w-full justify-center my-4 z-10 relative">
+      <div className="flex w-full items-center justify-between gap-3 rounded-lg border-2 border-dashed border-secondary bg-background p-3">
+        <div className="flex-1 text-sm overflow-x-scroll text-center text-nowrap text-zinc-400 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {window.location.href}
+        </div>
+        <Button 
+          onClick={handleCopy}
+          className="shrink-0 bg-secondary text-white hover:bg-secondary/80"
+        >
+          {copied ? <Check className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4 text-white" />}
+          {copied ? "Copied" : "Copy Invite Link"}
+        </Button>
+      </div>
+    </div>
   );
 };
 

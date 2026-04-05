@@ -26,7 +26,7 @@ export function PixiCanvas() {
 
   return (
     <div className="relative h-full w-full">
-      <div ref={containerRef} id="pixi-container-div" className="aspect-square h-full w-full bg-[#111111]" />
+      <div ref={containerRef} id="pixi-container-div" className="aspect-square h-full w-full bg-background" />
     </div>
   );
 }

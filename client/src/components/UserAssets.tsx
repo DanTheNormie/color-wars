@@ -1,12 +1,10 @@
 import { memo, useMemo } from "react";
 import { useStore } from "@/stores/sessionStore";
 import { useMapStore } from "@/stores/mapStateStore";
-import { Spade, MapPinCheckInside } from "lucide-react";
-import type { RewardConfig } from "@color-wars/shared";
+import { MapPinCheckInside } from "lucide-react";
 
 const UserAssets = () => {
   const playerId = useStore((s) => s.currentPlayer?.id);
-  const playerCards = useStore((s) => s.currentPlayer?.cards);
   const territoryOwnership = useStore((s) => s.state.game?.territoryOwnership);
   const currentMap = useMapStore((s) => s.current_map);
   const roomPhase = useStore((s) => s.state.room?.phase);
@@ -23,18 +21,18 @@ const UserAssets = () => {
       }));
   }, [territoryOwnership, currentMap, playerId]);
 
-  const cards = useMemo(() => {
-    if (!playerCards) return [];
+  // const cards = useMemo(() => {
+  //   if (!playerCards) return [];
     
-    return playerCards.map((cardJson) => {
-      try {
-        return JSON.parse(cardJson) as RewardConfig;
-      } catch (e) {
-        console.error("Failed to parse card JSON", e);
-        return null;
-      }
-    }).filter(Boolean) as RewardConfig[];
-  }, [playerCards]);
+  //   return playerCards.map((cardJson) => {
+  //     try {
+  //       return JSON.parse(cardJson) as RewardConfig;
+  //     } catch (e) {
+  //       console.error("Failed to parse card JSON", e);
+  //       return null;
+  //     }
+  //   }).filter(Boolean) as RewardConfig[];
+  // }, [playerCards]);
 
 
   if (roomPhase !== "active") return null;
@@ -68,13 +66,13 @@ const UserAssets = () => {
       </div>
 
       {/* Cards Section */}
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <div className="flex items-center w-full justify-center gap-2 pb-1">
           <Spade className="h-4 w-4"/>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Inventory Cards ({cards.length})</h3>
         </div>
         
-        {/* {cards.length > 0 ? (
+        {cards.length > 0 ? (
           <div className="flex flex-col gap-2">
             {cards.map((card, idx) => (
               <div 
@@ -93,8 +91,8 @@ const UserAssets = () => {
           </div>
         ) : (
           <p className="py-2 text-center text-xs italic text-zinc-600">You don't have any cards yet.</p>
-        )} */}
-      </div>
+        )}
+      </div> */}
     </div>
   );
 };

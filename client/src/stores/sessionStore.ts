@@ -19,7 +19,7 @@ import type { TerritoryId } from "@/types/map";
 import { useNetworkStore } from "./networkStore";
 import { GameEventBus } from "@/lib/managers/GameEventBus";
 
-const DEFAULT_PLAYER_NAME = "Commander";
+const DEFAULT_PLAYER_NAME = "";
 type ActionState = 'resolving_action' | 'idle' | 'awaiting_action_result'
 
 interface LocalRoom {

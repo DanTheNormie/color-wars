@@ -6,13 +6,12 @@ import { Button } from "./ui/button";
 import DiceHoldButton from "./DiceHoldButton";
 import {
   Tooltip,
-  TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { GameEventBus } from "@/lib/managers/GameEventBus";
 import SabotageModal from "./SabotageModal";
 import MissileLaunchModal from "./MissileLaunchModal";
-import { Sword, Rocket, RotateCcw, RotateCw } from "lucide-react";
+import { Sword, Rocket, RefreshCcw, RefreshCw } from "lucide-react";
 
 /**
  * TurnControls Component
@@ -31,10 +30,10 @@ const TurnControls = () => {
   const currentPlayerStatus = useStore((z) => z.state.game.players[currentPlayerID]?.status ?? "healthy");
   const hasRolledDice = useStore((z) => z.state.game.players[currentPlayerID]?.hasRolled ?? false);
   const currentTile = useStore((z) => z.state.game.diceTrack[z.state.game.players[currentPlayerID]?.position ?? 0]);
-  
+
   const hasSabotagedThisRound = useStore((z) => z.state.game.players[currentPlayerID]?.hasSabotagedThisRound ?? false);
   const players = useStore((z) => z.state.game.players);
-  
+
   const [isSabotageModalOpen, setIsSabotageModalOpen] = useState(false);
   const [isMissileModalOpen, setIsMissileModalOpen] = useState(false);
 
@@ -51,7 +50,7 @@ const TurnControls = () => {
         content: "You can't end your turn with a negative balance.",
         type: "error",
         duration: 5000
-      }); 
+      });
       return;
     }
     endTurn(vote);
@@ -124,61 +123,52 @@ const TurnControls = () => {
   );
 
   return (
-    <section className="relative flex h-full w-full items-center justify-between">
-      <div className="flex relative w-full h-full flex-1 grow-2 justify-center gap-[1%] items-center">
+    <section className="relative flex md:flex-row h-full w-full items-center justify-center">
+      <div className={`${hasRolledDice && actionState === 'idle' && !isNOTActivePlayer ? 'hidden' : 'flex'} relative w-full h-full flex-1 grow-2 justify-center gap-4 md:gap-[1%] items-center`}>
         {Array.from({ length: diceCount }).map((_, i) => (
-          <BetterDice 
-             key={i} 
-             ref={(el) => { diceRefs.current[i] = el; }} 
+          <BetterDice
+            key={i}
+            ref={(el) => { diceRefs.current[i] = el; }}
           />
         ))}
       </div>
-      <div className={`${(actionState == 'idle') ? '' : 'hidden'} flex w-full h-full flex-1 justify-center items-center flex-col gap-2 ${isNOTActivePlayer ? 'hidden' : ''}`}>
+      <div className={`${actionState === 'idle' && !isNOTActivePlayer ? '' : 'hidden'} flex w-full h-full flex-1 justify-center items-center flex-col gap-2`}>
         <DiceHoldButton hasRolled={hasRolledDice} onHoldStart={holdStart} onHoldEnd={holdEnd} />
-        <div className={`${!hasRolledDice ? 'hidden' : ''} w-full flex flex-col gap-2 justify-center`}>
-          <div className="w-full flex justify-center flex-col items-center gap-2">
-            <div className="flex flex-col gap-2 w-full max-w-[280px]">
-              <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest text-center">
+        <div className={`${!hasRolledDice ? 'hidden' : ''} w-full h-full flex flex-col gap-2 justify-center`}>
+          <div className="w-full h-full flex justify-center flex-col items-center gap-2">
+            <div className="flex flex-col h-full justify-between gap-2 w-full max-w-[280px]">
+              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest text-center">
                 VOTE TRACK ROTATION
               </p>
-              <div className="flex gap-4 items-center justify-center">
+              <div className="flex flex-wrap md:flex-nowrap gap-2 items-center flex-1 justify-around">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="pop"
                       color="blue"
-                      className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""} h-14 rounded-xl flex-1 transition-all group`}
+                      className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""} h-16 flex-1 rounded-xl transition-all group`}
                       onClick={() => endTurnHandler("clockwise")}>
-                      <RotateCcw className="w-5 h-5 mr-2 group-hover:-rotate-45 transition-transform" />
-                      <span className="font-bold">Anti-clockwise</span>
+                      <RefreshCcw className="lg:mr-2 group-hover:-rotate-45 transition-transform text-white" />
+                      <span className="font-bold text-white ">Anti-clockwise</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
-                    Vote to rotate the dicetrack anti-clockwise
-                  </TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="pop"
                       color="green"
-                      className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""} h-14 rounded-xl flex-1 transition-all group`}
+                      className={`${currentPlayerStatus === "in-debt" ? "opacity-50" : ""} h-16 flex-1 rounded-xl transition-all group`}
                       onClick={() => endTurnHandler("anticlockwise")}>
-                      <span className="font-bold">Clockwise</span>
-                      <RotateCw className="w-5 h-5 ml-2 group-hover:rotate-45 transition-transform" />
+                      <span className="font-bold text-white ">Clockwise</span>
+                      <RefreshCw className="lg:ml-2 group-hover:rotate-45 transition-transform text-white" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
-                    Vote to rotate the dicetrack clockwise
-                  </TooltipContent>
                 </Tooltip>
               </div>
             </div>
 
             {canSabotage &&
-              <Button 
-                variant="pop"
+              <Button
                 color="red"
                 onClick={() => setIsSabotageModalOpen(true)}
               >
@@ -187,8 +177,7 @@ const TurnControls = () => {
               </Button>
             }
             {hasMissileSilo &&
-              <Button 
-                variant="pop"
+              <Button
                 color="rose"
                 onClick={() => setIsMissileModalOpen(true)}
               >
